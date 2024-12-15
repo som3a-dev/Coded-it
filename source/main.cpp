@@ -5,10 +5,13 @@
 #include <SDL_ttf.h>
 
 static SDL_Window* window = NULL;
+static TTF_Font* font = NULL;
 static bool running = true;
 
 
 void loop();
+void handle_events();
+void draw();
 
 
 int main(int argc, char** argv)
@@ -20,13 +23,14 @@ int main(int argc, char** argv)
     if (error[0])
     {
         printf("Initializing SDL failed!\nError Message: '%s'\n", error);
+        return 1;
     }
 
     window = SDL_CreateWindow( "Coded-it", 100, 100, 800, 600, SDL_WINDOW_SHOWN );
     if (!window)
     {
         printf("SDL window creation failed!\n");
-        return 1;
+        return 2;
     }
 
     TTF_Init();
@@ -34,6 +38,14 @@ int main(int argc, char** argv)
     if (error[0])
     {
         printf("Initializing SDL_ttf failed!\nError Message: '%s'\n", error);
+        return 3;
+    }
+
+    font = TTF_OpenFont("CONSOLA.ttf", 36);
+    if (!font)
+    {
+        printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
+        return 4;
     }
 
     loop();
@@ -47,30 +59,37 @@ int main(int argc, char** argv)
 
 
 void loop()
-{
-    TTF_Font* font = TTF_OpenFont("CONSOLA.ttf", 36);
-    if (!font)
-    {
-        printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
-    }
-    
-    SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+{      
     while (running)
     {
-        SDL_Event e;
-        SDL_WaitEvent(&e);
+        handle_events();
+        draw();
+    }
+}
 
-        switch (e.type)
+
+void handle_events()
+{
+    SDL_Event e;
+    SDL_WaitEvent(&e);
+
+    switch (e.type)
+    {
+        case SDL_QUIT:
         {
-            case SDL_QUIT:
-            {
-                running = false;
-            } break;
-        }
+            running = false;
+        } break;
+    }
+}
 
-        //Draw
-        SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, 60, 60, 60)); //Clear
 
+void draw()
+{
+    SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+    
+    SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, 60, 60, 60)); //Clear
+
+    {
         const char* text = "Testing Font";
         SDL_Color text_color = {255, 255, 255, 255};
         SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, text_color);
@@ -79,7 +98,7 @@ void loop()
         TTF_SizeText(font, text, &(text_dst.w), &(text_dst.h));
         
         SDL_BlitSurface(text_surface, NULL, win_surface, &text_dst);
-        
-        SDL_UpdateWindowSurface(window);
     }
+    
+    SDL_UpdateWindowSurface(window);
 }
