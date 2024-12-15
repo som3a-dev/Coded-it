@@ -4,18 +4,24 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-static SDL_Window* window = NULL;
-static TTF_Font* font = NULL;
-static bool running = true;
+
+struct ProgramState
+{
+    SDL_Window* window = NULL;
+    SDL_Surface* window_surface = NULL;
+    TTF_Font* font = NULL;
+    bool running = true;
+};
 
 
-void loop();
-void handle_events();
-void draw();
+void loop(ProgramState* state);
+void handle_events(ProgramState* state);
+void draw(ProgramState* state);
 
 
 int main(int argc, char** argv)
 {
+    ProgramState state;
     const char* error = NULL;
     
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
@@ -26,12 +32,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    window = SDL_CreateWindow( "Coded-it", 100, 100, 800, 600, SDL_WINDOW_SHOWN );
-    if (!window)
+    state.window = SDL_CreateWindow( "Coded-it", 100, 100, 800, 600, SDL_WINDOW_SHOWN );
+    if (!state.window)
     {
         printf("SDL window creation failed!\n");
         return 2;
     }
+    state.window_surface = SDL_GetWindowSurface(state.window);
 
     TTF_Init();
     error = TTF_GetError();
@@ -41,34 +48,35 @@ int main(int argc, char** argv)
         return 3;
     }
 
-    font = TTF_OpenFont("CONSOLA.ttf", 36);
-    if (!font)
+    state.font = TTF_OpenFont("CONSOLA.ttf", 36);
+    if (!state.font)
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
         return 4;
     }
 
-    loop();
+    loop(&state);
 
+    TTF_CloseFont(state.font);
     TTF_Quit();
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(state.window);
     SDL_Quit();
 
     return EXIT_SUCCESS;
 }
 
 
-void loop()
+void loop(ProgramState* state)
 {      
-    while (running)
+    while (state->running)
     {
-        handle_events();
-        draw();
+        handle_events(state);
+        draw(state);
     }
 }
 
 
-void handle_events()
+void handle_events(ProgramState* state)
 {
     SDL_Event e;
     SDL_WaitEvent(&e);
@@ -77,28 +85,26 @@ void handle_events()
     {
         case SDL_QUIT:
         {
-            running = false;
+            state->running = false;
         } break;
     }
 }
 
 
-void draw()
+void draw(ProgramState* state)
 {
-    SDL_Surface* win_surface = SDL_GetWindowSurface(window);
-    
-    SDL_FillRect(win_surface, NULL, SDL_MapRGB(win_surface->format, 60, 60, 60)); //Clear
+    SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
 
     {
         const char* text = "Testing Font";
         SDL_Color text_color = {255, 255, 255, 255};
-        SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, text_color);
+        SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, text, text_color);
         
         SDL_Rect text_dst = {0, 0, 0, 0};
-        TTF_SizeText(font, text, &(text_dst.w), &(text_dst.h));
+        TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
         
-        SDL_BlitSurface(text_surface, NULL, win_surface, &text_dst);
+        SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
     }
     
-    SDL_UpdateWindowSurface(window);
+    SDL_UpdateWindowSurface(state->window);
 }
