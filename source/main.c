@@ -16,6 +16,9 @@ typedef struct
     bool running;
 
     String text;
+
+    int char_w;
+    int char_h;
 } ProgramState;
 
 
@@ -114,6 +117,11 @@ void handle_events(ProgramState* state)
                 {
                     String_pop(&(state->text));
                 } break;
+
+                case SDLK_RETURN:
+                {
+                    String_push(&(state->text), '\n');
+                } break;
             }
         } break;
     }
@@ -122,9 +130,29 @@ void handle_events(ProgramState* state)
 
 void draw(ProgramState* state)
 {
+    //Update the size of a character
+    TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+    
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
 
-    draw_text(state, state->text.text, 0, 0, 255, 255, 255);
+    //draw_text(state, state->text.text, 36 / 2, 0, 255, 255, 255);
+
+    int x = 0;
+    int y = 0;
+    for (int i = 0; i < state->text.len; i++)
+    {
+        char c = state->text.text[i];
+        if (c == '\n')
+        {
+            y += state->char_h;
+            x = 0;
+            continue;
+        }
+        
+        char str[2] = {c, '\0'};
+        draw_text(state, str, x, y, 255, 255, 255);
+        x += state->char_w;
+    }
     
     SDL_UpdateWindowSurface(state->window);
 }
@@ -135,7 +163,7 @@ void draw_text(ProgramState* state, const char* text, int x, int y, int r, int g
     SDL_Color text_color = {r, g, b, 255};
     SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, text, text_color);
     
-    SDL_Rect text_dst = {0, 0, 0, 0};
+    SDL_Rect text_dst = {x, y, 0, 0};
     TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
     
     SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
