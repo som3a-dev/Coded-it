@@ -1,17 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
 
 
-struct ProgramState
+typedef struct
 {
-    SDL_Window* window = NULL;
-    SDL_Surface* window_surface = NULL;
-    TTF_Font* font = NULL;
-    bool running = true;
-};
+    SDL_Window* window;
+    SDL_Surface* window_surface;
+    TTF_Font* font;
+    bool running;
+} ProgramState;
 
 
 void loop(ProgramState* state);
@@ -21,7 +22,9 @@ void draw(ProgramState* state);
 
 int main(int argc, char** argv)
 {
-    ProgramState state;
+    ProgramState state = {0};
+    state.running = true;
+    
     const char* error = NULL;
     
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
