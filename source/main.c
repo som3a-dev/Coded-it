@@ -23,6 +23,8 @@ void loop(ProgramState* state);
 void handle_events(ProgramState* state);
 void draw(ProgramState* state);
 
+void draw_text(ProgramState* state, const char* text, int x, int y, int r, int g, int b);
+
 
 int main(int argc, char** argv)
 {
@@ -122,15 +124,19 @@ void draw(ProgramState* state)
 {
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
 
-    {
-        SDL_Color text_color = {255, 255, 255, 255};
-        SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, state->text.text, text_color);
-        
-        SDL_Rect text_dst = {0, 0, 0, 0};
-        TTF_SizeText(state->font, state->text.text, &(text_dst.w), &(text_dst.h));
-        
-        SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
-    }
+    draw_text(state, state->text.text, 0, 0, 255, 255, 255);
     
     SDL_UpdateWindowSurface(state->window);
+}
+
+
+void draw_text(ProgramState* state, const char* text, int x, int y, int r, int g, int b)
+{
+    SDL_Color text_color = {r, g, b, 255};
+    SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, text, text_color);
+    
+    SDL_Rect text_dst = {0, 0, 0, 0};
+    TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
+    
+    SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
 }
