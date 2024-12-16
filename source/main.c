@@ -14,16 +14,20 @@ typedef struct
     SDL_Surface* window_surface;
     TTF_Font* font;
     bool running;
-
+    
     String text;
-
+    
     int char_w;
     int char_h;
+    
+    bool draw_cursor; //used for a blinking cursor
+    int last_cursor_blink_tic;
 } ProgramState;
 
 
 void loop(ProgramState* state);
 void handle_events(ProgramState* state);
+void update(ProgramState* state);
 void draw(ProgramState* state);
 
 void draw_text(ProgramState* state, const char* text, int x, int y, int r, int g, int b);
@@ -35,6 +39,8 @@ int main(int argc, char** argv)
     state.running = true;
     state.text.text = NULL;
     state.text.len = 0;
+    state.draw_cursor = true;
+    state.last_cursor_blink_tic = 0;
     
     const char* error = NULL;
     
@@ -45,7 +51,7 @@ int main(int argc, char** argv)
         printf("Initializing SDL failed!\nError Message: '%s'\n", error);
         return 1;
     }
-
+    
     state.window = SDL_CreateWindow( "Coded-it", 100, 100, 800, 600, SDL_WINDOW_SHOWN );
     if (!state.window)
     {
@@ -53,7 +59,7 @@ int main(int argc, char** argv)
         return 2;
     }
     state.window_surface = SDL_GetWindowSurface(state.window);
-
+    
     TTF_Init();
     error = TTF_GetError();
     if (error[0])
@@ -61,21 +67,21 @@ int main(int argc, char** argv)
         printf("Initializing SDL_ttf failed!\nError Message: '%s'\n", error);
         return 3;
     }
-
+    
     state.font = TTF_OpenFont("CONSOLA.ttf", 36);
     if (!state.font)
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
         return 4;
     }
-
+    
     loop(&state);
-
+    
     TTF_CloseFont(state.font);
     TTF_Quit();
     SDL_DestroyWindow(state.window);
     SDL_Quit();
-
+    
     return EXIT_SUCCESS;
 }
 
@@ -85,6 +91,7 @@ void loop(ProgramState* state)
     while (state->running)
     {
         handle_events(state);
+        update(state);
         draw(state);
     }
 }
@@ -93,22 +100,23 @@ void loop(ProgramState* state)
 void handle_events(ProgramState* state)
 {
     SDL_Event e;
-    SDL_WaitEvent(&e);
-
+    
+    SDL_WaitEventTimeout(&e, 100);
+    
     switch (e.type)
     {
         case SDL_QUIT:
         {
             state->running = false;
         } break;
-
+        
         case SDL_TEXTINPUT:
         {
             String_push(&(state->text), e.text.text[0]);
             system("@cls||clear");
             printf("%s\n", state->text);
         } break;
-
+        
         case SDL_KEYDOWN:
         {
             switch (e.key.keysym.sym)
@@ -117,7 +125,7 @@ void handle_events(ProgramState* state)
                 {
                     String_pop(&(state->text));
                 } break;
-
+                
                 case SDLK_RETURN:
                 {
                     String_push(&(state->text), '\n');
@@ -128,15 +136,25 @@ void handle_events(ProgramState* state)
 }
 
 
+void update(ProgramState* state)
+{
+    if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= 1000)
+    {
+        state->draw_cursor = !(state->draw_cursor);
+        state->last_cursor_blink_tic = SDL_GetTicks();
+    }
+}
+
+
 void draw(ProgramState* state)
 {
     //Update the size of a character
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
     
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
-
+    
     //draw_text(state, state->text.text, 36 / 2, 0, 255, 255, 255);
-
+    
     int x = 0;
     int y = 0;
     for (int i = 0; i < state->text.len; i++)
@@ -152,6 +170,12 @@ void draw(ProgramState* state)
         char str[2] = {c, '\0'};
         draw_text(state, str, x, y, 255, 255, 255);
         x += state->char_w;
+    }
+    
+    if (state->draw_cursor)
+    {
+        SDL_Rect cursor_rect = {x, y + 2, state->char_w, state->char_h - 2};
+        SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
     }
     
     SDL_UpdateWindowSurface(state->window);
