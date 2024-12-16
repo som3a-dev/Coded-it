@@ -8,4 +8,5 @@ typedef struct
 
 
 
-void String_add(String* str, char c);
+void String_push(String* str, char c);
+void String_pop(String* str);
