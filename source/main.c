@@ -5,6 +5,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "string.h"
+
 
 typedef struct
 {
@@ -12,6 +14,8 @@ typedef struct
     SDL_Surface* window_surface;
     TTF_Font* font;
     bool running;
+
+    String text;
 } ProgramState;
 
 
@@ -24,6 +28,8 @@ int main(int argc, char** argv)
 {
     ProgramState state = {0};
     state.running = true;
+    state.text.text = NULL;
+    state.text.len = 0;
     
     const char* error = NULL;
     
@@ -90,6 +96,13 @@ void handle_events(ProgramState* state)
         {
             state->running = false;
         } break;
+
+        case SDL_TEXTINPUT:
+        {
+            String_add(&(state->text), e.text.text[0]);
+            system("@cls||clear");
+            printf("%s\n", state->text);
+        } break;
     }
 }
 
@@ -99,12 +112,11 @@ void draw(ProgramState* state)
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
 
     {
-        const char* text = "Testing Font";
         SDL_Color text_color = {255, 255, 255, 255};
-        SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, text, text_color);
+        SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, state->text.text, text_color);
         
         SDL_Rect text_dst = {0, 0, 0, 0};
-        TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
+        TTF_SizeText(state->font, state->text.text, &(text_dst.w), &(text_dst.h));
         
         SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
     }
