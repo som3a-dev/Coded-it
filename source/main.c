@@ -99,9 +99,20 @@ void handle_events(ProgramState* state)
 
         case SDL_TEXTINPUT:
         {
-            String_add(&(state->text), e.text.text[0]);
+            String_push(&(state->text), e.text.text[0]);
             system("@cls||clear");
             printf("%s\n", state->text);
+        } break;
+
+        case SDL_KEYDOWN:
+        {
+            switch (e.key.keysym.sym)
+            {
+                case SDLK_BACKSPACE:
+                {
+                    String_pop(&(state->text));
+                } break;
+            }
         } break;
     }
 }
