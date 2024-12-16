@@ -18,5 +18,13 @@
     <ClCompile Include="source\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\string.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
