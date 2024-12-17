@@ -25,6 +25,9 @@ typedef struct
 } ProgramState;
 
 
+const int CURSOR_BLINK_TIME = 1000; //cursor blinks every CURSOR_BLINK_TIME seconds
+
+
 void loop(ProgramState* state);
 void handle_events(ProgramState* state);
 void update(ProgramState* state);
@@ -115,6 +118,10 @@ void handle_events(ProgramState* state)
             String_push(&(state->text), e.text.text[0]);
             system("@cls||clear");
             printf("%s\n", state->text);
+            
+            //don't blink while typing
+            state->last_cursor_blink_tic = SDL_GetTicks();
+            state->draw_cursor = true;
         } break;
         
         case SDL_KEYDOWN:
@@ -124,11 +131,17 @@ void handle_events(ProgramState* state)
                 case SDLK_BACKSPACE:
                 {
                     String_pop(&(state->text));
+                    
+                    state->last_cursor_blink_tic = SDL_GetTicks();
+                    state->draw_cursor = true;
                 } break;
                 
                 case SDLK_RETURN:
                 {
                     String_push(&(state->text), '\n');
+                    
+                    state->last_cursor_blink_tic = SDL_GetTicks();
+                    state->draw_cursor = true;
                 } break;
             }
         } break;
@@ -138,7 +151,7 @@ void handle_events(ProgramState* state)
 
 void update(ProgramState* state)
 {
-    if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= 1000)
+    if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= CURSOR_BLINK_TIME)
     {
         state->draw_cursor = !(state->draw_cursor);
         state->last_cursor_blink_tic = SDL_GetTicks();
