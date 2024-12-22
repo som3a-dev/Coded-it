@@ -5,7 +5,7 @@
 void String_push(String* str, char c)
 {
     if (!str) return;
-
+    
     if (str->text)
     {
         str->len++;
@@ -28,8 +28,39 @@ void String_pop(String* str)
     if (!str) return;
     if (!(str->text)) return;
     if (str->len <= 0) return;
-
+    
     str->text[str->len-1] = '\0';
     str->len--;
     str->text = realloc(str->text, sizeof(char) * str->len+1);
 }
+
+//O(n) worst case
+void String_insert(String* str, char c, int index)
+{
+    if (!str) return;
+    if (index < 0) return;
+    if (index > str->len) return;
+
+    if (!(str->text))
+    {
+        str->len = 1;
+        str->text = realloc(str->text, sizeof(char) * str->len + 1);
+    }
+    else
+    {
+        str->len++;
+        str->text = realloc(str->text, sizeof(char) * str->len + 1);
+    }
+
+    str->text[str->len] = '\0';
+
+    for (int i = str->len-2; i >= index; i--)
+    {
+        str->text[i + 1] = str->text[i];
+    }
+
+    str->text[index] = c;
+}
+
+
+void String_remove(String* str, int index);
