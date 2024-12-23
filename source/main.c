@@ -20,6 +20,7 @@ typedef struct
     int char_w;
     int char_h;
     
+    int cursor_index; //the index of the character the cursor is on.
     bool draw_cursor; //used for a blinking cursor
     int last_cursor_blink_tic;
 } ProgramState;
@@ -44,6 +45,7 @@ int main(int argc, char** argv)
     state.text.len = 0;
     state.draw_cursor = true;
     state.last_cursor_blink_tic = 0;
+    state.cursor_index = 0;
     
     const char* error = NULL;
     
@@ -90,7 +92,7 @@ int main(int argc, char** argv)
 
 
 void loop(ProgramState* state)
-{      
+{
     while (state->running)
     {
         handle_events(state);
@@ -115,13 +117,14 @@ void handle_events(ProgramState* state)
         
         case SDL_TEXTINPUT:
         {
-            String_push(&(state->text), e.text.text[0]);
+            String_insert(&(state->text), e.text.text[0], state->cursor_index);
             system("@cls||clear");
             printf("%s\n", state->text);
             
             //don't blink while typing
             state->last_cursor_blink_tic = SDL_GetTicks();
             state->draw_cursor = true;
+            state->cursor_index++;
         } break;
         
         case SDL_KEYDOWN:
@@ -130,16 +133,53 @@ void handle_events(ProgramState* state)
             {
                 case SDLK_BACKSPACE:
                 {
-                    String_pop(&(state->text));
+                    //String_pop(&(state->text));
+                    String_remove(&(state->text), state->cursor_index);
                     
                     state->last_cursor_blink_tic = SDL_GetTicks();
                     state->draw_cursor = true;
+                    
+                    if (state->cursor_index > 0)
+                    {
+                        state->cursor_index--;
+                    }
                 } break;
                 
                 case SDLK_RETURN:
                 {
-                    String_push(&(state->text), '\n');
+                    //String_push(&(state->text), '\n');
+                    String_insert(&(state->text), '\n', state->cursor_index);
                     
+                    state->last_cursor_blink_tic = SDL_GetTicks();
+                    state->draw_cursor = true;
+                    state->cursor_index++;
+                } break;
+                
+                case SDLK_UP:
+                {
+                    state->last_cursor_blink_tic = SDL_GetTicks();
+                    state->draw_cursor = true;
+                } break;
+                
+                case SDLK_DOWN:
+                {
+                    state->last_cursor_blink_tic = SDL_GetTicks();
+                    state->draw_cursor = true;
+                } break;
+                
+                case SDLK_LEFT:
+                {
+                    if (state->cursor_index > 0)
+                    {
+                        state->cursor_index--;
+                        state->last_cursor_blink_tic = SDL_GetTicks();
+                        state->draw_cursor = true;
+                    }
+                } break;
+                
+                case SDLK_RIGHT:
+                {
+                    state->cursor_index++;
                     state->last_cursor_blink_tic = SDL_GetTicks();
                     state->draw_cursor = true;
                 } break;
@@ -170,24 +210,43 @@ void draw(ProgramState* state)
     
     int x = 0;
     int y = 0;
+    int cursor_x = 0;
+    int cursor_y = 0;
     for (int i = 0; i < state->text.len; i++)
     {
+        bool draw_char = true;
+        
         char c = state->text.text[i];
         if (c == '\n')
         {
             y += state->char_h;
+            //cursor_y += state->char_h;
             x = 0;
-            continue;
+            draw_char = false;
         }
         
-        char str[2] = {c, '\0'};
-        draw_text(state, str, x, y, 255, 255, 255);
-        x += state->char_w;
+        if (i == state->cursor_index-1)
+        {
+            cursor_x = x;
+            cursor_y = y;
+            
+            if (draw_char)
+            {
+                cursor_x += state->char_w;
+            }
+        }
+        
+        if (draw_char)
+        {
+            char str[2] = {c, '\0'};
+            draw_text(state, str, x, y, 255, 255, 255);
+            x += state->char_w;
+        }
     }
     
     if (state->draw_cursor)
     {
-        SDL_Rect cursor_rect = {x, y + 2, state->char_w, state->char_h - 2};
+        SDL_Rect cursor_rect = {cursor_x, cursor_y + 2, state->char_w, state->char_h - 2};
         SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
     }
     
