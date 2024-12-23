@@ -63,4 +63,18 @@ void String_insert(String* str, char c, int index)
 }
 
 
-void String_remove(String* str, int index);
+void String_remove(String* str, int index)
+{
+    if (!str) return;
+    if (index < 0) return;
+    if (index > str->len - 1) return;
+
+    for (int i = index; i < str->len-1; i++)
+    {
+        str->text[i] = str->text[i + 1];
+    }
+
+    str->len--;
+    str->text = realloc(str->text, sizeof(char) * str->len + 1);
+    str->text[str->len] = '\0';
+}
