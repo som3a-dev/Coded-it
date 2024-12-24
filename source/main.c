@@ -134,7 +134,7 @@ void handle_events(ProgramState* state)
                 case SDLK_BACKSPACE:
                 {
                     //String_pop(&(state->text));
-                    String_remove(&(state->text), state->cursor_index);
+                    String_remove(&(state->text), state->cursor_index-1);
                     
                     state->last_cursor_blink_tic = SDL_GetTicks();
                     state->draw_cursor = true;
