@@ -136,11 +136,10 @@ void handle_events(ProgramState* state)
                     //String_pop(&(state->text));
                     String_remove(&(state->text), state->cursor_index-1);
                     
-                    state->last_cursor_blink_tic = SDL_GetTicks();
-                    state->draw_cursor = true;
-                    
                     if (state->cursor_index > 0)
                     {
+                        state->last_cursor_blink_tic = SDL_GetTicks();
+                        state->draw_cursor = true;
                         state->cursor_index--;
                     }
                 } break;
