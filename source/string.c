@@ -78,3 +78,20 @@ void String_remove(String* str, int index)
     str->text = realloc(str->text, sizeof(char) * str->len + 1);
     str->text[str->len] = '\0';
 }
+
+
+int String_get_previous_newline(String* str, int index)
+{
+    if (!str) return -2;
+    if (!str->len) return -3;
+    if (!str->text) return -4;
+    for (int i = index-1; i >= 0; i--)
+    {
+        if (str->text[i] == '\n')
+        {
+            return i;
+        }
+    }
+
+    return -1; //no newline found
+}
