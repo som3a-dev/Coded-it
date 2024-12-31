@@ -38,3 +38,5 @@ void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
 
 void editor_draw_text(ProgramState* state, const char* text, int x, int y, int r, int g, int b);
+
+void editor_set_cursor(ProgramState* state, int index);

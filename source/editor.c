@@ -87,10 +87,7 @@ void editor_handle_events(ProgramState* state)
         system("@cls||clear");
         printf("%s\n", state->text);
 
-        //don't blink while typing
-        state->last_cursor_blink_tic = SDL_GetTicks();
-        state->draw_cursor = true;
-        state->cursor_index++;
+        editor_set_cursor(state, state->cursor_index + 1);
     } break;
 
     case SDL_KEYDOWN:
@@ -102,12 +99,7 @@ void editor_handle_events(ProgramState* state)
             //String_pop(&(state->text));
             String_remove(&(state->text), state->cursor_index - 1);
 
-            if (state->cursor_index > 0)
-            {
-                state->last_cursor_blink_tic = SDL_GetTicks();
-                state->draw_cursor = true;
-                state->cursor_index--;
-            }
+            editor_set_cursor(state, state->cursor_index - 1);
         } break;
 
         case SDLK_RETURN:
@@ -115,9 +107,7 @@ void editor_handle_events(ProgramState* state)
             //String_push(&(state->text), '\n');
             String_insert(&(state->text), '\n', state->cursor_index);
 
-            state->last_cursor_blink_tic = SDL_GetTicks();
-            state->draw_cursor = true;
-            state->cursor_index++;
+            editor_set_cursor(state, state->cursor_index + 1);
         } break;
 
         case SDLK_UP:
@@ -140,10 +130,7 @@ void editor_handle_events(ProgramState* state)
                 cursor_index_in_line = prev_line_len - 1;
             }
 
-            state->cursor_index = newline_before_prev_newline + cursor_index_in_line + 1;
-
-            state->last_cursor_blink_tic = SDL_GetTicks();
-            state->draw_cursor = true;
+            editor_set_cursor(state, newline_before_prev_newline + cursor_index_in_line + 1);
         } break;
 
         case SDLK_DOWN:
@@ -174,36 +161,27 @@ void editor_handle_events(ProgramState* state)
             {
                 cursor_index_in_line = next_line_len;
             }
-
-            state->cursor_index = next_newline + cursor_index_in_line + 1;
-
-            state->last_cursor_blink_tic = SDL_GetTicks();
-            state->draw_cursor = true;
+                
+            editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
         } break;
 
         case SDLK_LEFT:
         {
-            if (state->cursor_index > 0)
-            {
-                state->cursor_index--;
-                state->last_cursor_blink_tic = SDL_GetTicks();
-                state->draw_cursor = true;
-            }
+            editor_set_cursor(state, state->cursor_index - 1);
         } break;
 
         case SDLK_RIGHT:
         {
-            state->cursor_index++;
-            state->last_cursor_blink_tic = SDL_GetTicks();
-            state->draw_cursor = true;
+            editor_set_cursor(state, state->cursor_index + 1);
         } break;
 
         case SDLK_TAB:
         {
             String_insert(&(state->text), ' ', state->cursor_index);
-            state->cursor_index++;
+            editor_set_cursor(state, state->cursor_index+1);
             String_insert(&(state->text), ' ', state->cursor_index);
-            state->cursor_index++;
+            editor_set_cursor(state, state->cursor_index+1);
+            
         } break;
         }
     } break;
@@ -228,12 +206,44 @@ void editor_draw(ProgramState* state)
 
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
 
-    //draw_text(state, state->text.text, 36 / 2, 0, 255, 255, 255);
+
+
+    if (state->draw_cursor)
+    {
+        //TODO(omar): i don't like having 2 loops one to draw the text and one to draw the cursor.
+        //Try to find a better way
+        int cursor_x = 0;
+        int cursor_y = 0;
+        for (int i = 0; i < state->text.len; i++)
+        {
+            char c = state->text.text[i];
+            if (c == '\n')
+            {
+                cursor_y += state->char_h;
+                cursor_x = 0;
+            }
+            else
+            {
+                cursor_x += state->char_w;
+            }
+
+            if (i == state->cursor_index - 1)
+            {
+                break;
+            }
+            else if ((i == state->cursor_index) && (i == 0))
+            {
+                cursor_x = 0;
+                cursor_y = 0;
+                break;
+            }
+        }
+        SDL_Rect cursor_rect = { cursor_x, cursor_y + 2, state->char_w, state->char_h - 2 };
+        SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
+    }
 
     int x = 0;
     int y = 0;
-    int cursor_x = 0;
-    int cursor_y = 0;
     for (int i = 0; i < state->text.len; i++)
     {
         bool draw_char = true;
@@ -241,24 +251,9 @@ void editor_draw(ProgramState* state)
         char c = state->text.text[i];
         if (c == '\n')
         {
-            //char str[2] = { '|', '\0'};
-            //draw_text(state, str, x, y, 255, 255, 255);
-
             y += state->char_h;
-            //cursor_y += state->char_h;
             x = 0;
             draw_char = false;
-        }
-
-        if (i == state->cursor_index - 1)
-        {
-            cursor_x = x;
-            cursor_y = y;
-
-            if (draw_char)
-            {
-                cursor_x += state->char_w;
-            }
         }
 
         if (draw_char)
@@ -267,12 +262,6 @@ void editor_draw(ProgramState* state)
             editor_draw_text(state, str, x, y, 255, 255, 255);
             x += state->char_w;
         }
-    }
-
-    if (state->draw_cursor)
-    {
-        SDL_Rect cursor_rect = { cursor_x, cursor_y + 2, state->char_w, state->char_h - 2 };
-        SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
     }
 
     SDL_UpdateWindowSurface(state->window);
@@ -288,4 +277,22 @@ void editor_draw_text(ProgramState* state, const char* text, int x, int y, int r
     TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
 
     SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
+}
+
+
+void editor_set_cursor(ProgramState* state, int index)
+{
+    state->cursor_index = index;
+    if (state->cursor_index < 0)
+    {
+        state->cursor_index = 0;
+    }
+    if (state->cursor_index > state->text.len)
+    {
+        state->cursor_index = state->text.len;
+    }
+
+    //don't blink while typing
+    state->last_cursor_blink_tic = SDL_GetTicks();
+    state->draw_cursor = true;
 }
