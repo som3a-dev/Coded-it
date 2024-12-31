@@ -183,16 +183,18 @@ void handle_events(ProgramState* state)
                 case SDLK_DOWN:
                 {
                     int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
-                    if (prev_newline == state->text.len+1)
-                    {
-                        return;
-                    }
 
                     int cursor_index_in_line = state->cursor_index - prev_newline - 1;
                     //printf("Cursor index in line: %d\n", cursor_index_in_line);
 
                     int next_newline = String_get_next_newline(&(state->text), prev_newline);
                     //printf("Next newline: %d\n", next_newline);
+
+                    if (next_newline == state->text.len)
+                    {
+                        //We are at the last line
+                        break;
+                    }
 
                     int next_next_newline = String_get_next_newline(&(state->text), next_newline);
                     //printf("Next newline: %d\n", next_next_newline);
