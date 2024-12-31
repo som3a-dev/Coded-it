@@ -95,3 +95,20 @@ int String_get_previous_newline(String* str, int index)
 
     return -1; //no newline found
 }
+
+
+int String_get_next_newline(String* str, int index)
+{
+    if (!str) return -2;
+    if (!str->len) return -3;
+    if (!str->text) return -4;
+    for (int i = index + 1; i < str->len; i++)
+    {
+        if (str->text[i] == '\n')
+        {
+            return i;
+        }
+    }
+
+    return str->len+1; //no newline found
+}

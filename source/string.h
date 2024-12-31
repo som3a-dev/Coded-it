@@ -25,3 +25,7 @@ void String_remove(String* str, int index);
 //if you give the index of '!' it will return 11
 //if you give the index of 'H' it will return -1 (no newline exists before 'H')
 int String_get_previous_newline(String* str, int index);
+
+//same stuff. but
+//if no newline is found we return str->len+1 instead of -1.
+int String_get_next_newline(String* str, int index);
