@@ -110,5 +110,5 @@ int String_get_next_newline(String* str, int index)
         }
     }
 
-    return str->len+1; //no newline found
+    return str->len; //no newline found
 }

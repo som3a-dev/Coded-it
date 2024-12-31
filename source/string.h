@@ -27,5 +27,5 @@ void String_remove(String* str, int index);
 int String_get_previous_newline(String* str, int index);
 
 //same stuff. but
-//if no newline is found we return str->len+1 instead of -1.
+//if no newline is found we return str->len instead of -1.
 int String_get_next_newline(String* str, int index);
