@@ -21,9 +21,15 @@
     <ClCompile Include="source\string.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\editor.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\editor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
