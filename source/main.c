@@ -73,7 +73,7 @@ int main(int argc, char** argv)
         return 3;
     }
     
-    state.font = TTF_OpenFont("CONSOLA.ttf", 36);
+    state.font = TTF_OpenFont("CONSOLA.ttf", 24);
     if (!state.font)
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
@@ -106,7 +106,7 @@ void handle_events(ProgramState* state)
 {
     SDL_Event e;
     
-    SDL_WaitEventTimeout(&e, 100);
+    SDL_WaitEventTimeout(&e, 1000);
     
     switch (e.type)
     {
@@ -156,12 +156,59 @@ void handle_events(ProgramState* state)
                 
                 case SDLK_UP:
                 {
+                    int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
+                    if (prev_newline == -1)
+                    {
+                        return;
+                    }
+
+                    int cursor_index_in_line = state->cursor_index - prev_newline - 1;
+                    printf("Cursor index in line: %d\n", cursor_index_in_line);
+
+                    int newline_before_prev_newline = String_get_previous_newline(&(state->text), prev_newline);
+
+                    //cap cursor_index_in_line at the length of the previous line - 1
+                    int prev_line_len = prev_newline - newline_before_prev_newline;
+                    if (cursor_index_in_line >= prev_line_len)
+                    {
+                        cursor_index_in_line = prev_line_len-1;
+                    }
+
+                    state->cursor_index = newline_before_prev_newline + cursor_index_in_line + 1;
+
                     state->last_cursor_blink_tic = SDL_GetTicks();
                     state->draw_cursor = true;
                 } break;
                 
                 case SDLK_DOWN:
                 {
+                    int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
+                    if (prev_newline == state->text.len+1)
+                    {
+                        return;
+                    }
+
+                    int cursor_index_in_line = state->cursor_index - prev_newline - 1;
+                    //printf("Cursor index in line: %d\n", cursor_index_in_line);
+
+                    int next_newline = String_get_next_newline(&(state->text), prev_newline);
+                    //printf("Next newline: %d\n", next_newline);
+
+                    int next_next_newline = String_get_next_newline(&(state->text), next_newline);
+                    //printf("Next newline: %d\n", next_next_newline);
+
+                    //cap cursor_index_in_line at the length of the previous line - 1
+                    int next_line_len = next_next_newline - next_newline - 1;
+                    if (next_line_len < 0) next_line_len = 0;
+                    //printf("Next line len: %d\n", next_line_len);
+
+                    if (cursor_index_in_line > next_line_len)
+                    {
+                        cursor_index_in_line = next_line_len;
+                    }
+
+                    state->cursor_index = next_newline + cursor_index_in_line + 1;
+
                     state->last_cursor_blink_tic = SDL_GetTicks();
                     state->draw_cursor = true;
                 } break;
@@ -218,6 +265,9 @@ void draw(ProgramState* state)
         char c = state->text.text[i];
         if (c == '\n')
         {
+            //char str[2] = { '|', '\0'};
+            //draw_text(state, str, x, y, 255, 255, 255);
+
             y += state->char_h;
             //cursor_y += state->char_h;
             x = 0;
