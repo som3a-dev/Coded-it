@@ -231,6 +231,14 @@ void handle_events(ProgramState* state)
                     state->last_cursor_blink_tic = SDL_GetTicks();
                     state->draw_cursor = true;
                 } break;
+
+                case SDLK_TAB:
+                {
+                    String_insert(&(state->text), ' ', state->cursor_index);
+                    state->cursor_index++;
+                    String_insert(&(state->text), ' ', state->cursor_index);
+                    state->cursor_index++;
+                } break;
             }
         } break;
     }
