@@ -16,12 +16,12 @@ typedef struct
     SDL_Surface* window_surface;
     TTF_Font* font;
     bool running;
-
+    
     String text;
-
+    
     int char_w;
     int char_h;
-
+    
     int cursor_index; //the index of the character the cursor is on.
     bool draw_cursor; //used for a blinking cursor
     int last_cursor_blink_tic;

@@ -11,9 +11,9 @@ void editor_init(ProgramState* state)
     state->draw_cursor = true;
     state->last_cursor_blink_tic = 0;
     state->cursor_index = 0;
-
+    
     const char* error = NULL;
-
+    
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     error = SDL_GetError();
     if (error[0])
@@ -21,7 +21,7 @@ void editor_init(ProgramState* state)
         printf("Initializing SDL failed!\nError Message: '%s'\n", error);
         return 1;
     }
-
+    
     state->window = SDL_CreateWindow("Coded-it", 100, 100, 800, 600, SDL_WINDOW_SHOWN);
     if (!state->window)
     {
@@ -29,7 +29,7 @@ void editor_init(ProgramState* state)
         return 2;
     }
     state->window_surface = SDL_GetWindowSurface(state->window);
-
+    
     TTF_Init();
     error = TTF_GetError();
     if (error[0])
@@ -37,7 +37,7 @@ void editor_init(ProgramState* state)
         printf("Initializing SDL_ttf failed!\nError Message: '%s'\n", error);
         return 3;
     }
-
+    
     state->font = TTF_OpenFont("CONSOLA.ttf", 24);
     if (!state->font)
     {
@@ -53,7 +53,7 @@ void editor_destroy(ProgramState* state)
     TTF_Quit();
     SDL_DestroyWindow(state->window);
     SDL_Quit();
-
+    
 }
 
 
@@ -71,120 +71,120 @@ void editor_loop(ProgramState* state)
 void editor_handle_events(ProgramState* state)
 {
     SDL_Event e;
-
+    
     SDL_WaitEventTimeout(&e, 1000);
-
+    
     switch (e.type)
     {
-    case SDL_QUIT:
-    {
-        state->running = false;
-    } break;
-
-    case SDL_TEXTINPUT:
-    {
-        String_insert(&(state->text), e.text.text[0], state->cursor_index);
-        system("@cls||clear");
-        printf("%s\n", state->text);
-
-        editor_set_cursor(state, state->cursor_index + 1);
-    } break;
-
-    case SDL_KEYDOWN:
-    {
-        switch (e.key.keysym.sym)
+        case SDL_QUIT:
         {
-        case SDLK_BACKSPACE:
-        {
-            //String_pop(&(state->text));
-            String_remove(&(state->text), state->cursor_index - 1);
-
-            editor_set_cursor(state, state->cursor_index - 1);
+            state->running = false;
         } break;
-
-        case SDLK_RETURN:
+        
+        case SDL_TEXTINPUT:
         {
-            //String_push(&(state->text), '\n');
-            String_insert(&(state->text), '\n', state->cursor_index);
-
-            editor_set_cursor(state, state->cursor_index + 1);
-        } break;
-
-        case SDLK_UP:
-        {
-            int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
-            if (prev_newline == -1)
-            {
-                return;
-            }
-
-            int cursor_index_in_line = state->cursor_index - prev_newline - 1;
-            printf("Cursor index in line: %d\n", cursor_index_in_line);
-
-            int newline_before_prev_newline = String_get_previous_newline(&(state->text), prev_newline);
-
-            //cap cursor_index_in_line at the length of the previous line - 1
-            int prev_line_len = prev_newline - newline_before_prev_newline;
-            if (cursor_index_in_line >= prev_line_len)
-            {
-                cursor_index_in_line = prev_line_len - 1;
-            }
-
-            editor_set_cursor(state, newline_before_prev_newline + cursor_index_in_line + 1);
-        } break;
-
-        case SDLK_DOWN:
-        {
-            int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
-
-            int cursor_index_in_line = state->cursor_index - prev_newline - 1;
-            //printf("Cursor index in line: %d\n", cursor_index_in_line);
-
-            int next_newline = String_get_next_newline(&(state->text), prev_newline);
-            //printf("Next newline: %d\n", next_newline);
-
-            if (next_newline == state->text.len)
-            {
-                //We are at the last line
-                break;
-            }
-
-            int next_next_newline = String_get_next_newline(&(state->text), next_newline);
-            //printf("Next newline: %d\n", next_next_newline);
-
-            //cap cursor_index_in_line at the length of the previous line - 1
-            int next_line_len = next_next_newline - next_newline - 1;
-            if (next_line_len < 0) next_line_len = 0;
-            //printf("Next line len: %d\n", next_line_len);
-
-            if (cursor_index_in_line > next_line_len)
-            {
-                cursor_index_in_line = next_line_len;
-            }
-                
-            editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
-        } break;
-
-        case SDLK_LEFT:
-        {
-            editor_set_cursor(state, state->cursor_index - 1);
-        } break;
-
-        case SDLK_RIGHT:
-        {
-            editor_set_cursor(state, state->cursor_index + 1);
-        } break;
-
-        case SDLK_TAB:
-        {
-            String_insert(&(state->text), ' ', state->cursor_index);
-            editor_set_cursor(state, state->cursor_index+1);
-            String_insert(&(state->text), ' ', state->cursor_index);
-            editor_set_cursor(state, state->cursor_index+1);
+            String_insert(&(state->text), e.text.text[0], state->cursor_index);
+            //system("@cls||clear");
+            //printf("%s\n", state->text);
             
+            editor_set_cursor(state, state->cursor_index + 1);
         } break;
-        }
-    } break;
+        
+        case SDL_KEYDOWN:
+        {
+            switch (e.key.keysym.sym)
+            {
+                case SDLK_BACKSPACE:
+                {
+                    //String_pop(&(state->text));
+                    String_remove(&(state->text), state->cursor_index - 1);
+                    
+                    editor_set_cursor(state, state->cursor_index - 1);
+                } break;
+                
+                case SDLK_RETURN:
+                {
+                    //String_push(&(state->text), '\n');
+                    String_insert(&(state->text), '\n', state->cursor_index);
+                    
+                    editor_set_cursor(state, state->cursor_index + 1);
+                } break;
+                
+                case SDLK_UP:
+                {
+                    int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
+                    if (prev_newline == -1)
+                    {
+                        return;
+                    }
+                    
+                    int cursor_index_in_line = state->cursor_index - prev_newline - 1;
+                    printf("Cursor index in line: %d\n", cursor_index_in_line);
+                    
+                    int newline_before_prev_newline = String_get_previous_newline(&(state->text), prev_newline);
+                    
+                    //cap cursor_index_in_line at the length of the previous line - 1
+                    int prev_line_len = prev_newline - newline_before_prev_newline;
+                    if (cursor_index_in_line >= prev_line_len)
+                    {
+                        cursor_index_in_line = prev_line_len - 1;
+                    }
+                    
+                    editor_set_cursor(state, newline_before_prev_newline + cursor_index_in_line + 1);
+                } break;
+                
+                case SDLK_DOWN:
+                {
+                    int prev_newline = String_get_previous_newline(&(state->text), state->cursor_index);
+                    
+                    int cursor_index_in_line = state->cursor_index - prev_newline - 1;
+                    //printf("Cursor index in line: %d\n", cursor_index_in_line);
+                    
+                    int next_newline = String_get_next_newline(&(state->text), prev_newline);
+                    //printf("Next newline: %d\n", next_newline);
+                    
+                    if (next_newline == state->text.len)
+                    {
+                        //We are at the last line
+                        break;
+                    }
+                    
+                    int next_next_newline = String_get_next_newline(&(state->text), next_newline);
+                    //printf("Next newline: %d\n", next_next_newline);
+                    
+                    //cap cursor_index_in_line at the length of the previous line - 1
+                    int next_line_len = next_next_newline - next_newline - 1;
+                    if (next_line_len < 0) next_line_len = 0;
+                    //printf("Next line len: %d\n", next_line_len);
+                    
+                    if (cursor_index_in_line > next_line_len)
+                    {
+                        cursor_index_in_line = next_line_len;
+                    }
+                    
+                    editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
+                } break;
+                
+                case SDLK_LEFT:
+                {
+                    editor_set_cursor(state, state->cursor_index - 1);
+                } break;
+                
+                case SDLK_RIGHT:
+                {
+                    editor_set_cursor(state, state->cursor_index + 1);
+                } break;
+                
+                case SDLK_TAB:
+                {
+                    String_insert(&(state->text), ' ', state->cursor_index);
+                    editor_set_cursor(state, state->cursor_index+1);
+                    String_insert(&(state->text), ' ', state->cursor_index);
+                    editor_set_cursor(state, state->cursor_index+1);
+                    
+                } break;
+            }
+        } break;
     }
 }
 
@@ -203,11 +203,11 @@ void editor_draw(ProgramState* state)
 {
     //Update the size of a character
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
-
+    
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
-
-
-
+    
+    
+    
     if (state->draw_cursor)
     {
         //TODO(omar): i don't like having 2 loops one to draw the text and one to draw the cursor.
@@ -226,7 +226,7 @@ void editor_draw(ProgramState* state)
             {
                 cursor_x += state->char_w;
             }
-
+            
             if (i == state->cursor_index - 1)
             {
                 break;
@@ -238,16 +238,16 @@ void editor_draw(ProgramState* state)
                 break;
             }
         }
-        SDL_Rect cursor_rect = { cursor_x, cursor_y + 2, state->char_w, state->char_h - 2 };
+        SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
         SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
     }
-
+    
     int x = 0;
     int y = 0;
     for (int i = 0; i < state->text.len; i++)
     {
         bool draw_char = true;
-
+        
         char c = state->text.text[i];
         if (c == '\n')
         {
@@ -255,7 +255,7 @@ void editor_draw(ProgramState* state)
             x = 0;
             draw_char = false;
         }
-
+        
         if (draw_char)
         {
             char str[2] = { c, '\0' };
@@ -263,7 +263,7 @@ void editor_draw(ProgramState* state)
             x += state->char_w;
         }
     }
-
+    
     SDL_UpdateWindowSurface(state->window);
 }
 
@@ -272,11 +272,13 @@ void editor_draw_text(ProgramState* state, const char* text, int x, int y, int r
 {
     SDL_Color text_color = { r, g, b, 255 };
     SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, text, text_color);
-
+    
     SDL_Rect text_dst = { x, y, 0, 0 };
     TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
-
+    
     SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
+
+    SDL_FreeSurface(text_surface);
 }
 
 
@@ -291,7 +293,7 @@ void editor_set_cursor(ProgramState* state, int index)
     {
         state->cursor_index = state->text.len;
     }
-
+    
     //don't blink while typing
     state->last_cursor_blink_tic = SDL_GetTicks();
     state->draw_cursor = true;
