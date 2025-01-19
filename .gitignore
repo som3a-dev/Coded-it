@@ -402,3 +402,5 @@ FodyWeavers.xsd
 *.filters
 Coded-it.vcxproj.filters
 Coded-it.vcxproj.filters
+*.json
+*.swp

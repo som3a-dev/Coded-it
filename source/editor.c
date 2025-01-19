@@ -181,7 +181,6 @@ void editor_handle_events(ProgramState* state)
                     editor_set_cursor(state, state->cursor_index+1);
                     String_insert(&(state->text), ' ', state->cursor_index);
                     editor_set_cursor(state, state->cursor_index+1);
-                    
                 } break;
             }
         } break;
@@ -195,6 +194,34 @@ void editor_update(ProgramState* state)
     {
         state->draw_cursor = !(state->draw_cursor);
         state->last_cursor_blink_tic = SDL_GetTicks();
+    }
+
+    int mouse_x, mouse_y;
+    uint32_t mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
+
+    if (mouse_state & SDL_BUTTON(1))
+    {
+        int mouse_char_x = mouse_x / state->char_w;
+        int mouse_char_y = mouse_y / state->char_h;
+
+        int char_x = 0;
+        int char_y = 0;
+        for (int i = 0; i <= state->text.len; i++)
+        {
+            if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
+            {
+                state->cursor_index = i;
+                break;
+            }
+
+            char_x++;
+
+            if (state->text.text[i] == '\n')
+            {
+                char_x = 0;
+                char_y++;
+            }
+        }
     }
 }
 
