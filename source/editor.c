@@ -210,7 +210,7 @@ void editor_update(ProgramState* state)
         {
             if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
             {
-                state->cursor_index = i;
+                editor_set_cursor(state, i);
                 break;
             }
 
