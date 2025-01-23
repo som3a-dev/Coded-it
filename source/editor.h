@@ -11,12 +11,23 @@
 #include "string.h"
 #include "button.h"
 
+
+enum
+{
+    EDITOR_STATE_EDIT,
+    EDITOR_STATE_COMMAND,
+    EDITOR_STATE_COUNT //not an actual state. used for counting
+};
+
+
 typedef struct
 {
     SDL_Window* window;
     SDL_Surface* window_surface;
     TTF_Font* font;
     bool running;
+
+    int state;
     
     String text;
     

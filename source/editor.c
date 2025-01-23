@@ -17,6 +17,7 @@ int editor_init(ProgramState* state)
     state->draw_cursor = true;
     state->last_cursor_blink_tic = 0;
     state->cursor_index = 0;
+    state->state = EDITOR_STATE_EDIT;
     
     const char* error = NULL;
     
@@ -203,6 +204,16 @@ void editor_handle_events(ProgramState* state)
                     String_insert(&(state->text), ' ', state->cursor_index);
                     editor_set_cursor(state, state->cursor_index+1);
                 } break;
+
+                case SDLK_LCTRL:
+                {
+                    state->state++;
+
+                    if (state->state >= EDITOR_STATE_COUNT)
+                    {
+                        state->state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
+                    }
+                } break;
             }
         } break;
     }
@@ -220,40 +231,49 @@ void editor_update(ProgramState* state)
     int mouse_x, mouse_y;
     uint32_t mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
 
-    if (mouse_state & SDL_BUTTON(1))
+    switch (state->state)
     {
-        if (state->text.len != 0)
+        case EDITOR_STATE_EDIT:
         {
-            int mouse_char_x = mouse_x / state->char_w;
-            int mouse_char_y = mouse_y / state->char_h;
-
-            int char_x = 0;
-            int char_y = 0;
-            for (int i = 0; i <= state->text.len; i++)
+            if (mouse_state & SDL_BUTTON(1))
             {
-                if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
+                if (state->text.len != 0)
                 {
-                    editor_set_cursor(state, i);
-                    break;
-                }
+                    int mouse_char_x = mouse_x / state->char_w;
+                    int mouse_char_y = mouse_y / state->char_h;
 
-                char_x++;
+                    int char_x = 0;
+                    int char_y = 0;
+                    for (int i = 0; i <= state->text.len; i++)
+                    {
+                        if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
+                        {
+                            editor_set_cursor(state, i);
+                            break;
+                        }
 
-                if (state->text.text[i] == '\n')
-                {
-                    char_x = 0;
-                    char_y++;
+                        char_x++;
+
+                        if (state->text.text[i] == '\n')
+                        {
+                            char_x = 0;
+                            char_y++;
+                        }
+                    }
                 }
             }
-        }
-    }
+        } break;
 
-    if (mouse_state)
-    {
-        for (int i = 0; i < 10; i++)
+        case EDITOR_STATE_COMMAND:
         {
-            Button_on_mouse_click(state->buttons + i, mouse_state);
-        }
+            if (mouse_state)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Button_on_mouse_click(state->buttons + i, mouse_state);
+                }
+            }
+        } break;
     }
 }
 
@@ -265,68 +285,77 @@ void editor_draw(ProgramState* state)
     
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 0, 0, 0)); //Clear
     
-    for (int i = 0; i < 10; i++)
+    switch (state->state)
     {
-        Button_draw(state->buttons + i, state->font, state->window_surface);
-    }
-    
-    if (state->draw_cursor)
-    {
-        //TODO(omar): i don't like having 2 loops one to draw the text and one to draw the cursor.
-        //Try to find a better way
-        int cursor_x = 0;
-        int cursor_y = 0;
-        for (int i = 0; i < state->text.len; i++)
+        case EDITOR_STATE_COMMAND:
         {
-            char c = state->text.text[i];
-            if (c == '\n')
+            for (int i = 0; i < 10; i++)
             {
-                cursor_y += state->char_h;
-                cursor_x = 0;
+                Button_draw(state->buttons + i, state->font, state->window_surface);
             }
-            else
+        } break;
+
+        case EDITOR_STATE_EDIT:
+        {
+            if (state->draw_cursor)
             {
-                cursor_x += state->char_w;
+                //TODO(omar): i don't like having 2 loops one to draw the text and one to draw the cursor.
+                //Try to find a better way
+                int cursor_x = 0;
+                int cursor_y = 0;
+                for (int i = 0; i < state->text.len; i++)
+                {
+                    char c = state->text.text[i];
+                    if (c == '\n')
+                    {
+                        cursor_y += state->char_h;
+                        cursor_x = 0;
+                    }
+                    else
+                    {
+                        cursor_x += state->char_w;
+                    }
+                    
+                    if (i == state->cursor_index - 1)
+                    {
+                        break;
+                    }
+                    else if ((i == state->cursor_index) && (i == 0))
+                    {
+                        cursor_x = 0;
+                        cursor_y = 0;
+                        break;
+                    }
+                }
+                SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
+                SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
             }
             
-            if (i == state->cursor_index - 1)
+            int x = 0;
+            int y = 0;
+            for (int i = 0; i < state->text.len; i++)
             {
-                break;
+                bool draw_char = true;
+                
+                char c = state->text.text[i];
+                if (c == '\n')
+                {
+                    y += state->char_h;
+                    x = 0;
+                    draw_char = false;
+                }
+                
+                if (draw_char)
+                {
+                    char str[2] = { c, '\0' };
+                    draw_text(state->font, state->window_surface, str, x, y, 255, 255, 255);
+                    x += state->char_w;
+                }
             }
-            else if ((i == state->cursor_index) && (i == 0))
-            {
-                cursor_x = 0;
-                cursor_y = 0;
-                break;
-            }
-        }
-        SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
-        SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
+        } break;
     }
     
-    int x = 0;
-    int y = 0;
-    for (int i = 0; i < state->text.len; i++)
-    {
-        bool draw_char = true;
-        
-        char c = state->text.text[i];
-        if (c == '\n')
-        {
-            y += state->char_h;
-            x = 0;
-            draw_char = false;
-        }
-        
-        if (draw_char)
-        {
-            char str[2] = { c, '\0' };
-            draw_text(state->font, state->window_surface, str, x, y, 255, 255, 255);
-            x += state->char_w;
-        }
-    }
-    
-    SDL_UpdateWindowSurface(state->window);
+   SDL_UpdateWindowSurface(state->window);
 }
 
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
