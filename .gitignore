@@ -404,3 +404,6 @@ Coded-it.vcxproj.filters
 Coded-it.vcxproj.filters
 *.json
 *.swp
+*.filters
+*.vcxproj
+*.json

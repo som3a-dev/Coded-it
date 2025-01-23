@@ -1,9 +1,15 @@
 #include "editor.h"
+#include "button.h"
+#include <memory.h>
+
+
 
 const int CURSOR_BLINK_TIME = 1000;
 
 
-void editor_init(ProgramState* state)
+//NEXT OBJECTIVE: STATE MACHINE PROGRAM. SWITCH BETWEEN EDIT STATE AND COMMAND STATE WITH CTRL-O
+
+int editor_init(ProgramState* state)
 {
     state->running = true;
     state->text.text = NULL;
@@ -44,6 +50,12 @@ void editor_init(ProgramState* state)
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
         return 4;
     }
+
+    memset(state->buttons, 0, sizeof(Button) * 10);
+
+    Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 400, 400, 64, 64,
+    120, 30, 20,
+    200, 30, 20);
 }
 
 
@@ -88,6 +100,14 @@ void editor_handle_events(ProgramState* state)
             //printf("%s\n", state->text);
             
             editor_set_cursor(state, state->cursor_index + 1);
+        } break;
+
+        case SDL_MOUSEMOTION:
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y);
+            }
         } break;
         
         case SDL_KEYDOWN:
@@ -201,26 +221,37 @@ void editor_update(ProgramState* state)
 
     if (mouse_state & SDL_BUTTON(1))
     {
-        int mouse_char_x = mouse_x / state->char_w;
-        int mouse_char_y = mouse_y / state->char_h;
-
-        int char_x = 0;
-        int char_y = 0;
-        for (int i = 0; i <= state->text.len; i++)
+        if (state->text.len != 0)
         {
-            if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
-            {
-                editor_set_cursor(state, i);
-                break;
-            }
+            int mouse_char_x = mouse_x / state->char_w;
+            int mouse_char_y = mouse_y / state->char_h;
 
-            char_x++;
-
-            if (state->text.text[i] == '\n')
+            int char_x = 0;
+            int char_y = 0;
+            for (int i = 0; i <= state->text.len; i++)
             {
-                char_x = 0;
-                char_y++;
+                if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
+                {
+                    editor_set_cursor(state, i);
+                    break;
+                }
+
+                char_x++;
+
+                if (state->text.text[i] == '\n')
+                {
+                    char_x = 0;
+                    char_y++;
+                }
             }
+        }
+    }
+
+    if (mouse_state)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Button_on_mouse_click(state->buttons + i, mouse_state);
         }
     }
 }
@@ -231,9 +262,12 @@ void editor_draw(ProgramState* state)
     //Update the size of a character
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
     
-    SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 60, 60, 60)); //Clear
+    SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 0, 0, 0)); //Clear
     
-    
+    for (int i = 0; i < 10; i++)
+    {
+        Button_draw(state->buttons + i, state->window_surface);
+    }
     
     if (state->draw_cursor)
     {
