@@ -40,6 +40,7 @@ void editor_handle_events(ProgramState* state);
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
 
-void editor_draw_text(ProgramState* state, const char* text, int x, int y, int r, int g, int b);
+void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
+                int x, int y, int r, int g, int b);
 
 void editor_set_cursor(ProgramState* state, int index);

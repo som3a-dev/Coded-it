@@ -407,3 +407,5 @@ Coded-it.vcxproj.filters
 *.filters
 *.vcxproj
 *.json
+*.vcxproj
+*.filters

@@ -55,7 +55,8 @@ int editor_init(ProgramState* state)
 
     Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 400, 400, 64, 64,
     120, 30, 20,
-    200, 30, 20);
+    200, 30, 20,
+    "Text");
 }
 
 
@@ -320,7 +321,7 @@ void editor_draw(ProgramState* state)
         if (draw_char)
         {
             char str[2] = { c, '\0' };
-            editor_draw_text(state, str, x, y, 255, 255, 255);
+            draw_text(state->font, state->window_surface, str, x, y, 255, 255, 255);
             x += state->char_w;
         }
     }
@@ -328,16 +329,16 @@ void editor_draw(ProgramState* state)
     SDL_UpdateWindowSurface(state->window);
 }
 
-
-void editor_draw_text(ProgramState* state, const char* text, int x, int y, int r, int g, int b)
+void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
+                int x, int y, int r, int g, int b)
 {
     SDL_Color text_color = { r, g, b, 255 };
-    SDL_Surface* text_surface = TTF_RenderText_Solid(state->font, text, text_color);
+    SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, text_color);
     
     SDL_Rect text_dst = { x, y, 0, 0 };
-    TTF_SizeText(state->font, text, &(text_dst.w), &(text_dst.h));
+    TTF_SizeText(font, text, &(text_dst.w), &(text_dst.h));
     
-    SDL_BlitSurface(text_surface, NULL, state->window_surface, &text_dst);
+    SDL_BlitSurface(text_surface, NULL, dst_surface, &text_dst);
 
     SDL_FreeSurface(text_surface);
 }

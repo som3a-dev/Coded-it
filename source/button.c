@@ -1,9 +1,13 @@
 #include "button.h"
 #include <SDL.h>
+#include <SDL_ttf.h>
+#include <stdio.h>
 
 
-
-void Button_init(Button* button, int state, int x, int y, int w, int h, uint8_t r, uint8_t g, uint8_t b, uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b)
+void Button_init(Button* button, int state, int x, int y, int w, int h,
+                uint8_t r, uint8_t g, uint8_t b,
+                uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b,
+                const char* text)
 {
     button->state = state;
     button->x = x;
@@ -16,6 +20,7 @@ void Button_init(Button* button, int state, int x, int y, int w, int h, uint8_t 
     button->pressed_color.r = pressed_r;
     button->pressed_color.g = pressed_g;
     button->pressed_color.b = pressed_b;
+    button->text = text;
 }
 
 
