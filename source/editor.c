@@ -267,7 +267,7 @@ void editor_draw(ProgramState* state)
     
     for (int i = 0; i < 10; i++)
     {
-        Button_draw(state->buttons + i, state->window_surface);
+        Button_draw(state->buttons + i, state->font, state->window_surface);
     }
     
     if (state->draw_cursor)

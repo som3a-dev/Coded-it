@@ -40,6 +40,7 @@ void editor_handle_events(ProgramState* state);
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
 
+//TODO(omar): move this function from editor.h/.c into another more suitable file
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
                 int x, int y, int r, int g, int b);
 

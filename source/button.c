@@ -1,4 +1,5 @@
 #include "button.h"
+#include "editor.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
@@ -24,7 +25,7 @@ void Button_init(Button* button, int state, int x, int y, int w, int h,
 }
 
 
-void Button_draw(Button* button, SDL_Surface* dest_surface)
+void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface)
 {
     if (button->state == BUTTON_STATE_DISABLED)
     {
@@ -40,6 +41,20 @@ void Button_draw(Button* button, SDL_Surface* dest_surface)
     {
         SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->pressed_color.r, button->pressed_color.g, button->pressed_color.b));
     }
+
+    int text_x = button->x;
+    int text_y = button->y;
+    int text_w = 0;
+    int text_h = 0;
+
+    TTF_SizeText(font, button->text, &text_w, &text_h);
+
+    text_x += (button->w / 2) - (text_w / 2);
+    text_y += (button->h / 2) - (text_h / 2);
+
+    draw_text(font, dest_surface, button->text,
+              text_x, text_y,
+              255, 255, 255);
 }
 
 
