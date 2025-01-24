@@ -52,10 +52,15 @@ int editor_init(ProgramState* state)
 
     memset(state->buttons, 0, sizeof(Button) * 10);
 
-    Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 0, 0, 0, 0,
-    3, 3, 3,
-    200, 30, 20,
-    "Text", false, state->font);
+    {
+        ButtonConfig config = {0};
+        config.pressed_r = 50;
+        config.pressed_g = 30;
+        config.pressed_b = 30;
+        config.text = "Save";
+        config.font = state->font;
+        Button_init(state->buttons + 0, &config);
+    }
 }
 
 

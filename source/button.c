@@ -4,35 +4,35 @@
 #include <SDL_ttf.h>
 #include <stdio.h>
 
-
-void Button_init(Button* button, int state, int x, int y, int w, int h,
-                uint8_t r, uint8_t g, uint8_t b,
-                uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b,
-                const char* text, bool text_centered, TTF_Font* font)
+void Button_init(Button* button, ButtonConfig* config)
 {
-    button->state = state;
-    button->x = x;
-    button->y = y;
-    button->w = w;
-    button->h = h;
-    button->color.r = r;
-    button->color.g = g;
-    button->color.b = b;
-    button->pressed_color.r = pressed_r;
-    button->pressed_color.g = pressed_g;
-    button->pressed_color.b = pressed_b;
-    button->text = text;
-    button->text_centered = text_centered;
-
-
-    if (text && font)
+    button->state = BUTTON_STATE_ENABLED;
+    if (config->disabled)
     {
-        TTF_SizeText(font, text, &(button->text_w), &(button->text_h));
-        if (w == 0)
+        button->state = BUTTON_STATE_DISABLED;
+    }
+    button->x = config->x;
+    button->y = config->y;
+    button->w = config->w;
+    button->h = config->h;
+    button->color.r = config->r;
+    button->color.g = config->g;
+    button->color.b = config->b;
+    button->pressed_color.r = config->pressed_r;
+    button->pressed_color.g = config->pressed_g;
+    button->pressed_color.b = config->pressed_b;
+    button->text = config->text;
+    button->text_centered = config->text_centered;
+
+
+    if (config->text && config->font)
+    {
+        TTF_SizeText(config->font, config->text, &(button->text_w), &(button->text_h));
+        if (config->w == 0)
         {
             button->w = button->text_w;
         }
-        if (h == 0)
+        if (config->h == 0)
         {
             button->h = button->text_h;
         }

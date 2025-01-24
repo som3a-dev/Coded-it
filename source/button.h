@@ -32,11 +32,26 @@ typedef struct
 } Button;
 
 
-void Button_init(Button* button, int state, int x, int y, int w, int h,
-                uint8_t r, uint8_t g, uint8_t b,
-                uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b,
-                const char* text, bool text_centered,
-                TTF_Font* font);
+typedef struct
+{
+    bool disabled;
+    int x;
+    int y;
+    int w;
+    int h;
+
+    int r;
+    int g;
+    int b;
+    int pressed_r;
+    int pressed_g;
+    int pressed_b;
+
+    const char* text;
+    bool text_centered;
+    TTF_Font* font;
+} ButtonConfig;
+void Button_init(Button* button, ButtonConfig* config);
 void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface);
 
 void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y);
