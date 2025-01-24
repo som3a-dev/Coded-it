@@ -7,8 +7,6 @@
 const int CURSOR_BLINK_TIME = 1000;
 
 
-//NEXT OBJECTIVE: STATE MACHINE PROGRAM. SWITCH BETWEEN EDIT STATE AND COMMAND STATE WITH CTRL-O
-
 int editor_init(ProgramState* state)
 {
     state->running = true;
@@ -54,10 +52,10 @@ int editor_init(ProgramState* state)
 
     memset(state->buttons, 0, sizeof(Button) * 10);
 
-    Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 400, 400, 64, 64,
-    120, 30, 20,
+    Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 0, 0, 500, 32,
+    3, 3, 3,
     200, 30, 20,
-    "Text");
+    "Text", false);
 }
 
 

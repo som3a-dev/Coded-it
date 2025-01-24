@@ -25,13 +25,15 @@ typedef struct
     bool mouse_hovering; //true if the mouse is on the button 
 
     const char* text;
+    bool text_centered; //if false then text will be drawn from 0 on the x coord but cenetered
+                        //on the y
 } Button;
 
 
 void Button_init(Button* button, int state, int x, int y, int w, int h,
                 uint8_t r, uint8_t g, uint8_t b,
                 uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b,
-                const char* text);
+                const char* text, bool text_centered);
 void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface);
 
 void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y);

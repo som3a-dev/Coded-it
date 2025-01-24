@@ -8,7 +8,7 @@
 void Button_init(Button* button, int state, int x, int y, int w, int h,
                 uint8_t r, uint8_t g, uint8_t b,
                 uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b,
-                const char* text)
+                const char* text, bool text_centered)
 {
     button->state = state;
     button->x = x;
@@ -22,6 +22,7 @@ void Button_init(Button* button, int state, int x, int y, int w, int h,
     button->pressed_color.g = pressed_g;
     button->pressed_color.b = pressed_b;
     button->text = text;
+    button->text_centered = text_centered;
 }
 
 
@@ -49,7 +50,10 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface)
 
     TTF_SizeText(font, button->text, &text_w, &text_h);
 
-    text_x += (button->w / 2) - (text_w / 2);
+    if (button->text_centered)
+    {
+        text_x += (button->w / 2) - (text_w / 2);
+    }
     text_y += (button->h / 2) - (text_h / 2);
 
     draw_text(font, dest_surface, button->text,
