@@ -8,7 +8,7 @@
 void Button_init(Button* button, int state, int x, int y, int w, int h,
                 uint8_t r, uint8_t g, uint8_t b,
                 uint8_t pressed_r, uint8_t pressed_g, uint8_t pressed_b,
-                const char* text, bool text_centered)
+                const char* text, bool text_centered, TTF_Font* font)
 {
     button->state = state;
     button->x = x;
@@ -23,6 +23,21 @@ void Button_init(Button* button, int state, int x, int y, int w, int h,
     button->pressed_color.b = pressed_b;
     button->text = text;
     button->text_centered = text_centered;
+
+
+    if (text && font)
+    {
+        TTF_SizeText(font, text, &(button->text_w), &(button->text_h));
+        if (w == 0)
+        {
+            button->w = button->text_w;
+        }
+        if (h == 0)
+        {
+            button->h = button->text_h;
+        }
+    }
+
 }
 
 
@@ -45,16 +60,12 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface)
 
     int text_x = button->x;
     int text_y = button->y;
-    int text_w = 0;
-    int text_h = 0;
-
-    TTF_SizeText(font, button->text, &text_w, &text_h);
 
     if (button->text_centered)
     {
-        text_x += (button->w / 2) - (text_w / 2);
+        text_x += (button->w / 2) - (button->text_w / 2);
     }
-    text_y += (button->h / 2) - (text_h / 2);
+    text_y += (button->h / 2) - (button->text_h / 2);
 
     draw_text(font, dest_surface, button->text,
               text_x, text_y,

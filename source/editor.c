@@ -52,10 +52,10 @@ int editor_init(ProgramState* state)
 
     memset(state->buttons, 0, sizeof(Button) * 10);
 
-    Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 0, 0, 500, 32,
+    Button_init(state->buttons + 0, BUTTON_STATE_ENABLED, 0, 0, 0, 0,
     3, 3, 3,
     200, 30, 20,
-    "Text", false);
+    "Text", false, state->font);
 }
 
 
