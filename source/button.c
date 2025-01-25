@@ -3,9 +3,11 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
+#include <memory.h>
 
 void Button_init(Button* button, ButtonConfig* config)
 {
+    memset(button, 0, sizeof(Button));
     button->state = BUTTON_STATE_ENABLED;
     if (config->disabled)
     {
@@ -23,7 +25,7 @@ void Button_init(Button* button, ButtonConfig* config)
     button->pressed_color.b = config->pressed_b;
     button->text = config->text;
     button->text_centered = config->text_centered;
-
+    button->on_click = config->on_click;
 
     if (config->text && config->font)
     {
@@ -97,15 +99,12 @@ void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y)
 }
 
 
-void Button_on_mouse_click(Button* button, uint32_t mouse)
+bool Button_is_mouse_hovering(Button* button)
 {
     if (button->state == BUTTON_STATE_DISABLED)
     {
-        return;
+        return false;
     }
 
-    if (mouse & SDL_BUTTON(1))
-    {
-        printf("Button clicked\n");
-    } 
+    return button->mouse_hovering;
 }

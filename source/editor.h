@@ -20,7 +20,7 @@ enum
 };
 
 
-typedef struct
+typedef struct _ProgramState
 {
     SDL_Window* window;
     SDL_Surface* window_surface;
@@ -28,6 +28,8 @@ typedef struct
     bool running;
 
     int state;
+
+    const char* current_file;
     
     String text;
     
@@ -56,3 +58,5 @@ void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
                 int x, int y, int r, int g, int b);
 
 void editor_set_cursor(ProgramState* state, int index);
+
+void editor_save_file(const ProgramState* state);

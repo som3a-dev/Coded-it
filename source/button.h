@@ -3,13 +3,13 @@
 #include <SDL_ttf.h>
 #include <stdbool.h>
 
-
 enum
 {
     BUTTON_STATE_DISABLED,
     BUTTON_STATE_ENABLED
 };
 
+typedef struct _ProgramState ProgramState;
 
 typedef struct
 {
@@ -29,6 +29,8 @@ typedef struct
     int text_h;
     bool text_centered; //if false then text will be drawn from 0 on the x coord but cenetered
                         //on the y
+
+    void (*on_click)(ProgramState*);
 } Button;
 
 
@@ -50,9 +52,11 @@ typedef struct
     const char* text;
     bool text_centered;
     TTF_Font* font;
+
+    void (*on_click)(ProgramState*);
 } ButtonConfig;
 void Button_init(Button* button, ButtonConfig* config);
 void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface);
 
 void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y);
-void Button_on_mouse_click(Button* button, uint32_t mouse);
+bool Button_is_mouse_hovering(Button* button);

@@ -1,6 +1,7 @@
 #include "editor.h"
 #include "button.h"
 #include <memory.h>
+#include <string.h>
 
 
 
@@ -59,8 +60,11 @@ int editor_init(ProgramState* state)
         config.pressed_b = 30;
         config.text = "Save";
         config.font = state->font;
+        config.on_click = editor_save_file;
         Button_init(state->buttons + 0, &config);
     }
+
+    state->current_file = "test.txt";
 }
 
 
@@ -217,6 +221,11 @@ void editor_handle_events(ProgramState* state)
                         state->state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
                     }
                 } break;
+
+                case SDLK_INSERT:
+                {
+                    editor_save_file(state);
+                }
             }
         } break;
     }
@@ -273,7 +282,15 @@ void editor_update(ProgramState* state)
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    Button_on_mouse_click(state->buttons + i, mouse_state);
+                    Button* button = state->buttons + i;
+                    if (Button_is_mouse_hovering(button))
+                    {
+                        //do
+                        if (button->on_click)
+                        {
+                            button->on_click(state);
+                        }
+                    }
                 }
             }
         } break;
@@ -391,4 +408,21 @@ void editor_set_cursor(ProgramState* state, int index)
     //don't blink while typing
     state->last_cursor_blink_tic = SDL_GetTicks();
     state->draw_cursor = true;
+}
+
+
+void editor_save_file(const ProgramState* state)
+{
+    FILE* fp;
+    fopen_s(&fp, state->current_file, "w");
+    
+    if (!fp)
+    {
+        //TODO(omar): tell the fucking user the filename is invalid
+        return;
+    }
+
+    fwrite(state->text.text, sizeof(char), state->text.len, fp);
+
+    fclose(fp);
 }
