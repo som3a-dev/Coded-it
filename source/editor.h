@@ -16,9 +16,16 @@ enum
 {
     EDITOR_STATE_EDIT,
     EDITOR_STATE_COMMAND,
+    EDITOR_STATE_COMMAND_INPUT,
     EDITOR_STATE_COUNT //not an actual state. used for counting
 };
 
+
+typedef struct
+{
+    String text;
+    int cursor_index;
+} InputBuffer;
 
 typedef struct _ProgramState
 {
@@ -31,12 +38,12 @@ typedef struct _ProgramState
 
     const char* current_file;
     
-    String text;
-    
+    InputBuffer text;
+    InputBuffer command_input;
+
     int char_w;
     int char_h;
     
-    int cursor_index; //the index of the character the cursor is on.
     bool draw_cursor; //used for a blinking cursor
     int last_cursor_blink_tic;
 
@@ -52,6 +59,7 @@ void editor_loop(ProgramState* state);
 void editor_handle_events(ProgramState* state);
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
+void editor_draw_input_buffer(ProgramState* state);
 
 //TODO(omar): move this function from editor.h/.c into another more suitable file
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
@@ -60,3 +68,5 @@ void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
 void editor_set_cursor(ProgramState* state, int index);
 
 void editor_save_file(const ProgramState* state);
+
+InputBuffer* editor_get_current_input_buffer(const ProgramState* state);
