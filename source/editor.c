@@ -10,12 +10,9 @@ const int CURSOR_BLINK_TIME = 1000;
 
 int editor_init(ProgramState* state)
 {
+    memset(state, 0, sizeof(ProgramState));
     state->running = true;
-    state->text.text = NULL;
-    state->text.len = 0;
     state->draw_cursor = true;
-    state->last_cursor_blink_tic = 0;
-    state->cursor_index = 0;
     state->state = EDITOR_STATE_EDIT;
     
     const char* error = NULL;
@@ -51,8 +48,6 @@ int editor_init(ProgramState* state)
         return 4;
     }
 
-    memset(state->buttons, 0, sizeof(Button) * 10);
-
     {
         ButtonConfig config = {0};
         config.pressed_r = 50;
@@ -74,7 +69,6 @@ void editor_destroy(ProgramState* state)
     TTF_Quit();
     SDL_DestroyWindow(state->window);
     SDL_Quit();
-    
 }
 
 
