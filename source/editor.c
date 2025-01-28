@@ -320,9 +320,12 @@ void editor_draw(ProgramState* state)
         } break;
 
         case EDITOR_STATE_COMMAND_INPUT:
+        {
+            editor_draw_input_buffer(state, 0, 600-state->char_h*2);
+        } break;
         case EDITOR_STATE_EDIT:
         {
-            editor_draw_input_buffer(state);
+            editor_draw_input_buffer(state, 0, 0);
         } break;
     }
     
@@ -400,7 +403,7 @@ InputBuffer* editor_get_current_input_buffer(const ProgramState* state)
 }
 
 
-void editor_draw_input_buffer(ProgramState* state)
+void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
 {
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return;
@@ -409,15 +412,15 @@ void editor_draw_input_buffer(ProgramState* state)
     {
         //TODO(omar): i don't like having 2 loops one to draw the text and one to draw the cursor.
         //Try to find a better way
-        int cursor_x = 0;
-        int cursor_y = 0;
+        int cursor_x = startx;
+        int cursor_y = starty;
         for (int i = 0; i < buffer->text.len; i++)
         {
             char c = buffer->text.text[i];
             if (c == '\n')
             {
                 cursor_y += state->char_h;
-                cursor_x = 0;
+                cursor_x = startx;
             }
             else
             {
@@ -430,8 +433,8 @@ void editor_draw_input_buffer(ProgramState* state)
             }
             else if ((i == buffer->cursor_index) && (i == 0))
             {
-                cursor_x = 0;
-                cursor_y = 0;
+                cursor_x = startx;
+                cursor_y = starty;
                 break;
             }
         }
@@ -439,8 +442,8 @@ void editor_draw_input_buffer(ProgramState* state)
         SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
     }
     
-    int x = 0;
-    int y = 0;
+    int x = startx;
+    int y = starty;
     for (int i = 0; i < buffer->text.len; i++)
     {
         bool draw_char = true;
@@ -449,7 +452,7 @@ void editor_draw_input_buffer(ProgramState* state)
         if (c == '\n')
         {
             y += state->char_h;
-            x = 0;
+            x = startx;
             draw_char = false;
         }
         
