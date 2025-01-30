@@ -40,6 +40,12 @@ typedef struct _ProgramState
     
     InputBuffer text;
     InputBuffer command_input;
+    Button* clicked_button; //the button clicked during the last
+                            //EDITOR_STATE_COMMAND if any
+
+//    String command_input_result; //the text the user sent/typed to us from
+                                 //EDITOR_STATE_COMMAND_INPUT to be used by the
+                                 //clicked button from EDITOR_STATE_COMMAND
 
     int char_w;
     int char_h;

@@ -26,6 +26,7 @@ void Button_init(Button* button, ButtonConfig* config)
     button->text = config->text;
     button->text_centered = config->text_centered;
     button->on_click = config->on_click;
+    button->on_input = config->on_input;
 
     if (config->text && config->font)
     {
@@ -107,4 +108,23 @@ bool Button_is_mouse_hovering(Button* button)
     }
 
     return button->mouse_hovering;
+}
+
+
+void Button_save_on_click(ProgramState* state)
+{
+    if (!state) return;
+
+    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT); 
+}
+
+
+void Button_save_on_input(ProgramState* state, String* input)
+{
+    if (!state) return;
+
+    if (input)
+    {
+        printf("%s\n", input->text);
+    }
 }

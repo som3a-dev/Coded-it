@@ -55,7 +55,8 @@ int editor_init(ProgramState* state)
         config.pressed_b = 30;
         config.text = "Save";
         config.font = state->font;
-        config.on_click = editor_save_file;
+        config.on_click = Button_save_on_click;
+        config.on_input = Button_save_on_input;
         Button_init(state->buttons + 0, &config);
     }
 
@@ -296,6 +297,7 @@ void editor_update(ProgramState* state)
         {
             if (mouse_state)
             {
+                state->clicked_button = NULL;
                 for (int i = 0; i < 10; i++)
                 {
                     Button* button = state->buttons + i;
@@ -305,6 +307,8 @@ void editor_update(ProgramState* state)
                         if (button->on_click)
                         {
                             button->on_click(state);
+                            state->clicked_button = button;
+                            break;
                         }
                     }
                 }
@@ -484,7 +488,14 @@ void editor_set_state(ProgramState* state, int new_state)
         case EDITOR_STATE_COMMAND_INPUT:
         {
             InputBuffer* buffer = editor_get_current_input_buffer(state);
-            String_clear(&(buffer->text)); 
+            if (state->clicked_button)
+            {
+                if (state->clicked_button->on_input)
+                {
+                    state->clicked_button->on_input(state, &(buffer->text));
+                }
+            }
+            String_clear(&(buffer->text));
         } break;
     }
 
