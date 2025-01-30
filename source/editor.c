@@ -132,9 +132,19 @@ void editor_handle_events(ProgramState* state)
                 case SDLK_RETURN:
                 {
                     //String_push(&(state->text), '\n');
-                    String_insert(&(buffer->text), '\n', buffer->cursor_index);
-                    
-                    editor_set_cursor(state, buffer->cursor_index + 1);
+                    switch (state->state)
+                    {
+                        case EDITOR_STATE_EDIT:
+                        {
+                            String_insert(&(buffer->text), '\n', buffer->cursor_index);
+                            editor_set_cursor(state, buffer->cursor_index + 1);
+                        } break;
+
+                        case EDITOR_STATE_COMMAND_INPUT:
+                        {
+                            editor_set_state(state, EDITOR_STATE_EDIT);
+                        } break;
+                    }
                 } break;
                 
                 case SDLK_UP:
@@ -218,12 +228,14 @@ void editor_handle_events(ProgramState* state)
 
                 case SDLK_LCTRL:
                 {
-                    state->state++;
+                    int new_state = state->state + 1;
 
-                    if (state->state >= EDITOR_STATE_COUNT)
+                    if (new_state >= EDITOR_STATE_COUNT)
                     {
-                        state->state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
+                        new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
                     }
+
+                    editor_set_state(state, new_state);
                 } break;
 
                 case SDLK_INSERT:
@@ -465,3 +477,16 @@ void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
     }
 }
 
+void editor_set_state(ProgramState* state, int new_state)
+{
+    switch (state->state)
+    {
+        case EDITOR_STATE_COMMAND_INPUT:
+        {
+            InputBuffer* buffer = editor_get_current_input_buffer(state);
+            String_clear(&(buffer->text)); 
+        } break;
+    }
+
+    state->state = new_state;
+}

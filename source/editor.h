@@ -71,3 +71,5 @@ void editor_set_cursor(ProgramState* state, int index);
 void editor_save_file(const ProgramState* state);
 
 InputBuffer* editor_get_current_input_buffer(const ProgramState* state);
+
+void editor_set_state(ProgramState* state, int new_state);
