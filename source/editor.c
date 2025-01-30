@@ -496,6 +496,7 @@ void editor_set_state(ProgramState* state, int new_state)
                 }
             }
             String_clear(&(buffer->text));
+            memset(buffer, 0, sizeof(InputBuffer));
         } break;
     }
 
