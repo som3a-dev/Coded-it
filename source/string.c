@@ -1,5 +1,7 @@
 #include "string.h"
 
+#include <stdlib.h>
+
 
 
 void String_push(String* str, char c)
@@ -111,4 +113,18 @@ int String_get_next_newline(String* str, int index)
     }
 
     return str->len; //no newline found
+}
+
+
+void String_clear(String* str)
+{
+    if (!str) return;
+
+    if (str->text)
+    {
+        free(str->text);
+        str->text = NULL;
+    }
+
+    str->len = 0;
 }

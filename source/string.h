@@ -29,3 +29,5 @@ int String_get_previous_newline(String* str, int index);
 //same stuff. but
 //if no newline is found we return str->len instead of -1.
 int String_get_next_newline(String* str, int index);
+
+void String_clear(String* str);
