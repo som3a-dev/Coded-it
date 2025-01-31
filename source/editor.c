@@ -24,8 +24,11 @@ int editor_init(ProgramState* state)
         printf("Initializing SDL failed!\nError Message: '%s'\n", error);
         return 1;
     }
-    
-    state->window = SDL_CreateWindow("Coded-it", 100, 100, 800, 600, SDL_WINDOW_SHOWN);
+
+    state->window_w = 800;
+    state->window_h = 600; 
+    state->window = SDL_CreateWindow("Coded-it", 100, 100, state->window_w, state->window_h,
+                                     SDL_WINDOW_SHOWN);
     if (!state->window)
     {
         printf("SDL window creation failed!\n");
@@ -242,7 +245,24 @@ void editor_handle_events(ProgramState* state)
                 case SDLK_INSERT:
                 {
                     editor_save_file(state);
-                }
+                } break;
+
+                case SDLK_F11:
+                {
+                    uint32_t flags = SDL_GetWindowFlags(state->window);
+                    if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                    {
+                        SDL_SetWindowFullscreen(state->window, 0);
+                        state->window_surface = SDL_GetWindowSurface(state->window);
+                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                    }
+                    else
+                    {
+                        SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        state->window_surface = SDL_GetWindowSurface(state->window);
+                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                    }
+                } break;
             }
         } break;
     }
@@ -337,7 +357,7 @@ void editor_draw(ProgramState* state)
 
         case EDITOR_STATE_COMMAND_INPUT:
         {
-            editor_draw_input_buffer(state, 0, 600-state->char_h*2);
+            editor_draw_input_buffer(state, 0, state->window_h - state->char_h*2);
         } break;
         case EDITOR_STATE_EDIT:
         {

@@ -34,6 +34,9 @@ typedef struct _ProgramState
     TTF_Font* font;
     bool running;
 
+    int window_w;
+    int window_h;
+
     int state;
 
     const char* current_file;
