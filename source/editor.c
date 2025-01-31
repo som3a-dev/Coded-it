@@ -385,6 +385,11 @@ void editor_set_cursor(ProgramState* state, int index)
 void editor_save_file(const ProgramState* state)
 {
     FILE* fp;
+    if (!state->current_file)
+    {
+        printf("No current open file.\n");
+        return;
+    }
     fopen_s(&fp, state->current_file, "w");
     
     if (!fp)
@@ -494,6 +499,7 @@ void editor_set_state(ProgramState* state, int new_state)
                 if (state->clicked_button->on_input)
                 {
                     state->clicked_button->on_input(state, &(buffer->text));
+                    state->clicked_button = NULL;
                 }
             }
             String_clear(&(buffer->text));
