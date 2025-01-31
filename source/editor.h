@@ -79,3 +79,5 @@ void editor_save_file(const ProgramState* state);
 InputBuffer* editor_get_current_input_buffer(const ProgramState* state);
 
 void editor_set_state(ProgramState* state, int new_state);
+
+void editor_set_filename(ProgramState* state, const char* new_filename);

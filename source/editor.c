@@ -390,6 +390,7 @@ void editor_save_file(const ProgramState* state)
     if (!fp)
     {
         //TODO(omar): tell the fucking user the filename is invalid
+        printf("Couldn't open file '%s'.\n", state->current_file);
         return;
     }
 
@@ -501,4 +502,10 @@ void editor_set_state(ProgramState* state, int new_state)
     }
 
     state->state = new_state;
+}
+
+
+void editor_set_filename(ProgramState* state, const char* new_filename)
+{
+    state->current_file = new_filename;
 }

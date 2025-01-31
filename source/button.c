@@ -125,6 +125,7 @@ void Button_save_on_input(ProgramState* state, String* input)
 
     if (input)
     {
-        printf("%s\n", input->text);
+       editor_set_filename(state, input->text); 
+       editor_save_file(state);
     }
 }
