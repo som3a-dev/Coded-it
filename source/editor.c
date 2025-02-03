@@ -53,9 +53,9 @@ int editor_init(ProgramState* state)
 
     {
         ButtonConfig config = {0};
-        config.pressed_r = 50;
-        config.pressed_g = 30;
-        config.pressed_b = 30;
+        config.pressed_r = 110;
+        config.pressed_g = 100;
+        config.pressed_b = 100;
         config.text = "Save";
         config.font = state->font;
         config.on_click = Button_save_on_click;
@@ -64,9 +64,9 @@ int editor_init(ProgramState* state)
     }
     {
         ButtonConfig config = {0};
-        config.pressed_r = 50;
-        config.pressed_g = 30;
-        config.pressed_b = 30;
+        config.pressed_r = 110;
+        config.pressed_g = 100;
+        config.pressed_b = 100;
         config.text = "Open";
         config.font = state->font;
         config.y = 200;
@@ -133,149 +133,219 @@ void editor_handle_events(ProgramState* state)
         
         case SDL_KEYDOWN:
         {
-            InputBuffer* buffer = editor_get_current_input_buffer(state);
-            
-            switch (e.key.keysym.sym)
+            if (state->state == EDITOR_STATE_COMMAND)
             {
-                case SDLK_BACKSPACE:
+                switch (e.key.keysym.sym)
                 {
-                    //String_pop(&(state->text));
-                    String_remove(&(buffer->text), buffer->cursor_index - 1);
-                    
-                    editor_set_cursor(state, buffer->cursor_index - 1);
-                } break;
-                
-                case SDLK_RETURN:
-                {
-                    //String_push(&(state->text), '\n');
-                    switch (state->state)
+                    case SDLK_UP:
                     {
-                        case EDITOR_STATE_EDIT:
+                        if (state->clicked_button == NULL)
                         {
-                            String_insert(&(buffer->text), '\n', buffer->cursor_index);
-                            editor_set_cursor(state, buffer->cursor_index + 1);
-                        } break;
-
-                        case EDITOR_STATE_COMMAND_INPUT:
+                            state->clicked_button = state->buttons + 0;
+                        }
+                        else
                         {
-                            editor_set_state(state, EDITOR_STATE_EDIT);
-                        } break;
-                    }
-                } break;
-                
-                case SDLK_UP:
-                {
-                    int prev_newline = String_get_previous_newline(&(buffer->text),
-                    buffer->cursor_index);
-                    if (prev_newline == -1)
-                    {
-                        return;
-                    }
-                    
-                    int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
-                    printf("Cursor index in line: %d\n", cursor_index_in_line);
-                    
-                    int newline_before_prev_newline = String_get_previous_newline(buffer,
-                    prev_newline);
-                    
-                    //cap cursor_index_in_line at the length of the previous line - 1
-                    int prev_line_len = prev_newline - newline_before_prev_newline;
-                    if (cursor_index_in_line >= prev_line_len)
-                    {
-                        cursor_index_in_line = prev_line_len - 1;
-                    }
-                    
-                    editor_set_cursor(state,
-                    newline_before_prev_newline + cursor_index_in_line + 1);
-                } break;
-                
-                case SDLK_DOWN:
-                {
-                    int prev_newline = String_get_previous_newline(&(buffer->text),
-                    buffer->cursor_index);
-                    
-                    int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
-                    //printf("Cursor index in line: %d\n", cursor_index_in_line);
-                    
-                    int next_newline = String_get_next_newline(&(buffer->text),
-                    prev_newline);
-                    //printf("Next newline: %d\n", next_newline);
-                    
-                    if (next_newline == buffer->text.len)
-                    {
-                        //We are at the last line
-                        break;
-                    }
-                    
-                    int next_next_newline = String_get_next_newline(&(buffer->text),
-                    next_newline);
-                    //printf("Next newline: %d\n", next_next_newline);
-                    
-                    //cap cursor_index_in_line at the length of the previous line - 1
-                    int next_line_len = next_next_newline - next_newline - 1;
-                    if (next_line_len < 0) next_line_len = 0;
-                    //printf("Next line len: %d\n", next_line_len);
-                    
-                    if (cursor_index_in_line > next_line_len)
-                    {
-                        cursor_index_in_line = next_line_len;
-                    }
-                    
-                    editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
-                } break;
-                
-                case SDLK_LEFT:
-                {
-                    editor_set_cursor(state, buffer->cursor_index - 1);
-                } break;
-                
-                case SDLK_RIGHT:
-                {
-                    editor_set_cursor(state, buffer->cursor_index + 1);
-                } break;
-                
-                case SDLK_TAB:
-                {
-                    String_insert(&(buffer->text), ' ', buffer->cursor_index);
-                    editor_set_cursor(state, buffer->cursor_index+1);
-                    String_insert(&(buffer->text), ' ', buffer->cursor_index);
-                    editor_set_cursor(state, buffer->cursor_index+1);
-                } break;
+                            for (int i = 1; i < 10; i++)
+                            {
+                                Button* button = state->buttons + i;
+                                if (button == state->clicked_button &&
+                                   (button->state == BUTTON_STATE_ENABLED))
+                                {
+                                    if ((state->buttons + i - 1)->state != BUTTON_STATE_ENABLED)
+                                    {
+                                        continue;
+                                    }
+ 
+                                    state->clicked_button->mouse_hovering = false;
+                                    state->clicked_button = state->buttons + i - 1;
+                                    break;
+                                }
+                            }
+                        }
+                        state->clicked_button->mouse_hovering = true;
+                    } break;
 
-                case SDLK_LCTRL:
-                {
-                    int new_state = state->state + 1;
-
-                    if (new_state >= EDITOR_STATE_COUNT)
+                    case SDLK_DOWN:
                     {
-                        new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
-                    }
+                        if (state->clicked_button == NULL)
+                        {
+                            state->clicked_button = state->buttons + 0;
+                        }
+                        else
+                        {
+                            for (int i = 0; i < 9; i++)
+                            {
+                                Button* button = state->buttons + i;
+                                if (button == state->clicked_button &&
+                                   (button->state == BUTTON_STATE_ENABLED))
+                                {
+                                    if ((state->buttons + i + 1)->state != BUTTON_STATE_ENABLED)
+                                    {
+                                        continue;
+                                    }
 
-                    editor_set_state(state, new_state);
-                } break;
+                                    state->clicked_button->mouse_hovering = false;
+                                    state->clicked_button = state->buttons + i + 1;
+                                    break;
+                                }
+                            }
+                        }
 
-                case SDLK_INSERT:
-                {
-                    editor_save_file(state);
-                } break;
+                        state->clicked_button->mouse_hovering = true;
+                    } break;
 
-                case SDLK_F11:
-                {
-                    uint32_t flags = SDL_GetWindowFlags(state->window);
-                    if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                    case SDLK_RETURN:
                     {
-                        SDL_SetWindowFullscreen(state->window, 0);
-                        state->window_surface = SDL_GetWindowSurface(state->window);
-                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
-                    }
-                    else
-                    {
-                        SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                        state->window_surface = SDL_GetWindowSurface(state->window);
-                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
-                    }
-                } break;
+                        state->clicked_button->on_click(state);
+                   } break;
+                }
             }
+            else
+            {
+                InputBuffer* buffer = editor_get_current_input_buffer(state);
+                
+                switch (e.key.keysym.sym)
+                {
+                    case SDLK_BACKSPACE:
+                    {
+                        //String_pop(&(state->text));
+                        String_remove(&(buffer->text), buffer->cursor_index - 1);
+                        
+                        editor_set_cursor(state, buffer->cursor_index - 1);
+                    } break;
+                    
+                    case SDLK_RETURN:
+                    {
+                        //String_push(&(state->text), '\n');
+                        switch (state->state)
+                        {
+                            case EDITOR_STATE_EDIT:
+                            {
+                                String_insert(&(buffer->text), '\n', buffer->cursor_index);
+                                editor_set_cursor(state, buffer->cursor_index + 1);
+                            } break;
+
+                            case EDITOR_STATE_COMMAND_INPUT:
+                            {
+                                editor_set_state(state, EDITOR_STATE_EDIT);
+                            } break;
+                        }
+                    } break;
+                    
+                    case SDLK_UP:
+                    {
+                        int prev_newline = String_get_previous_newline(&(buffer->text),
+                        buffer->cursor_index);
+                        if (prev_newline == -1)
+                        {
+                            return;
+                        }
+                        
+                        int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
+                        printf("Cursor index in line: %d\n", cursor_index_in_line);
+                        
+                        int newline_before_prev_newline = String_get_previous_newline(buffer,
+                        prev_newline);
+                        
+                        //cap cursor_index_in_line at the length of the previous line - 1
+                        int prev_line_len = prev_newline - newline_before_prev_newline;
+                        if (cursor_index_in_line >= prev_line_len)
+                        {
+                            cursor_index_in_line = prev_line_len - 1;
+                        }
+                        
+                        editor_set_cursor(state,
+                        newline_before_prev_newline + cursor_index_in_line + 1);
+                    } break;
+                    
+                    case SDLK_DOWN:
+                    {
+                        int prev_newline = String_get_previous_newline(&(buffer->text),
+                        buffer->cursor_index);
+                        
+                        int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
+                        //printf("Cursor index in line: %d\n", cursor_index_in_line);
+                        
+                        int next_newline = String_get_next_newline(&(buffer->text),
+                        prev_newline);
+                        //printf("Next newline: %d\n", next_newline);
+                        
+                        if (next_newline == buffer->text.len)
+                        {
+                            //We are at the last line
+                            break;
+                        }
+                        
+                        int next_next_newline = String_get_next_newline(&(buffer->text),
+                        next_newline);
+                        //printf("Next newline: %d\n", next_next_newline);
+                        
+                        //cap cursor_index_in_line at the length of the previous line - 1
+                        int next_line_len = next_next_newline - next_newline - 1;
+                        if (next_line_len < 0) next_line_len = 0;
+                        //printf("Next line len: %d\n", next_line_len);
+                        
+                        if (cursor_index_in_line > next_line_len)
+                        {
+                            cursor_index_in_line = next_line_len;
+                        }
+                        
+                        editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
+                    } break;
+                    
+                    case SDLK_LEFT:
+                    {
+                        editor_set_cursor(state, buffer->cursor_index - 1);
+                    } break;
+                    
+                    case SDLK_RIGHT:
+                    {
+                        editor_set_cursor(state, buffer->cursor_index + 1);
+                    } break;
+                    
+                    case SDLK_TAB:
+                    {
+                        String_insert(&(buffer->text), ' ', buffer->cursor_index);
+                        editor_set_cursor(state, buffer->cursor_index+1);
+                        String_insert(&(buffer->text), ' ', buffer->cursor_index);
+                        editor_set_cursor(state, buffer->cursor_index+1);
+                    } break;
+
+                    case SDLK_LCTRL:
+                    {
+                        int new_state = state->state + 1;
+
+                        if (new_state >= EDITOR_STATE_COUNT)
+                        {
+                            new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
+                        }
+
+                        editor_set_state(state, new_state);
+                    } break;
+
+                    case SDLK_INSERT:
+                    {
+                        editor_save_file(state);
+                    } break;
+
+                    case SDLK_F11:
+                    {
+                        uint32_t flags = SDL_GetWindowFlags(state->window);
+                        if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                        {
+                            SDL_SetWindowFullscreen(state->window, 0);
+                            state->window_surface = SDL_GetWindowSurface(state->window);
+                            SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                        }
+                        else
+                        {
+                            SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                            state->window_surface = SDL_GetWindowSurface(state->window);
+                            SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                        }
+                    } break;
+                }
+                }
         } break;
     }
 }
