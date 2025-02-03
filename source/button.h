@@ -71,6 +71,7 @@ bool Button_is_mouse_hovering(Button* button);
 void Button_save_on_click(ProgramState* state);
 void Button_save_on_input(ProgramState* state, String* input);
 
+void Button_open_on_input(ProgramState* state, String* input);
 
 
 

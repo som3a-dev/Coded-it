@@ -62,6 +62,18 @@ int editor_init(ProgramState* state)
         config.on_input = Button_save_on_input;
         Button_init(state->buttons + 0, &config);
     }
+    {
+        ButtonConfig config = {0};
+        config.pressed_r = 50;
+        config.pressed_g = 30;
+        config.pressed_b = 30;
+        config.text = "Open";
+        config.font = state->font;
+        config.y = 200;
+        config.on_click = Button_save_on_click; //this is not an oversight.
+        config.on_input = Button_open_on_input;
+        Button_init(state->buttons + 1, &config);
+    }
 
     state->current_file = "test.txt";
 }
@@ -423,6 +435,40 @@ void editor_save_file(const ProgramState* state)
     fwrite(state->text.text.text, sizeof(char), state->text.text.len, fp);
 
     fclose(fp);
+}
+
+
+void editor_open_file(ProgramState* state)
+{
+    FILE* fp;
+    if (!state->current_file)
+    {
+        printf("No file selected to open.\n");
+    }
+    fopen_s(&fp, state->current_file, "r");
+
+    if (!fp)
+    {
+        //TODO(omar): tell the fucking user the filename is invalid
+        printf("Couldn't open file '%s'.\n", state->current_file);
+        return;
+    }
+
+    String_clear(&(state->text.text));
+    state->text.cursor_index = 0;
+    while (!feof(fp))
+    {
+        char c = fgetc(fp);
+        if (c <= 0) //a weird character appears at the end of every .txt file. not sure why
+        {
+            continue;
+        }
+        String_push(&(state->text.text), c);
+        if (c == '\n')
+        {
+            continue;
+        }
+    }
 }
 
 

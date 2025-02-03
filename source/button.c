@@ -136,3 +136,22 @@ void Button_save_on_input(ProgramState* state, String* input)
         }
     }
 }
+
+
+void Button_open_on_input(ProgramState* state, String* input)
+{
+    if (!state) return;
+
+    if (input)
+    {
+        if (input->text)
+        {
+            editor_set_filename(state, input->text); 
+            editor_open_file(state);
+        }
+        else
+        {
+            printf("Please specify a filename.\n");
+        }
+    }
+}
