@@ -44,7 +44,8 @@ int editor_init(ProgramState* state)
         return 3;
     }
     
-    state->font = TTF_OpenFont("CONSOLA.ttf", 24);
+    state->font_size = 24;
+    state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     if (!state->font)
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
@@ -357,7 +358,48 @@ void editor_handle_events(ProgramState* state)
                             SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
                         }
                     } break;
- 
+
+                    case SDLK_EQUALS:
+                    {
+                        uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+                        if (keystate[SDL_SCANCODE_LCTRL])
+                        {
+                            TTF_CloseFont(state->font);
+
+                            state->font_size += 2;
+                            if (state->font_size > 36)
+                            {
+                                state->font_size = 36;
+                            }
+
+                            state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                            TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+                            
+                            editor_resize_and_position_buttons(state);
+                        }
+                    } break;
+
+                    case SDLK_MINUS:
+                    {
+                        uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+                        if (keystate[SDL_SCANCODE_LCTRL])
+                        {
+                            TTF_CloseFont(state->font);
+
+                            state->font_size -= 2;
+                            if (state->font_size < 12)
+                            {
+                                state->font_size = 12;
+                            }
+
+                            state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                            TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+                            editor_resize_and_position_buttons(state);
+                        }
+                    } break;
                 }
         } break;
     }
@@ -676,4 +718,20 @@ void editor_set_state(ProgramState* state, int new_state)
 void editor_set_filename(ProgramState* state, const char* new_filename)
 {
     state->current_file = new_filename;
+}
+
+
+void editor_resize_and_position_buttons(ProgramState* state)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        Button* button = state->buttons + i;
+
+        button->w = 0;
+        button->h = 0; //so that it is set to the size of the text
+        
+        Button_resize_text(button, state->font);
+
+        button->y = state->char_h * i;
+    }
 }

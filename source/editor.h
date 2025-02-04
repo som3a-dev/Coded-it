@@ -32,6 +32,7 @@ typedef struct _ProgramState
     SDL_Window* window;
     SDL_Surface* window_surface;
     TTF_Font* font;
+    int font_size;
     bool running;
 
     int window_w;
@@ -86,3 +87,6 @@ InputBuffer* editor_get_current_input_buffer(const ProgramState* state);
 void editor_set_state(ProgramState* state, int new_state);
 
 void editor_set_filename(ProgramState* state, const char* new_filename);
+
+void editor_resize_and_position_buttons(ProgramState* state); //called after
+                                                              //changing font size
