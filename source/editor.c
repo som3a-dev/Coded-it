@@ -324,16 +324,21 @@ void editor_handle_events(ProgramState* state)
 
                 switch (e.key.keysym.sym)
                 {
-                    case SDLK_LCTRL:
+                    case SDLK_o:
                     {
-                        int new_state = state->state + 1;
+                        uint8_t* keystate = SDL_GetKeyboardState(NULL);
 
-                        if (new_state >= EDITOR_STATE_COUNT)
+                        if (keystate[SDL_SCANCODE_LCTRL])
                         {
-                            new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
-                        }
+                            int new_state = state->state + 1;
 
-                        editor_set_state(state, new_state);
+                            if (new_state >= EDITOR_STATE_COUNT)
+                            {
+                                new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
+                            }
+
+                            editor_set_state(state, new_state);
+                        }
                     } break;
 
                     case SDLK_F11:
