@@ -197,7 +197,7 @@ void editor_handle_events(ProgramState* state)
                     case SDLK_RETURN:
                     {
                         state->clicked_button->on_click(state);
-                   } break;
+                    } break;
                 }
             }
             else
@@ -311,6 +311,15 @@ void editor_handle_events(ProgramState* state)
                         editor_set_cursor(state, buffer->cursor_index+1);
                     } break;
 
+                    case SDLK_INSERT:
+                    {
+                        editor_save_file(state);
+                    } break;
+                }
+                }
+
+                switch (e.key.keysym.sym)
+                {
                     case SDLK_LCTRL:
                     {
                         int new_state = state->state + 1;
@@ -321,11 +330,6 @@ void editor_handle_events(ProgramState* state)
                         }
 
                         editor_set_state(state, new_state);
-                    } break;
-
-                    case SDLK_INSERT:
-                    {
-                        editor_save_file(state);
                     } break;
 
                     case SDLK_F11:
@@ -344,7 +348,7 @@ void editor_handle_events(ProgramState* state)
                             SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
                         }
                     } break;
-                }
+ 
                 }
         } break;
     }
@@ -441,6 +445,7 @@ void editor_draw(ProgramState* state)
         {
             editor_draw_input_buffer(state, 0, state->window_h - state->char_h*2);
         } break;
+
         case EDITOR_STATE_EDIT:
         {
             editor_draw_input_buffer(state, 0, 0);
