@@ -51,11 +51,14 @@ int editor_init(ProgramState* state)
         return 4;
     }
 
+    TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
     {
         ButtonConfig config = {0};
         config.pressed_r = 110;
         config.pressed_g = 100;
         config.pressed_b = 100;
+        config.h = state->char_h;
         config.text = "Save";
         config.font = state->font;
         config.on_click = Button_save_on_click;
@@ -69,7 +72,8 @@ int editor_init(ProgramState* state)
         config.pressed_b = 100;
         config.text = "Open";
         config.font = state->font;
-        config.y = 200;
+        config.h = state->char_h;
+        config.y = config.h;
         config.on_click = Button_save_on_click; //this is not an oversight.
         config.on_input = Button_open_on_input;
         Button_init(state->buttons + 1, &config);
@@ -426,9 +430,6 @@ void editor_update(ProgramState* state)
 
 void editor_draw(ProgramState* state)
 {
-    //Update the size of a character
-    TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
-    
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 0, 0, 0)); //Clear
     
     switch (state->state)
