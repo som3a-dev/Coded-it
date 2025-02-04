@@ -545,6 +545,8 @@ void editor_open_file(ProgramState* state)
             continue;
         }
     }
+
+    fclose(fp);
 }
 
 
