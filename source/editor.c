@@ -646,6 +646,15 @@ void editor_set_state(ProgramState* state, int new_state)
             String_clear(&(buffer->text));
             memset(buffer, 0, sizeof(InputBuffer));
         } break;
+
+        case EDITOR_STATE_COMMAND:
+        {
+            if (state->clicked_button)
+            {
+                state->clicked_button->mouse_hovering = false;
+                state->clicked_button = false;
+            }
+        } break;
     }
 
     state->state = new_state;
