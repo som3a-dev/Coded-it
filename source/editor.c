@@ -650,10 +650,13 @@ void editor_set_state(ProgramState* state, int new_state)
 
         case EDITOR_STATE_COMMAND:
         {
-            if (state->clicked_button)
+            if (new_state != EDITOR_STATE_COMMAND_INPUT)
             {
-                state->clicked_button->mouse_hovering = false;
-                state->clicked_button = false;
+                if (state->clicked_button)
+                {
+                    state->clicked_button->mouse_hovering = false;
+                    state->clicked_button = false;
+                }
             }
         } break;
     }
