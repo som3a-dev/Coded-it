@@ -30,15 +30,7 @@ void Button_init(Button* button, ButtonConfig* config)
 
     if (config->text && config->font)
     {
-        TTF_SizeText(config->font, config->text, &(button->text_w), &(button->text_h));
-        if (config->w == 0)
-        {
-            button->w = button->text_w;
-        }
-        if (config->h == 0)
-        {
-            button->h = button->text_h;
-        }
+        Button_resize_text(button, config->font);
     }
 
 }
@@ -108,6 +100,20 @@ bool Button_is_mouse_hovering(Button* button)
     }
 
     return button->mouse_hovering;
+}
+
+
+void Button_resize_text(Button* button, TTF_Font* font)
+{
+    TTF_SizeText(font, button->text, &(button->text_w), &(button->text_h));
+    if (button->w == 0)
+    {
+        button->w = button->text_w;
+    }
+    if (button->h == 0)
+    {
+        button->h = button->text_h;
+    }
 }
 
 

@@ -68,6 +68,8 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface);
 void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y);
 bool Button_is_mouse_hovering(Button* button);
 
+void Button_resize_text(Button* button, TTF_Font* font);
+
 void Button_save_on_click(ProgramState* state);
 void Button_save_on_input(ProgramState* state, String* input);
 
