@@ -641,8 +641,9 @@ void editor_set_state(ProgramState* state, int new_state)
                 if (state->clicked_button->on_input)
                 {
                     state->clicked_button->on_input(state, &(buffer->text));
-                    state->clicked_button = NULL;
                 }
+                state->clicked_button->mouse_hovering = false;
+                state->clicked_button = NULL;
             }
             String_clear(&(buffer->text));
             memset(buffer, 0, sizeof(InputBuffer));
@@ -655,7 +656,7 @@ void editor_set_state(ProgramState* state, int new_state)
                 if (state->clicked_button)
                 {
                     state->clicked_button->mouse_hovering = false;
-                    state->clicked_button = false;
+                    state->clicked_button = NULL;
                 }
             }
         } break;
