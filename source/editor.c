@@ -835,6 +835,11 @@ void editor_resize_and_position_buttons(ProgramState* state)
 
         button->y = state->char_h * i;
     }
+
+    state->editor_area_x = 0;
+    state->editor_area_y = 0;
+    state->editor_area_w = state->window_w;
+    state->editor_area_h = state->window_h - state->char_h * 2.5f;
 }
 
 bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
