@@ -25,6 +25,9 @@ typedef struct
 {
     String text;
     int cursor_index;
+
+    int x;
+    int y;
 } InputBuffer;
 
 typedef struct _ProgramState
@@ -37,6 +40,14 @@ typedef struct _ProgramState
 
     int window_w;
     int window_h;
+
+    //NOTE(omar): this is the offset at which we render the
+    //            file's text.
+    //            used for scrolling.
+    //            you can thank my gamedev background for it
+    //            being named camera
+    int camera_x;
+    int camera_y;
 
     int editor_area_x;
     int editor_area_y;
@@ -76,8 +87,7 @@ void editor_loop(ProgramState* state);
 void editor_handle_events(ProgramState* state);
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
-void editor_draw_input_buffer(ProgramState* state,
-                              int startx, int starty);
+void editor_draw_input_buffer(ProgramState* state);
 
 //TODO(omar): move this function from editor.h/.c into another more suitable file
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
@@ -97,3 +107,10 @@ void editor_set_filename(ProgramState* state, const char* new_filename);
 
 void editor_resize_and_position_buttons(ProgramState* state); //called after
                                                               //changing font size
+
+//gets position in X and Y of the current input buffer's cursor
+//returns false if there is no current input buffer.
+bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y);
+
+
+

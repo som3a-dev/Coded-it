@@ -72,6 +72,8 @@ int editor_init(ProgramState* state)
     state->editor_area_w = state->window_w;
     state->editor_area_h = state->window_h - state->char_h * 2.5f;
 
+    state->command_input.y = state->window_h - state->char_h*2;
+
     {
         ButtonConfig config = {0};
         config.pressed_r = 110;
@@ -467,6 +469,32 @@ void editor_update(ProgramState* state)
                     }
                 }
             }
+
+
+            int cursor_x = 0;
+            int cursor_y = 0;
+            editor_get_cursor_pos(state, &cursor_x, &cursor_y);
+            cursor_x -= state->camera_x;
+            cursor_y -= state->camera_y;
+
+            if ((cursor_x + state->char_w) > state->editor_area_w)
+            {
+                state->camera_x += state->char_w;
+            }
+            if ((cursor_y + state->char_h) > state->editor_area_h)
+            {
+                state->camera_y += state->char_h;
+            }
+
+            if (cursor_y < state->editor_area_y)
+            {
+                state->camera_y -= state->char_h;
+            }
+            if (cursor_x < state->editor_area_x)
+            {
+                state->camera_x -= state->char_w;
+            }
+
         } break;
 
         case EDITOR_STATE_COMMAND:
@@ -518,12 +546,12 @@ void editor_draw(ProgramState* state)
 
         case EDITOR_STATE_COMMAND_INPUT:
         {
-            editor_draw_input_buffer(state, 0, state->window_h - state->char_h*2);
+            editor_draw_input_buffer(state);
         } break;
 
         case EDITOR_STATE_EDIT:
         {
-            editor_draw_input_buffer(state, 0, 0);
+            editor_draw_input_buffer(state);
         } break;
     }
 
@@ -618,6 +646,8 @@ void editor_open_file(ProgramState* state)
 
     String_clear(&(state->text.text));
     state->text.cursor_index = 0;
+    state->camera_x = 0;
+    state->camera_y = 0;
     while (!feof(fp))
     {
         char c = fgetc(fp);
@@ -655,46 +685,26 @@ InputBuffer* editor_get_current_input_buffer(const ProgramState* state)
 }
 
 
-void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
+void editor_draw_input_buffer(ProgramState* state) 
 {
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return;
 
+    int startx = buffer->x;
+    int starty = buffer->y;
+
     if (state->draw_cursor)
     {
-        //TODO(omar): i don't like having 2 loops one to draw the text and one to draw the cursor.
-        //Try to find a better way
-        int cursor_x = startx;
-        int cursor_y = starty;
-        for (int i = 0; i < buffer->text.len; i++)
-        {
-            char c = buffer->text.text[i];
-            if (c == '\n')
-            {
-                cursor_y += state->char_h;
-                cursor_x = startx;
-            }
-            else
-            {
-                cursor_x += state->char_w;
-            }
-            
-            if (i == buffer->cursor_index - 1)
-            {
-                break;
-            }
-            else if ((i == buffer->cursor_index) && (i == 0))
-            {
-                cursor_x = startx;
-                cursor_y = starty;
-                break;
-            }
-        }
+        int cursor_x = 0;
+        int cursor_y = 0;
+        editor_get_cursor_pos(state, &cursor_x, &cursor_y);
 
         bool draw_cursor = true;
 
         if (state->state == EDITOR_STATE_EDIT)
         {
+            cursor_x -= state->camera_x;
+            cursor_y -= state->camera_y;
             if ((cursor_x + state->char_w) > state->editor_area_w)
             {
                 draw_cursor = false;
@@ -720,7 +730,7 @@ void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
                         SDL_MapRGB(state->window_surface->format, 200, 200, 200));
         }
     }
-    
+
     int x = startx;
     int y = starty;
     for (int i = 0; i < buffer->text.len; i++)
@@ -735,21 +745,26 @@ void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
             draw_char = false;
         }
 
+        int draw_x = x;
+        int draw_y = y;
+
         if (state->state == EDITOR_STATE_EDIT)
         {
-            if ((x + state->char_w) > state->editor_area_w)
+            draw_x -= state->camera_x;
+            draw_y -= state->camera_y;
+            if ((draw_x + state->char_w) > state->editor_area_w)
             {
                 draw_char = false;
             }
-            if ((y + state->char_h) > state->editor_area_h)
+            if ((draw_y + state->char_h) > state->editor_area_h)
             {
                 draw_char = false;
             }
-            if (y < state->editor_area_y)
+            if (draw_y < state->editor_area_y)
             {
                 draw_char = false;
             }
-            if (x < state->editor_area_x)
+            if (draw_x < state->editor_area_x)
             {
                 draw_char = false;
             }
@@ -758,7 +773,7 @@ void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
         if (draw_char)
         {
             char str[2] = { c, '\0' };
-            draw_text(state->font, state->window_surface, str, x, y, 255, 255, 255);
+            draw_text(state->font, state->window_surface, str, draw_x, draw_y, 255, 255, 255);
             x += state->char_w;
         }
     }
@@ -781,7 +796,7 @@ void editor_set_state(ProgramState* state, int new_state)
                 state->clicked_button = NULL;
             }
             String_clear(&(buffer->text));
-            memset(buffer, 0, sizeof(InputBuffer));
+            buffer->cursor_index = 0;
         } break;
 
         case EDITOR_STATE_COMMAND:
@@ -820,4 +835,44 @@ void editor_resize_and_position_buttons(ProgramState* state)
 
         button->y = state->char_h * i;
     }
+}
+
+bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
+{
+    InputBuffer* buffer = editor_get_current_input_buffer(state);
+    if (!buffer) return false;
+
+    int startx = buffer->x;
+    int starty = buffer->y;
+
+    int cursor_x = startx;
+    int cursor_y = starty;
+    for (int i = 0; i < buffer->text.len; i++)
+    {
+        char c = buffer->text.text[i];
+        if (c == '\n')
+        {
+            cursor_y += state->char_h;
+            cursor_x = startx;
+        }
+        else
+        {
+            cursor_x += state->char_w;
+        }
+        
+        if (i == buffer->cursor_index - 1)
+        {
+            break;
+        }
+        else if ((i == buffer->cursor_index) && (i == 0))
+        {
+            cursor_x = startx;
+            cursor_y = starty;
+            break;
+        }
+    }
+
+    *out_x = cursor_x;
+    *out_y = cursor_y;
+    return true;
 }
