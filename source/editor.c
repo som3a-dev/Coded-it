@@ -1,5 +1,6 @@
 #include "editor.h"
 #include "button.h"
+#include "draw.h"
 #include <memory.h>
 #include <string.h>
 
@@ -8,12 +9,24 @@
 const int CURSOR_BLINK_TIME = 1000;
 
 
+//NEXT OBJECTIVE:: DO ALL THE TEXT EDITING COOL SHIT WITH LCTRL AND COPY PASTING AND STUFF
+//                 CODE THE BASIC STANDARD STUFF FIRST THEN IF NEEDED DESIGN SOMETHING AKIN
+//                 TO VIM ?? MAYBE LESS COMPLEX BUT SOMETHING THAT ALLOWS FOR FAST EDITING WITH
+//                 A KEYBOARD ONLY. A DIFFERENT MODE? IF NEEDED.
+//                  
+//                 ALSO DISPLAYING MESSAGES TO THE USER IN THE BOTTOM RIGHT CORNER OR SOMETHING
+//                 "FILE OPENED SUCCESSFULLY", "OPENING FILE FAILED", "PASTED XXX LINES"
+//                 AND A STATUS BAR WITH THE FILENAME. CURRENT LINE AND CURRENT CHARACTER NUMBER
+
+
 int editor_init(ProgramState* state)
 {
     memset(state, 0, sizeof(ProgramState));
     state->running = true;
     state->draw_cursor = true;
     state->state = EDITOR_STATE_EDIT;
+
+    String_set(&(state->message), "This is a message!");
     
     const char* error = NULL;
     
@@ -53,6 +66,11 @@ int editor_init(ProgramState* state)
     }
 
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+    state->editor_area_x = 0;
+    state->editor_area_y = 0;
+    state->editor_area_w = state->window_w;
+    state->editor_area_h = state->window_h - state->char_h * 2.5f;
 
     {
         ButtonConfig config = {0};
@@ -421,6 +439,7 @@ void editor_update(ProgramState* state)
     {
         case EDITOR_STATE_EDIT:
         {
+            String_set(&(state->message), "EDIT");
             if (mouse_state & SDL_BUTTON(1))
             {
                 if (state->text.text.len != 0)
@@ -452,6 +471,7 @@ void editor_update(ProgramState* state)
 
         case EDITOR_STATE_COMMAND:
         {
+            String_set(&(state->message), "COMMAND");
             if (mouse_state)
             {
                 state->clicked_button = NULL;
@@ -478,7 +498,14 @@ void editor_update(ProgramState* state)
 void editor_draw(ProgramState* state)
 {
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 0, 0, 0)); //Clear
-    
+
+    SDL_Rect border_line = 
+    {
+        0, state->window_h - state->char_h*2.5,
+        state->window_w, 4
+    };
+    SDL_FillRect(state->window_surface, &border_line, 0xbbbbbbff);
+
     switch (state->state)
     {
         case EDITOR_STATE_COMMAND:
@@ -499,8 +526,18 @@ void editor_draw(ProgramState* state)
             editor_draw_input_buffer(state, 0, 0);
         } break;
     }
-    
-   SDL_UpdateWindowSurface(state->window);
+
+    if (state->state != EDITOR_STATE_COMMAND_INPUT)
+    {
+        if (state->message.text)
+        {
+            draw_text(state->font, state->window_surface, state->message.text,
+                    0,
+                    state->window_h - state->char_h*2,
+                    255, 230, 230);
+        }
+    }
+    SDL_UpdateWindowSurface(state->window);
 }
 
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
@@ -667,6 +704,26 @@ void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
             y += state->char_h;
             x = startx;
             draw_char = false;
+        }
+
+        if (state->state == EDITOR_STATE_EDIT)
+        {
+            if ((x + state->char_w) > state->editor_area_w)
+            {
+                draw_char = false;
+            }
+            if ((y + state->char_h) > state->editor_area_h)
+            {
+                draw_char = false;
+            }
+            if (y < state->editor_area_y)
+            {
+                draw_char = false;
+            }
+            if (x < state->editor_area_x)
+            {
+                draw_char = false;
+            }
         }
         
         if (draw_char)

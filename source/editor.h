@@ -38,9 +38,16 @@ typedef struct _ProgramState
     int window_w;
     int window_h;
 
+    int editor_area_x;
+    int editor_area_y;
+    int editor_area_w;
+    int editor_area_h;
+
     int state;
 
     const char* current_file;
+
+    String message;
     
     InputBuffer text;
     InputBuffer command_input;
