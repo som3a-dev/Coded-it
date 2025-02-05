@@ -377,6 +377,8 @@ void editor_handle_events(ProgramState* state)
                             state->window_surface = SDL_GetWindowSurface(state->window);
                             SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
                         }
+
+                        editor_resize_and_position_buttons(state);
                     } break;
 
                     case SDLK_EQUALS:
@@ -840,6 +842,8 @@ void editor_resize_and_position_buttons(ProgramState* state)
     state->editor_area_y = 0;
     state->editor_area_w = state->window_w;
     state->editor_area_h = state->window_h - state->char_h * 2.5f;
+
+    state->command_input.y = state->window_h - state->char_h*2;
 }
 
 bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
