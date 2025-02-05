@@ -567,6 +567,8 @@ void editor_set_cursor(ProgramState* state, int index)
     {
         buffer->cursor_index = buffer->text.len;
     }
+
+    
     
     //don't blink while typing
     state->last_cursor_blink_tic = SDL_GetTicks();
@@ -688,8 +690,35 @@ void editor_draw_input_buffer(ProgramState* state, int startx, int starty)
                 break;
             }
         }
-        SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
-        SDL_FillRect(state->window_surface, &cursor_rect, SDL_MapRGB(state->window_surface->format, 200, 200, 200));
+
+        bool draw_cursor = true;
+
+        if (state->state == EDITOR_STATE_EDIT)
+        {
+            if ((cursor_x + state->char_w) > state->editor_area_w)
+            {
+                draw_cursor = false;
+            }
+            if ((cursor_y + state->char_h) > state->editor_area_h)
+            {
+                draw_cursor = false;
+            }
+            if (cursor_y < state->editor_area_y)
+            {
+                draw_cursor = false;
+            }
+            if (cursor_x < state->editor_area_x)
+            {
+                draw_cursor = false;
+            }
+        }
+
+        if (draw_cursor)
+        {
+            SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
+            SDL_FillRect(state->window_surface, &cursor_rect,
+                        SDL_MapRGB(state->window_surface->format, 200, 200, 200));
+        }
     }
     
     int x = startx;
