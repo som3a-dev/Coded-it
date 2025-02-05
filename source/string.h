@@ -31,3 +31,6 @@ int String_get_previous_newline(String* str, int index);
 int String_get_next_newline(String* str, int index);
 
 void String_clear(String* str);
+
+void String_set(String* str, const char* text);
+

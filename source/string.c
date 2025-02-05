@@ -1,6 +1,7 @@
 #include "string.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 
 
@@ -127,4 +128,17 @@ void String_clear(String* str)
     }
 
     str->len = 0;
+}
+
+
+void String_set(String* str, const char* text)
+{
+    if (!str) return;
+
+    String_clear(str);
+
+    for (int i = 0; i < strlen(text); i++)
+    {
+        String_push(str, text[i]);
+    }
 }
