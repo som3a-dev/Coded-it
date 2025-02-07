@@ -443,7 +443,6 @@ void editor_update(ProgramState* state)
     {
         case EDITOR_STATE_EDIT:
         {
-            String_set(&(state->message), "EDIT");
             if (mouse_state & SDL_BUTTON(1))
             {
                 if (state->text.text.len != 0)
@@ -501,7 +500,6 @@ void editor_update(ProgramState* state)
 
         case EDITOR_STATE_COMMAND:
         {
-            String_set(&(state->message), "COMMAND");
             if (mouse_state)
             {
                 state->clicked_button = NULL;
@@ -618,8 +616,7 @@ void editor_save_file(const ProgramState* state)
     
     if (!fp)
     {
-        //TODO(omar): tell the fucking user the filename is invalid
-        printf("Couldn't open file '%s'.\n", state->current_file);
+        //it should never be NULL ??
         return;
     }
 
@@ -641,8 +638,14 @@ void editor_open_file(ProgramState* state)
 
     if (!fp)
     {
-        //TODO(omar): tell the fucking user the filename is invalid
-        printf("Couldn't open file '%s'.\n", state->current_file);
+        const char* msg_format = "Couldn't open file '%s'.";
+        size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
+        char* msg = malloc(msg_size); 
+
+        snprintf(msg, msg_size, msg_format, state->current_file);
+ 
+        editor_set_message(state, msg);
+        free(msg);
         return;
     }
 
@@ -884,4 +887,11 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
     *out_x = cursor_x;
     *out_y = cursor_y;
     return true;
+}
+
+
+void editor_set_message(ProgramState* state, const char* msg)
+{
+    String_set(&(state->message), msg);
+    printf("%s\n", msg);
 }

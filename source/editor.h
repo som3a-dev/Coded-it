@@ -112,5 +112,4 @@ void editor_resize_and_position_buttons(ProgramState* state); //called after
 //returns false if there is no current input buffer.
 bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y);
 
-
-
+void editor_set_message(ProgramState* state, const char* msg);
