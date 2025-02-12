@@ -7,6 +7,7 @@
 
 
 const int CURSOR_BLINK_TIME = 1000;
+const int MESSAGE_DURATION = 100;
 
 
 //NEXT OBJECTIVE:: DO ALL THE TEXT EDITING COOL SHIT WITH LCTRL AND COPY PASTING AND STUFF
@@ -26,8 +27,6 @@ int editor_init(ProgramState* state)
     state->draw_cursor = true;
     state->state = EDITOR_STATE_EDIT;
 
-    String_set(&(state->message), "This is a message!");
-    
     const char* error = NULL;
     
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
@@ -99,6 +98,8 @@ int editor_init(ProgramState* state)
         config.on_input = Button_open_on_input;
         Button_init(state->buttons + 1, &config);
     }
+
+    Queue_init(&(state->messages), sizeof(String));
 
     state->current_file = "test.txt";
 }
@@ -436,6 +437,16 @@ void editor_update(ProgramState* state)
         state->last_cursor_blink_tic = SDL_GetTicks();
     }
 
+    if (state->message)
+    {
+        if (SDL_GetTicks() > (state->message_change_tic + MESSAGE_DURATION))
+        {
+            String_clear(state->message);
+            free(state->message);
+            state->message = NULL;
+        }
+    }
+
     int mouse_x, mouse_y;
     uint32_t mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
 
@@ -557,9 +568,14 @@ void editor_draw(ProgramState* state)
 
     if (state->state != EDITOR_STATE_COMMAND_INPUT)
     {
-        if (state->message.text)
+        if (!state->message)
         {
-            draw_text(state->font, state->window_surface, state->message.text,
+            state->message = Queue_pop(&(state->messages), true);
+            state->message_change_tic = SDL_GetTicks();
+        }
+        if (state->message)
+        {
+            draw_text(state->font, state->window_surface, state->message->text,
                     0,
                     state->window_h - state->char_h*2,
                     255, 230, 230);
@@ -636,38 +652,45 @@ void editor_open_file(ProgramState* state)
     }
     fopen_s(&fp, state->current_file, "r");
 
+    char* msg_format = NULL;
     if (!fp)
     {
-        const char* msg_format = "Couldn't open file '%s'.";
-        size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
-        char* msg = malloc(msg_size); 
-
-        snprintf(msg, msg_size, msg_format, state->current_file);
- 
-        editor_set_message(state, msg);
-        free(msg);
-        return;
+        msg_format = "Couldn't open file '%s'.";
     }
-
-    String_clear(&(state->text.text));
-    state->text.cursor_index = 0;
-    state->camera_x = 0;
-    state->camera_y = 0;
-    while (!feof(fp))
+    else
     {
-        char c = fgetc(fp);
-        if (c <= 0) //a weird character appears at the end of every .txt file. not sure why
+        String_clear(&(state->text.text));
+        state->text.cursor_index = 0;
+        state->camera_x = 0;
+        state->camera_y = 0;
+        while (!feof(fp))
         {
-            continue;
+            char c = fgetc(fp);
+            if (c <= 0) //a weird character appears at the end of every .txt file. not sure why
+            {
+                continue;
+            }
+            String_push(&(state->text.text), c);
+            if (c == '\n')
+            {
+                continue;
+            }
         }
-        String_push(&(state->text.text), c);
-        if (c == '\n')
-        {
-            continue;
-        }
+        fclose(fp);
+
+        msg_format = "Successfully opened file '%s'.";
     }
 
-    fclose(fp);
+    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
+    char* msg = malloc(msg_size); 
+
+    snprintf(msg, msg_size, msg_format, state->current_file);
+    
+    String str = {0};
+    String_set(&str, msg);
+    free(msg);
+
+    editor_push_message(state, &str);
 }
 
 
@@ -890,8 +913,7 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
 }
 
 
-void editor_set_message(ProgramState* state, const char* msg)
+void editor_push_message(ProgramState* state, String* msg)
 {
-    String_set(&(state->message), msg);
-    printf("%s\n", msg);
+    Queue_push(&(state->messages), msg);
 }

@@ -6,6 +6,7 @@
 #include <SDL_ttf.h>
 
 #include "string.h"
+#include "queue.h"
 #include "editor.h"
 
 
