@@ -82,7 +82,7 @@ typedef struct _ProgramState
 } ProgramState;
 
 
-int editor_init(ProgramState* state);
+void editor_init(ProgramState* state);
 void editor_destroy(ProgramState* state);
 
 void editor_loop(ProgramState* state);

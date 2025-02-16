@@ -20,7 +20,7 @@ const int MESSAGE_DURATION = 1000;
 //                 AND A STATUS BAR WITH THE FILENAME. CURRENT LINE AND CURRENT CHARACTER NUMBER
 
 
-int editor_init(ProgramState* state)
+void editor_init(ProgramState* state)
 {
     memset(state, 0, sizeof(ProgramState));
     state->running = true;
@@ -141,12 +141,14 @@ void editor_handle_events(ProgramState* state)
         case SDL_TEXTINPUT:
         {
             InputBuffer* buffer = editor_get_current_input_buffer(state);
- 
-            String_insert(&(buffer->text), e.text.text[0], buffer->cursor_index);
-            //system("@cls||clear");
-            //printf("%s\n", state->text);
-            
-            editor_set_cursor(state, buffer->cursor_index + 1);
+            if (buffer)
+            {
+                String_insert(&(buffer->text), e.text.text[0], buffer->cursor_index);
+                //system("@cls||clear");
+                //printf("%s\n", state->text);
+                
+                editor_set_cursor(state, buffer->cursor_index + 1);
+            }
         } break;
 
         case SDL_MOUSEMOTION:
