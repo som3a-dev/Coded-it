@@ -7,7 +7,7 @@
 
 
 const int CURSOR_BLINK_TIME = 1000;
-const int MESSAGE_DURATION = 100;
+const int MESSAGE_DURATION = 1000;
 
 
 //NEXT OBJECTIVE:: DO ALL THE TEXT EDITING COOL SHIT WITH LCTRL AND COPY PASTING AND STUFF
@@ -439,11 +439,15 @@ void editor_update(ProgramState* state)
 
     if (state->message)
     {
-        if (SDL_GetTicks() > (state->message_change_tic + MESSAGE_DURATION))
+        int tic = SDL_GetTicks();
+        if (tic > (state->message_change_tic + MESSAGE_DURATION))
         {
+            printf("Msg: %s\nChange tic: %d\nCurrent Tic: %d\nDuration: %d\n\n", state->message->text,
+            state->message_change_tic, tic, MESSAGE_DURATION);
             String_clear(state->message);
             free(state->message);
             state->message = NULL;
+            state->message_change_tic = tic; 
         }
     }
 
