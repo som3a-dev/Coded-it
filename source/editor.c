@@ -4,7 +4,9 @@
 #include <memory.h>
 #include <string.h>
 
-
+//everybody does these this is C shut up
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 const int CURSOR_BLINK_TIME = 1000;
 const int MESSAGE_DURATION = 1000;
@@ -101,7 +103,8 @@ void editor_init(ProgramState* state)
 
     Queue_init(&(state->messages), sizeof(String));
 
-    state->current_file = "test.txt";
+   state->current_file = "test.txt";
+   state->selection_start_index = -1;
 }
 
 
@@ -156,6 +159,31 @@ void editor_handle_events(ProgramState* state)
             for (int i = 0; i < 10; i++)
             {
                 Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y);
+            }
+        } break;
+
+        case SDL_KEYUP:
+        {
+            if (state->state == EDITOR_STATE_EDIT)
+            {
+                switch (e.key.keysym.sym)
+                {
+                    case SDLK_LSHIFT:
+                    {
+                        InputBuffer* buffer = editor_get_current_input_buffer(state);
+                        if (state->selection_start_index != -1)
+                        {
+                            int selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                            int selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+
+                            for (int i = selection_start; i <= selection_end; i++)
+                            {
+                                printf("%c", buffer->text.text[i]);
+                            }
+                            printf("\n");
+                        }
+                    } break;
+                }
             }
         } break;
         
@@ -234,6 +262,11 @@ void editor_handle_events(ProgramState* state)
                 
                 switch (e.key.keysym.sym)
                 {
+                    case SDLK_LSHIFT:
+                    {
+                        state->selection_start_index = buffer->cursor_index;
+                    } break;
+
                     case SDLK_BACKSPACE:
                     {
                         //String_pop(&(state->text));
@@ -451,6 +484,13 @@ void editor_update(ProgramState* state)
             state->message = NULL;
             state->message_change_tic = tic; 
         }
+    }
+
+    //selection logic
+    uint8_t* keystate = SDL_GetKeyboardState(NULL);
+    if (!(keystate[SDL_SCANCODE_LSHIFT]))
+    {
+        state->selection_start_index = -1;
     }
 
     int mouse_x, mouse_y;
@@ -767,6 +807,16 @@ void editor_draw_input_buffer(ProgramState* state)
 
     int x = startx;
     int y = starty;
+
+    int selection_start = -1;
+    int selection_end = -1;
+
+    if (state->selection_start_index != -1)
+    {
+        selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+        selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+    }
+
     for (int i = 0; i < buffer->text.len; i++)
     {
         bool draw_char = true;
@@ -806,10 +856,19 @@ void editor_draw_input_buffer(ProgramState* state)
         
         if (draw_char)
         {
+            //draw selection box if being selected
+            if ((selection_start <= i) && (i <= selection_end))
+            {
+                SDL_Rect cursor_rect = { draw_x, draw_y, state->char_w, state->char_h};
+                SDL_FillRect(state->window_surface, &cursor_rect,
+                             SDL_MapRGB(state->window_surface->format, 100, 100, 255));
+                
+            }            
+ 
             char str[2] = { c, '\0' };
             draw_text(state->font, state->window_surface, str, draw_x, draw_y, 255, 255, 255);
             x += state->char_w;
-        }
+       }
     }
 }
 

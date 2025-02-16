@@ -79,6 +79,8 @@ typedef struct _ProgramState
     int last_cursor_blink_tic;
 
     Button buttons[10];
+
+    int selection_start_index; //if selecting text. this is the index of the character we began selecting from
 } ProgramState;
 
 
