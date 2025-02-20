@@ -259,12 +259,20 @@ void editor_handle_events(ProgramState* state)
             else
             {
                 InputBuffer* buffer = editor_get_current_input_buffer(state);
-                
+                uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+                bool abort_selection = true;
+
                 switch (e.key.keysym.sym)
                 {
                     case SDLK_LSHIFT:
                     {
-                        state->selection_start_index = buffer->cursor_index;
+                        abort_selection = false;
+
+                        if (state->selection_start_index == -1)
+                        {
+                            state->selection_start_index = buffer->cursor_index;
+                        }
                     } break;
 
                     case SDLK_BACKSPACE:
@@ -295,6 +303,11 @@ void editor_handle_events(ProgramState* state)
                     
                     case SDLK_UP:
                     {
+                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+                        {
+                            abort_selection = false;
+                        }
+
                         int prev_newline = String_get_previous_newline(&(buffer->text),
                         buffer->cursor_index);
                         if (prev_newline == -1)
@@ -321,6 +334,11 @@ void editor_handle_events(ProgramState* state)
                     
                     case SDLK_DOWN:
                     {
+                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+                        {
+                            abort_selection = false;
+                        }
+
                         int prev_newline = String_get_previous_newline(&(buffer->text),
                         buffer->cursor_index);
                         
@@ -356,11 +374,21 @@ void editor_handle_events(ProgramState* state)
                     
                     case SDLK_LEFT:
                     {
+                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+                        {
+                            abort_selection = false;
+                        }
+
                         editor_set_cursor(state, buffer->cursor_index - 1);
                     } break;
                     
                     case SDLK_RIGHT:
                     {
+                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+                        {
+                            abort_selection = false;
+                        }
+
                         editor_set_cursor(state, buffer->cursor_index + 1);
                     } break;
                     
@@ -377,7 +405,13 @@ void editor_handle_events(ProgramState* state)
                         editor_save_file(state);
                     } break;
                 }
+
+                if (abort_selection)
+                {
+                    state->selection_start_index = -1;
                 }
+
+            }
 
                 switch (e.key.keysym.sym)
                 {
@@ -484,13 +518,6 @@ void editor_update(ProgramState* state)
             state->message = NULL;
             state->message_change_tic = tic; 
         }
-    }
-
-    //selection logic
-    uint8_t* keystate = SDL_GetKeyboardState(NULL);
-    if (!(keystate[SDL_SCANCODE_LSHIFT]))
-    {
-        state->selection_start_index = -1;
     }
 
     int mouse_x, mouse_y;
