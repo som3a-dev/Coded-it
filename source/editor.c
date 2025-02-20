@@ -675,15 +675,32 @@ void editor_save_file(const ProgramState* state)
         return;
     }
     fopen_s(&fp, state->current_file, "w");
-    
+
+    const char* msg_format;
     if (!fp)
     {
         //it should never be NULL ??
-        return;
+        msg_format = "Couldn't save to file '%s'.";
+    }
+    else
+    {
+        //fucking text.text.text
+        fwrite(state->text.text.text, sizeof(char), state->text.text.len, fp);
+
+        msg_format = "Saved to file '%s'.";
     }
 
-    //fucking text.text.text
-    fwrite(state->text.text.text, sizeof(char), state->text.text.len, fp);
+    //send message
+    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
+    char* msg = malloc(msg_size); 
+
+    snprintf(msg, msg_size, msg_format, state->current_file);
+    
+    String str = {0};
+    String_set(&str, msg);
+    free(msg);
+
+    editor_push_message(state, &str);
 
     fclose(fp);
 }
@@ -724,7 +741,7 @@ void editor_open_file(ProgramState* state)
         }
         fclose(fp);
 
-        msg_format = "Successfully opened file '%s'.";
+        msg_format = "Opened file '%s'.";
     }
 
     size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
