@@ -104,7 +104,7 @@ void editor_init(ProgramState* state)
     Queue_init(&(state->messages), sizeof(String));
 
    state->current_file = "test.txt";
-   state->selection_start_index = -1;
+   state->selection_start_index = -2;
 }
 
 
@@ -171,7 +171,7 @@ void editor_handle_events(ProgramState* state)
                     case SDLK_LSHIFT:
                     {
                         InputBuffer* buffer = editor_get_current_input_buffer(state);
-                        if (state->selection_start_index != -1)
+                        if (state->selection_start_index != -2)
                         {
                             int selection_start = MIN(state->selection_start_index, buffer->cursor_index);
                             int selection_end = MAX(state->selection_start_index, buffer->cursor_index);
@@ -269,7 +269,7 @@ void editor_handle_events(ProgramState* state)
                     {
                         abort_selection = false;
 
-                        if (state->selection_start_index == -1)
+                        if (state->selection_start_index == -2)
                         {
                             state->selection_start_index = buffer->cursor_index;
                         }
@@ -408,7 +408,7 @@ void editor_handle_events(ProgramState* state)
 
                 if (abort_selection)
                 {
-                    state->selection_start_index = -1;
+                    state->selection_start_index = -2;
                 }
 
             }
@@ -500,7 +500,11 @@ void editor_handle_events(ProgramState* state)
 
 void editor_update(ProgramState* state)
 {
-    if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= CURSOR_BLINK_TIME)
+    if (state->selection_start_index != -2)
+    {
+        state->draw_cursor = true;
+    }
+    else if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= CURSOR_BLINK_TIME)
     {
         state->draw_cursor = !(state->draw_cursor);
         state->last_cursor_blink_tic = SDL_GetTicks();
@@ -844,6 +848,11 @@ void editor_draw_input_buffer(ProgramState* state)
         if (draw_cursor)
         {
             SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
+            if (state->selection_start_index != -2)
+            {
+                cursor_rect.y += state->char_h - 1;
+                cursor_rect.h = state->char_h * 0.1;
+            }
             SDL_FillRect(state->window_surface, &cursor_rect,
                         SDL_MapRGB(state->window_surface->format, 200, 200, 200));
         }
@@ -852,13 +861,21 @@ void editor_draw_input_buffer(ProgramState* state)
     int x = startx;
     int y = starty;
 
-    int selection_start = -1;
-    int selection_end = -1;
+    int selection_start = -2;
+    int selection_end = -2;
 
-    if (state->selection_start_index != -1)
+    if (state->selection_start_index != -2)
     {
-        selection_start = MIN(state->selection_start_index, buffer->cursor_index);
-        selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+        if (state->selection_start_index < (buffer->cursor_index))
+        {
+            selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+            selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+        }
+        else
+        {
+            selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+            selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+        }
     }
 
     for (int i = 0; i < buffer->text.len; i++)
