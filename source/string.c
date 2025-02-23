@@ -47,7 +47,7 @@ void String_insert(String* str, char c, int index)
     if (!(str->text))
     {
         str->len = 1;
-        str->text = malloc(str->text, sizeof(char) * str->len + 1);
+        str->text = malloc(sizeof(char) * str->len + 1);
     }
     else
     {
