@@ -170,7 +170,7 @@ void editor_handle_events(ProgramState* state)
                 {
                     case SDLK_LSHIFT:
                     {
-                        InputBuffer* buffer = editor_get_current_input_buffer(state);
+/*                        InputBuffer* buffer = editor_get_current_input_buffer(state);
                         if (state->selection_start_index != -2)
                         {
                             int selection_start = MIN(state->selection_start_index, buffer->cursor_index);
@@ -181,7 +181,7 @@ void editor_handle_events(ProgramState* state)
                                 printf("%c", buffer->text.text[i]);
                             }
                             printf("\n");
-                        }
+                        }*/
                     } break;
                 }
             }
@@ -272,6 +272,51 @@ void editor_handle_events(ProgramState* state)
                         if (state->selection_start_index == -2)
                         {
                             state->selection_start_index = buffer->cursor_index;
+                        }
+                    } break;
+
+                    case SDLK_c:
+                    {
+                        if (state->selection_start_index != -2)
+                        {
+                            if (keystate[SDL_SCANCODE_LCTRL])
+                            {
+                                int selection_start = -2;
+                                int selection_end = -2;
+                                if (state->selection_start_index < (buffer->cursor_index))
+                                {
+                                    selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                                    selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+                                }
+                                else
+                                {
+                                    selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                                    selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+                                }
+
+                                int len = (selection_end - selection_start) + 1;
+                                char* text = state->text.text.text + selection_start;
+                                char* text_copy = malloc(sizeof(char) * (len+1));
+
+                                memcpy(text_copy, text, sizeof(char) * len);
+
+                                text_copy[len] = '\0';
+                                
+                                String_set(&(state->clipboard), text_copy);
+
+                                free(text_copy);
+
+                                printf("%s\n", state->clipboard.text);
+                            }
+                        }
+
+                    } break;
+
+                    case SDLK_v:
+                    {
+                        if (keystate[SDL_SCANCODE_LCTRL])
+                        {
+                            printf("Pasted\n");
                         }
                     } break;
 
@@ -404,6 +449,11 @@ void editor_handle_events(ProgramState* state)
                     {
                         editor_save_file(state);
                     } break;
+
+                    case SDLK_LCTRL:
+                    {
+                        abort_selection = false;
+                    } break;
                 }
 
                 if (abort_selection)
@@ -413,87 +463,87 @@ void editor_handle_events(ProgramState* state)
 
             }
 
-                switch (e.key.keysym.sym)
+            switch (e.key.keysym.sym)
+            {
+                case SDLK_o:
                 {
-                    case SDLK_o:
+                    uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+                    if (keystate[SDL_SCANCODE_LCTRL])
                     {
-                        uint8_t* keystate = SDL_GetKeyboardState(NULL);
+                        int new_state = state->state + 1;
 
-                        if (keystate[SDL_SCANCODE_LCTRL])
+                        if (new_state >= EDITOR_STATE_COUNT)
                         {
-                            int new_state = state->state + 1;
-
-                            if (new_state >= EDITOR_STATE_COUNT)
-                            {
-                                new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
-                            }
-
-                            editor_set_state(state, new_state);
+                            new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
                         }
-                    } break;
 
-                    case SDLK_F11:
+                        editor_set_state(state, new_state);
+                    }
+                } break;
+
+                case SDLK_F11:
+                {
+                    uint32_t flags = SDL_GetWindowFlags(state->window);
+                    if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
                     {
-                        uint32_t flags = SDL_GetWindowFlags(state->window);
-                        if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                        SDL_SetWindowFullscreen(state->window, 0);
+                        state->window_surface = SDL_GetWindowSurface(state->window);
+                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                    }
+                    else
+                    {
+                        SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        state->window_surface = SDL_GetWindowSurface(state->window);
+                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                    }
+
+                    editor_resize_and_position_buttons(state);
+                } break;
+
+                case SDLK_EQUALS:
+                {
+                    uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+                    if (keystate[SDL_SCANCODE_LCTRL])
+                    {
+                        TTF_CloseFont(state->font);
+
+                        state->font_size += 2;
+                        if (state->font_size > 36)
                         {
-                            SDL_SetWindowFullscreen(state->window, 0);
-                            state->window_surface = SDL_GetWindowSurface(state->window);
-                            SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                            state->font_size = 36;
                         }
-                        else
+
+                        state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                        TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+                        
+                        editor_resize_and_position_buttons(state);
+                    }
+                } break;
+
+                case SDLK_MINUS:
+                {
+                    uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+                    if (keystate[SDL_SCANCODE_LCTRL])
+                    {
+                        TTF_CloseFont(state->font);
+
+                        state->font_size -= 2;
+                        if (state->font_size < 12)
                         {
-                            SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                            state->window_surface = SDL_GetWindowSurface(state->window);
-                            SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                            state->font_size = 12;
                         }
+
+                        state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                        TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
                         editor_resize_and_position_buttons(state);
-                    } break;
-
-                    case SDLK_EQUALS:
-                    {
-                        uint8_t* keystate = SDL_GetKeyboardState(NULL);
-
-                        if (keystate[SDL_SCANCODE_LCTRL])
-                        {
-                            TTF_CloseFont(state->font);
-
-                            state->font_size += 2;
-                            if (state->font_size > 36)
-                            {
-                                state->font_size = 36;
-                            }
-
-                            state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
-                            TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
-                            
-                            editor_resize_and_position_buttons(state);
-                        }
-                    } break;
-
-                    case SDLK_MINUS:
-                    {
-                        uint8_t* keystate = SDL_GetKeyboardState(NULL);
-
-                        if (keystate[SDL_SCANCODE_LCTRL])
-                        {
-                            TTF_CloseFont(state->font);
-
-                            state->font_size -= 2;
-                            if (state->font_size < 12)
-                            {
-                                state->font_size = 12;
-                            }
-
-                            state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
-                            TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
-
-                            editor_resize_and_position_buttons(state);
-                        }
-                    } break;
-                }
-        } break;
+                    }
+                } break;
+            }
+    } break;
     }
 }
 
