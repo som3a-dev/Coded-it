@@ -309,14 +309,21 @@ void editor_handle_events(ProgramState* state)
                                 printf("%s\n", state->clipboard.text);
                             }
                         }
-
                     } break;
 
                     case SDLK_v:
                     {
-                        if (keystate[SDL_SCANCODE_LCTRL])
+                        if (state->clipboard.text)
                         {
-                            printf("Pasted\n");
+                            if (keystate[SDL_SCANCODE_LCTRL])
+                            {
+                                InputBuffer* buffer = editor_get_current_input_buffer(state);
+                                printf("%s\n", state->clipboard.text);
+                                String_insert_string(&(buffer->text), state->clipboard.text,
+                                buffer->cursor_index);
+                                
+                                buffer->cursor_index += state->clipboard.len;
+                            }
                         }
                     } break;
 

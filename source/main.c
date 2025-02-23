@@ -18,5 +18,6 @@ int main(int argc, char** argv)
     editor_loop(&state);
     
     editor_destroy(&state);
+
     return EXIT_SUCCESS;
 }
