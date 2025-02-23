@@ -66,6 +66,40 @@ void String_insert(String* str, char c, int index)
 }
 
 
+void String_insert_string(String* str, const char* str2, int index)
+{
+    if (!str) return;
+    if (index < 0) return;
+    if (index > str->len) return;
+
+    int old_str_len = str->len;
+    int str2_len = strlen(str2);
+    
+    if (!(str->text))
+    {
+        str->len = str2_len;
+        str->text = malloc(sizeof(char) * str->len + 1);
+    }
+    else
+    {
+        str->len += str2_len;
+        str->text = realloc(str->text, sizeof(char) * str->len + 1);
+    }
+
+    for (int i = str->len-1; i >= (index + str2_len); i--)
+    {
+        str->text[i] = str->text[i - str2_len];
+    }
+
+    for (int i = index; i < (index + str2_len); i++)
+    {
+        str->text[i] = str2[i - index];
+    }
+
+    str->text[str->len] = '\0';
+}
+
+
 void String_remove(String* str, int index)
 {
     if (!str) return;
