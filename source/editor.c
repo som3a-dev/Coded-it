@@ -13,10 +13,6 @@ const int MESSAGE_DURATION = 1000;
 
 
 //NEXT OBJECTIVE:: DO ALL THE TEXT EDITING COOL SHIT WITH LCTRL AND COPY PASTING AND STUFF
-//                 CODE THE BASIC STANDARD STUFF FIRST THEN IF NEEDED DESIGN SOMETHING AKIN
-//                 TO VIM ?? MAYBE LESS COMPLEX BUT SOMETHING THAT ALLOWS FOR FAST EDITING WITH
-//                 A KEYBOARD ONLY. A DIFFERENT MODE? IF NEEDED.
-//                  
 //                 ALSO DISPLAYING MESSAGES TO THE USER IN THE BOTTOM RIGHT CORNER OR SOMETHING
 //                 "FILE OPENED SUCCESSFULLY", "OPENING FILE FAILED", "PASTED XXX LINES"
 //                 AND A STATUS BAR WITH THE FILENAME. CURRENT LINE AND CURRENT CHARACTER NUMBER
@@ -60,7 +56,8 @@ void editor_init(ProgramState* state)
     
     state->font_size = 24;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
-    if (!state->font)
+    state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
+    if (!(state->font) || !(state->static_font))
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
         return 4;
@@ -71,10 +68,16 @@ void editor_init(ProgramState* state)
     state->editor_area_x = 0;
     state->editor_area_y = 0;
     state->editor_area_w = state->window_w;
-    state->editor_area_h = state->window_h - state->char_h * 2.5f;
+ //   state->editor_area_h = state->window_h - state->char_h * 2.5f;
 
-    state->command_input.y = state->window_h - state->char_h*2;
+    {
+        int char_h;
+        TTF_SizeText(state->static_font, "A", NULL, &char_h);
 
+        state->command_input.y = state->window_h - char_h*2;
+        state->editor_area_h = state->window_h - char_h * 2.5f;
+
+    }
     {
         ButtonConfig config = {0};
         config.pressed_r = 110;
@@ -397,7 +400,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     }
 
                     int len = (selection_end - selection_start) + 1;
-                    char* text = state->text.text.text + selection_start;
+                    char* text = buffer->text.text + selection_start;
                     char* text_copy = malloc(sizeof(char) * (len+1));
 
                     memcpy(text_copy, text, sizeof(char) * len);
@@ -636,7 +639,7 @@ void editor_update(ProgramState* state)
 
             int cursor_x = 0;
             int cursor_y = 0;
-            editor_get_cursor_pos(state, &cursor_x, &cursor_y);
+            editor_get_cursor_pos(state, &cursor_x, &cursor_y, state->char_w, state->char_h);
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
 
@@ -689,12 +692,16 @@ void editor_draw(ProgramState* state)
 {
     SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 0, 0, 0)); //Clear
 
-    SDL_Rect border_line = 
     {
-        0, state->window_h - state->char_h*2.5,
-        state->window_w, 4
-    };
-    SDL_FillRect(state->window_surface, &border_line, 0xbbbbbbff);
+        int char_h;
+        TTF_SizeText(state->static_font, "A", NULL, &char_h);
+        SDL_Rect border_line = 
+        {
+            0, state->window_h - char_h*2.5,
+            state->window_w, 4
+        };
+        SDL_FillRect(state->window_surface, &border_line, 0xbbbbbbff);
+    }
 
     switch (state->state)
     {
@@ -726,9 +733,12 @@ void editor_draw(ProgramState* state)
         }
         if (state->message)
         {
-            draw_text(state->font, state->window_surface, state->message->text,
+            int char_h;
+            TTF_SizeText(state->static_font, "A", NULL, &char_h);
+
+            draw_text(state->static_font, state->window_surface, state->message->text,
                     0,
-                    state->window_h - state->char_h*2,
+                    state->window_h - char_h*2,
                     255, 230, 230);
         }
     }
@@ -886,6 +896,22 @@ void editor_draw_input_buffer(ProgramState* state)
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return;
 
+    TTF_Font* font;
+    int char_w;
+    int char_h;
+
+    if (state->state == EDITOR_STATE_COMMAND_INPUT)
+    {
+        font = state->static_font;
+        TTF_SizeText(font, "A", &char_w, &char_h);
+    }
+    else
+    {
+        font = state->font;
+        char_w = state->char_w;
+        char_h = state->char_h;
+    }
+
     int startx = buffer->x;
     int starty = buffer->y;
 
@@ -893,7 +919,7 @@ void editor_draw_input_buffer(ProgramState* state)
     {
         int cursor_x = 0;
         int cursor_y = 0;
-        editor_get_cursor_pos(state, &cursor_x, &cursor_y);
+        editor_get_cursor_pos(state, &cursor_x, &cursor_y, char_w, char_h);
 
         bool draw_cursor = true;
 
@@ -901,11 +927,11 @@ void editor_draw_input_buffer(ProgramState* state)
         {
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
-            if ((cursor_x + state->char_w) > state->editor_area_w)
+            if ((cursor_x + char_w) > state->editor_area_w)
             {
                 draw_cursor = false;
             }
-            if ((cursor_y + state->char_h) > state->editor_area_h)
+            if ((cursor_y + char_h) > state->editor_area_h)
             {
                 draw_cursor = false;
             }
@@ -921,11 +947,11 @@ void editor_draw_input_buffer(ProgramState* state)
 
         if (draw_cursor)
         {
-            SDL_Rect cursor_rect = { cursor_x, cursor_y, state->char_w, state->char_h};
+            SDL_Rect cursor_rect = { cursor_x, cursor_y, char_w, char_h};
             if (state->selection_start_index != -2)
             {
-                cursor_rect.y += state->char_h - 1;
-                cursor_rect.h = state->char_h * 0.1;
+                cursor_rect.y += char_h - 1;
+                cursor_rect.h = char_h * 0.1;
             }
             SDL_FillRect(state->window_surface, &cursor_rect,
                         SDL_MapRGB(state->window_surface->format, 200, 200, 200));
@@ -971,11 +997,11 @@ void editor_draw_input_buffer(ProgramState* state)
         {
             draw_x -= state->camera_x;
             draw_y -= state->camera_y;
-            if ((draw_x + state->char_w) > state->editor_area_w)
+            if ((draw_x + char_w) > state->editor_area_w)
             {
                 draw_char = false;
             }
-            if ((draw_y + state->char_h) > state->editor_area_h)
+            if ((draw_y + char_h) > state->editor_area_h)
             {
                 draw_char = false;
             }
@@ -994,15 +1020,15 @@ void editor_draw_input_buffer(ProgramState* state)
             //draw selection box if being selected
             if ((selection_start <= i) && (i <= selection_end))
             {
-                SDL_Rect cursor_rect = { draw_x, draw_y, state->char_w, state->char_h};
+                SDL_Rect cursor_rect = { draw_x, draw_y, char_w, char_h};
                 SDL_FillRect(state->window_surface, &cursor_rect,
                              SDL_MapRGB(state->window_surface->format, 100, 100, 255));
                 
             }            
  
             char str[2] = { c, '\0' };
-            draw_text(state->font, state->window_surface, str, draw_x, draw_y, 255, 255, 255);
-            x += state->char_w;
+            draw_text(font, state->window_surface, str, draw_x, draw_y, 255, 255, 255);
+            x += char_w;
        }
     }
 }
@@ -1067,12 +1093,19 @@ void editor_resize_and_position_buttons(ProgramState* state)
     state->editor_area_x = 0;
     state->editor_area_y = 0;
     state->editor_area_w = state->window_w;
-    state->editor_area_h = state->window_h - state->char_h * 2.5f;
+    //state->editor_area_h = state->window_h - state->char_h * 2.5f;
 
-    state->command_input.y = state->window_h - state->char_h*2;
+    {
+        int char_h;
+        TTF_SizeText(state->static_font, "A", NULL, &char_h);
+
+        state->command_input.y = state->window_h - char_h*2;
+        state->editor_area_h = state->window_h - char_h * 2.5f;
+    }
+
 }
 
-bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
+bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_w, int char_h)
 {
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return false;
@@ -1087,12 +1120,12 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y)
         char c = buffer->text.text[i];
         if (c == '\n')
         {
-            cursor_y += state->char_h;
+            cursor_y += char_h;
             cursor_x = startx;
         }
         else
         {
-            cursor_x += state->char_w;
+            cursor_x += char_w;
         }
         
         if (i == buffer->cursor_index - 1)

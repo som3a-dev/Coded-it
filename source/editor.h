@@ -37,6 +37,8 @@ typedef struct _ProgramState
     SDL_Surface* window_surface;
     TTF_Font* font;
     int font_size;
+    TTF_Font* static_font; //the font for text not affected by zooming. like the status bar
+
     bool running;
 
     int window_w;
@@ -72,6 +74,8 @@ typedef struct _ProgramState
                                  //EDITOR_STATE_COMMAND_INPUT to be used by the
                                  //clicked button from EDITOR_STATE_COMMAND
 
+    //TODO(omar): make char_w and char_h variables for the static_font too
+    //instead of having to call TTF_SizeText
     int char_w;
     int char_h;
     
@@ -120,6 +124,7 @@ void editor_resize_and_position_buttons(ProgramState* state); //called after
 
 //gets position in X and Y of the current input buffer's cursor
 //returns false if there is no current input buffer.
-bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y);
+bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y,
+                           int char_w, int char_h);
 
 void editor_push_message(ProgramState* state, String* msg);
