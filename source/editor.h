@@ -91,6 +91,10 @@ void editor_destroy(ProgramState* state);
 void editor_loop(ProgramState* state);
 
 void editor_handle_events(ProgramState* state);
+void editor_handle_events_keydown(ProgramState* state, SDL_Event e);
+void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e);
+void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e);
+
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
 void editor_draw_input_buffer(ProgramState* state);

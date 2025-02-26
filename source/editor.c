@@ -189,368 +189,385 @@ void editor_handle_events(ProgramState* state)
         
         case SDL_KEYDOWN:
         {
-            if (state->state == EDITOR_STATE_COMMAND)
+            editor_handle_events_keydown(state, e);
+        } break;
+    }
+}
+
+
+void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
+{
+    if (state->state == EDITOR_STATE_COMMAND)
+    {
+        editor_handle_events_keydown_command(state, e);
+    }
+    else
+    {
+        editor_handle_events_keydown_textual(state, e);
+    }
+
+    switch (e.key.keysym.sym)
+    {
+        case SDLK_o:
+        {
+            uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+            if (keystate[SDL_SCANCODE_LCTRL])
             {
-                switch (e.key.keysym.sym)
+                int new_state = state->state + 1;
+
+                if (new_state >= EDITOR_STATE_COUNT)
                 {
-                    case SDLK_UP:
-                    {
-                        if (state->clicked_button == NULL)
-                        {
-                            state->clicked_button = state->buttons + 0;
-                        }
-                        else
-                        {
-                            for (int i = 1; i < 10; i++)
-                            {
-                                Button* button = state->buttons + i;
-                                if (button == state->clicked_button &&
-                                   (button->state == BUTTON_STATE_ENABLED))
-                                {
-                                    if ((state->buttons + i - 1)->state != BUTTON_STATE_ENABLED)
-                                    {
-                                        continue;
-                                    }
- 
-                                    state->clicked_button->mouse_hovering = false;
-                                    state->clicked_button = state->buttons + i - 1;
-                                    break;
-                                }
-                            }
-                        }
-                        state->clicked_button->mouse_hovering = true;
-                    } break;
-
-                    case SDLK_DOWN:
-                    {
-                        if (state->clicked_button == NULL)
-                        {
-                            state->clicked_button = state->buttons + 0;
-                        }
-                        else
-                        {
-                            for (int i = 0; i < 9; i++)
-                            {
-                                Button* button = state->buttons + i;
-                                if (button == state->clicked_button &&
-                                   (button->state == BUTTON_STATE_ENABLED))
-                                {
-                                    if ((state->buttons + i + 1)->state != BUTTON_STATE_ENABLED)
-                                    {
-                                        continue;
-                                    }
-
-                                    state->clicked_button->mouse_hovering = false;
-                                    state->clicked_button = state->buttons + i + 1;
-                                    break;
-                                }
-                            }
-                        }
-
-                        state->clicked_button->mouse_hovering = true;
-                    } break;
-
-                    case SDLK_RETURN:
-                    {
-                        state->clicked_button->on_click(state);
-                    } break;
+                    new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
                 }
+
+                editor_set_state(state, new_state);
+            }
+        } break;
+
+        case SDLK_F11:
+        {
+            uint32_t flags = SDL_GetWindowFlags(state->window);
+            if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+            {
+                SDL_SetWindowFullscreen(state->window, 0);
+                state->window_surface = SDL_GetWindowSurface(state->window);
+                SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
             }
             else
             {
-                InputBuffer* buffer = editor_get_current_input_buffer(state);
-                uint8_t* keystate = SDL_GetKeyboardState(NULL);
-
-                bool abort_selection = true;
-
-                switch (e.key.keysym.sym)
-                {
-                    case SDLK_LSHIFT:
-                    {
-                        abort_selection = false;
-
-                        if (state->selection_start_index == -2)
-                        {
-                            state->selection_start_index = buffer->cursor_index;
-                        }
-                    } break;
-
-                    case SDLK_c:
-                    {
-                        if (state->selection_start_index != -2)
-                        {
-                            if (keystate[SDL_SCANCODE_LCTRL])
-                            {
-                                int selection_start = -2;
-                                int selection_end = -2;
-                                if (state->selection_start_index < (buffer->cursor_index))
-                                {
-                                    selection_start = MIN(state->selection_start_index, buffer->cursor_index);
-                                    selection_end = MAX(state->selection_start_index, buffer->cursor_index);
-                                }
-                                else
-                                {
-                                    selection_start = MIN(state->selection_start_index, buffer->cursor_index);
-                                    selection_end = MAX(state->selection_start_index, buffer->cursor_index);
-                                }
-
-                                int len = (selection_end - selection_start) + 1;
-                                char* text = state->text.text.text + selection_start;
-                                char* text_copy = malloc(sizeof(char) * (len+1));
-
-                                memcpy(text_copy, text, sizeof(char) * len);
-
-                                text_copy[len] = '\0';
-                                
-                                String_set(&(state->clipboard), text_copy);
-
-                                free(text_copy);
-
-                                printf("%s\n", state->clipboard.text);
-                            }
-                        }
-                    } break;
-
-                    case SDLK_v:
-                    {
-                        if (state->clipboard.text)
-                        {
-                            if (keystate[SDL_SCANCODE_LCTRL])
-                            {
-                                InputBuffer* buffer = editor_get_current_input_buffer(state);
-                                printf("%s\n", state->clipboard.text);
-                                String_insert_string(&(buffer->text), state->clipboard.text,
-                                buffer->cursor_index);
-                                
-                                buffer->cursor_index += state->clipboard.len;
-                            }
-                        }
-                    } break;
-
-                    case SDLK_BACKSPACE:
-                    {
-                        //String_pop(&(state->text));
-                        String_remove(&(buffer->text), buffer->cursor_index - 1);
-                        
-                        editor_set_cursor(state, buffer->cursor_index - 1);
-                    } break;
-                    
-                    case SDLK_RETURN:
-                    {
-                        //String_push(&(state->text), '\n');
-                        switch (state->state)
-                        {
-                            case EDITOR_STATE_EDIT:
-                            {
-                                String_insert(&(buffer->text), '\n', buffer->cursor_index);
-                                editor_set_cursor(state, buffer->cursor_index + 1);
-                            } break;
-
-                            case EDITOR_STATE_COMMAND_INPUT:
-                            {
-                                editor_set_state(state, EDITOR_STATE_EDIT);
-                            } break;
-                        }
-                    } break;
-                    
-                    case SDLK_UP:
-                    {
-                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
-                        {
-                            abort_selection = false;
-                        }
-
-                        int prev_newline = String_get_previous_newline(&(buffer->text),
-                        buffer->cursor_index);
-                        if (prev_newline == -1)
-                        {
-                            return;
-                        }
-                        
-                        int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
-                        printf("Cursor index in line: %d\n", cursor_index_in_line);
-                        
-                        int newline_before_prev_newline = String_get_previous_newline(buffer,
-                        prev_newline);
-                        
-                        //cap cursor_index_in_line at the length of the previous line - 1
-                        int prev_line_len = prev_newline - newline_before_prev_newline;
-                        if (cursor_index_in_line >= prev_line_len)
-                        {
-                            cursor_index_in_line = prev_line_len - 1;
-                        }
-                        
-                        editor_set_cursor(state,
-                        newline_before_prev_newline + cursor_index_in_line + 1);
-                    } break;
-                    
-                    case SDLK_DOWN:
-                    {
-                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
-                        {
-                            abort_selection = false;
-                        }
-
-                        int prev_newline = String_get_previous_newline(&(buffer->text),
-                        buffer->cursor_index);
-                        
-                        int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
-                        //printf("Cursor index in line: %d\n", cursor_index_in_line);
-                        
-                        int next_newline = String_get_next_newline(&(buffer->text),
-                        prev_newline);
-                        //printf("Next newline: %d\n", next_newline);
-                        
-                        if (next_newline == buffer->text.len)
-                        {
-                            //We are at the last line
-                            break;
-                        }
-                        
-                        int next_next_newline = String_get_next_newline(&(buffer->text),
-                        next_newline);
-                        //printf("Next newline: %d\n", next_next_newline);
-                        
-                        //cap cursor_index_in_line at the length of the previous line - 1
-                        int next_line_len = next_next_newline - next_newline - 1;
-                        if (next_line_len < 0) next_line_len = 0;
-                        //printf("Next line len: %d\n", next_line_len);
-                        
-                        if (cursor_index_in_line > next_line_len)
-                        {
-                            cursor_index_in_line = next_line_len;
-                        }
-                        
-                        editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
-                    } break;
-                    
-                    case SDLK_LEFT:
-                    {
-                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
-                        {
-                            abort_selection = false;
-                        }
-
-                        editor_set_cursor(state, buffer->cursor_index - 1);
-                    } break;
-                    
-                    case SDLK_RIGHT:
-                    {
-                        if (keystate[SDL_SCANCODE_LSHIFT] != 0)
-                        {
-                            abort_selection = false;
-                        }
-
-                        editor_set_cursor(state, buffer->cursor_index + 1);
-                    } break;
-                    
-                    case SDLK_TAB:
-                    {
-                        String_insert(&(buffer->text), ' ', buffer->cursor_index);
-                        editor_set_cursor(state, buffer->cursor_index+1);
-                        String_insert(&(buffer->text), ' ', buffer->cursor_index);
-                        editor_set_cursor(state, buffer->cursor_index+1);
-                    } break;
-
-                    case SDLK_INSERT:
-                    {
-                        editor_save_file(state);
-                    } break;
-
-                    case SDLK_LCTRL:
-                    {
-                        abort_selection = false;
-                    } break;
-                }
-
-                if (abort_selection)
-                {
-                    state->selection_start_index = -2;
-                }
-
+                SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                state->window_surface = SDL_GetWindowSurface(state->window);
+                SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
             }
 
-            switch (e.key.keysym.sym)
+            editor_resize_and_position_buttons(state);
+        } break;
+
+        case SDLK_EQUALS:
+        {
+            uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+            if (keystate[SDL_SCANCODE_LCTRL])
             {
-                case SDLK_o:
+                TTF_CloseFont(state->font);
+
+                state->font_size += 2;
+                if (state->font_size > 36)
                 {
-                    uint8_t* keystate = SDL_GetKeyboardState(NULL);
+                    state->font_size = 36;
+                }
 
-                    if (keystate[SDL_SCANCODE_LCTRL])
+                state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+                
+                editor_resize_and_position_buttons(state);
+            }
+        } break;
+
+        case SDLK_MINUS:
+        {
+            uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+            if (keystate[SDL_SCANCODE_LCTRL])
+            {
+                TTF_CloseFont(state->font);
+
+                state->font_size -= 2;
+                if (state->font_size < 12)
+                {
+                    state->font_size = 12;
+                }
+
+                state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+                editor_resize_and_position_buttons(state);
+            }
+        } break;
+    }
+}
+
+
+void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e)
+{
+    switch (e.key.keysym.sym)
+    {
+        case SDLK_UP:
+        {
+            if (state->clicked_button == NULL)
+            {
+                state->clicked_button = state->buttons + 0;
+            }
+            else
+            {
+                for (int i = 1; i < 10; i++)
+                {
+                    Button* button = state->buttons + i;
+                    if (button == state->clicked_button &&
+                        (button->state == BUTTON_STATE_ENABLED))
                     {
-                        int new_state = state->state + 1;
-
-                        if (new_state >= EDITOR_STATE_COUNT)
+                        if ((state->buttons + i - 1)->state != BUTTON_STATE_ENABLED)
                         {
-                            new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
+                            continue;
                         }
 
-                        editor_set_state(state, new_state);
+                        state->clicked_button->mouse_hovering = false;
+                        state->clicked_button = state->buttons + i - 1;
+                        break;
                     }
-                } break;
+                }
+            }
+            state->clicked_button->mouse_hovering = true;
+        } break;
 
-                case SDLK_F11:
+        case SDLK_DOWN:
+        {
+            if (state->clicked_button == NULL)
+            {
+                state->clicked_button = state->buttons + 0;
+            }
+            else
+            {
+                for (int i = 0; i < 9; i++)
                 {
-                    uint32_t flags = SDL_GetWindowFlags(state->window);
-                    if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                    Button* button = state->buttons + i;
+                    if (button == state->clicked_button &&
+                        (button->state == BUTTON_STATE_ENABLED))
                     {
-                        SDL_SetWindowFullscreen(state->window, 0);
-                        state->window_surface = SDL_GetWindowSurface(state->window);
-                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                        if ((state->buttons + i + 1)->state != BUTTON_STATE_ENABLED)
+                        {
+                            continue;
+                        }
+
+                        state->clicked_button->mouse_hovering = false;
+                        state->clicked_button = state->buttons + i + 1;
+                        break;
+                    }
+                }
+            }
+
+            state->clicked_button->mouse_hovering = true;
+        } break;
+
+        case SDLK_RETURN:
+        {
+            state->clicked_button->on_click(state);
+        } break;
+    }
+}
+
+
+void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
+{
+    InputBuffer* buffer = editor_get_current_input_buffer(state);
+    uint8_t* keystate = SDL_GetKeyboardState(NULL);
+
+    bool abort_selection = true;
+
+    switch (e.key.keysym.sym)
+    {
+        case SDLK_LSHIFT:
+        {
+            abort_selection = false;
+
+            if (state->selection_start_index == -2)
+            {
+                state->selection_start_index = buffer->cursor_index;
+            }
+        } break;
+
+        case SDLK_c:
+        {
+            if (state->selection_start_index != -2)
+            {
+                if (keystate[SDL_SCANCODE_LCTRL])
+                {
+                    int selection_start = -2;
+                    int selection_end = -2;
+                    if (state->selection_start_index < (buffer->cursor_index))
+                    {
+                        selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                        selection_end = MAX(state->selection_start_index, buffer->cursor_index);
                     }
                     else
                     {
-                        SDL_SetWindowFullscreen(state->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                        state->window_surface = SDL_GetWindowSurface(state->window);
-                        SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
+                        selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                        selection_end = MAX(state->selection_start_index, buffer->cursor_index);
                     }
 
-                    editor_resize_and_position_buttons(state);
+                    int len = (selection_end - selection_start) + 1;
+                    char* text = state->text.text.text + selection_start;
+                    char* text_copy = malloc(sizeof(char) * (len+1));
+
+                    memcpy(text_copy, text, sizeof(char) * len);
+
+                    text_copy[len] = '\0';
+                    
+                    String_set(&(state->clipboard), text_copy);
+
+                    free(text_copy);
+
+                    printf("%s\n", state->clipboard.text);
+                }
+            }
+        } break;
+
+        case SDLK_v:
+        {
+            if (state->clipboard.text)
+            {
+                if (keystate[SDL_SCANCODE_LCTRL])
+                {
+                    InputBuffer* buffer = editor_get_current_input_buffer(state);
+                    printf("%s\n", state->clipboard.text);
+                    String_insert_string(&(buffer->text), state->clipboard.text,
+                    buffer->cursor_index);
+                    
+                    buffer->cursor_index += state->clipboard.len;
+                }
+            }
+        } break;
+
+        case SDLK_BACKSPACE:
+        {
+            //String_pop(&(state->text));
+            String_remove(&(buffer->text), buffer->cursor_index - 1);
+            
+            editor_set_cursor(state, buffer->cursor_index - 1);
+        } break;
+        
+        case SDLK_RETURN:
+        {
+            //String_push(&(state->text), '\n');
+            switch (state->state)
+            {
+                case EDITOR_STATE_EDIT:
+                {
+                    String_insert(&(buffer->text), '\n', buffer->cursor_index);
+                    editor_set_cursor(state, buffer->cursor_index + 1);
                 } break;
 
-                case SDLK_EQUALS:
+                case EDITOR_STATE_COMMAND_INPUT:
                 {
-                    uint8_t* keystate = SDL_GetKeyboardState(NULL);
-
-                    if (keystate[SDL_SCANCODE_LCTRL])
-                    {
-                        TTF_CloseFont(state->font);
-
-                        state->font_size += 2;
-                        if (state->font_size > 36)
-                        {
-                            state->font_size = 36;
-                        }
-
-                        state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
-                        TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
-                        
-                        editor_resize_and_position_buttons(state);
-                    }
-                } break;
-
-                case SDLK_MINUS:
-                {
-                    uint8_t* keystate = SDL_GetKeyboardState(NULL);
-
-                    if (keystate[SDL_SCANCODE_LCTRL])
-                    {
-                        TTF_CloseFont(state->font);
-
-                        state->font_size -= 2;
-                        if (state->font_size < 12)
-                        {
-                            state->font_size = 12;
-                        }
-
-                        state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
-                        TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
-
-                        editor_resize_and_position_buttons(state);
-                    }
+                    editor_set_state(state, EDITOR_STATE_EDIT);
                 } break;
             }
-    } break;
+        } break;
+        
+        case SDLK_UP:
+        {
+            if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+            {
+                abort_selection = false;
+            }
+
+            int prev_newline = String_get_previous_newline(&(buffer->text),
+            buffer->cursor_index);
+            if (prev_newline == -1)
+            {
+                return;
+            }
+            
+            int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
+            printf("Cursor index in line: %d\n", cursor_index_in_line);
+            
+            int newline_before_prev_newline = String_get_previous_newline(buffer,
+            prev_newline);
+            
+            //cap cursor_index_in_line at the length of the previous line - 1
+            int prev_line_len = prev_newline - newline_before_prev_newline;
+            if (cursor_index_in_line >= prev_line_len)
+            {
+                cursor_index_in_line = prev_line_len - 1;
+            }
+            
+            editor_set_cursor(state,
+            newline_before_prev_newline + cursor_index_in_line + 1);
+        } break;
+        
+        case SDLK_DOWN:
+        {
+            if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+            {
+                abort_selection = false;
+            }
+
+            int prev_newline = String_get_previous_newline(&(buffer->text),
+            buffer->cursor_index);
+            
+            int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
+            //printf("Cursor index in line: %d\n", cursor_index_in_line);
+            
+            int next_newline = String_get_next_newline(&(buffer->text),
+            prev_newline);
+            //printf("Next newline: %d\n", next_newline);
+            
+            if (next_newline == buffer->text.len)
+            {
+                //We are at the last line
+                break;
+            }
+            
+            int next_next_newline = String_get_next_newline(&(buffer->text),
+            next_newline);
+            //printf("Next newline: %d\n", next_next_newline);
+            
+            //cap cursor_index_in_line at the length of the previous line - 1
+            int next_line_len = next_next_newline - next_newline - 1;
+            if (next_line_len < 0) next_line_len = 0;
+            //printf("Next line len: %d\n", next_line_len);
+            
+            if (cursor_index_in_line > next_line_len)
+            {
+                cursor_index_in_line = next_line_len;
+            }
+            
+            editor_set_cursor(state, next_newline + cursor_index_in_line + 1);
+        } break;
+        
+        case SDLK_LEFT:
+        {
+            if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+            {
+                abort_selection = false;
+            }
+
+            editor_set_cursor(state, buffer->cursor_index - 1);
+        } break;
+        
+        case SDLK_RIGHT:
+        {
+            if (keystate[SDL_SCANCODE_LSHIFT] != 0)
+            {
+                abort_selection = false;
+            }
+
+            editor_set_cursor(state, buffer->cursor_index + 1);
+        } break;
+        
+        case SDLK_TAB:
+        {
+            String_insert(&(buffer->text), ' ', buffer->cursor_index);
+            editor_set_cursor(state, buffer->cursor_index+1);
+            String_insert(&(buffer->text), ' ', buffer->cursor_index);
+            editor_set_cursor(state, buffer->cursor_index+1);
+        } break;
+
+        case SDLK_INSERT:
+        {
+            editor_save_file(state);
+        } break;
+
+        case SDLK_LCTRL:
+        {
+            abort_selection = false;
+        } break;
+    }
+
+    if (abort_selection)
+    {
+        state->selection_start_index = -2;
     }
 }
 
