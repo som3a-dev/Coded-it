@@ -106,8 +106,11 @@ void editor_init(ProgramState* state)
 
     Queue_init(&(state->messages), sizeof(String));
 
-   state->current_file = "test.txt";
    state->selection_start_index = -2;
+
+   state->current_file = "CODE.c";
+   editor_open_file(state);
+   state->current_file = NULL;
 }
 
 
@@ -435,9 +438,33 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
         case SDLK_BACKSPACE:
         {
             //String_pop(&(state->text));
-            String_remove(&(buffer->text), buffer->cursor_index - 1);
-            
-            editor_set_cursor(state, buffer->cursor_index - 1);
+
+            if (state->selection_start_index == -2)
+            {
+                String_remove(&(buffer->text), buffer->cursor_index - 1);
+                editor_set_cursor(state, buffer->cursor_index - 1);
+            }
+            else
+            {
+                int selection_start, selection_end;
+                if (state->selection_start_index < (buffer->cursor_index))
+                {
+                    selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                    selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+                }
+                else
+                {
+                    selection_start = MIN(state->selection_start_index, buffer->cursor_index);
+                    selection_end = MAX(state->selection_start_index, buffer->cursor_index);
+                }
+
+                for (int i = selection_start; i <= selection_end; i++)
+                {
+                    String_remove(&(state->text.text), selection_start);
+                }
+
+                editor_set_cursor(state, buffer->cursor_index - (selection_end - selection_start));
+            }
         } break;
         
         case SDLK_RETURN:
