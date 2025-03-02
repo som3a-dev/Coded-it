@@ -3,6 +3,7 @@
 #include "draw.h"
 #include <memory.h>
 #include <string.h>
+#include <SDL_syswm.h>
 
 //everybody does these this is C shut up
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -106,11 +107,12 @@ void editor_init(ProgramState* state)
 
     Queue_init(&(state->messages), sizeof(String));
 
-   state->selection_start_index = -2;
+    state->selection_start_index = -2;
 
-   state->current_file = "CODE.c";
-   editor_open_file(state);
-   state->current_file = NULL;
+    state->current_file = "CODE.c";
+    editor_open_file(state);
+    state->current_file = NULL;
+
 }
 
 
@@ -463,7 +465,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     String_remove(&(state->text.text), selection_start);
                 }
 
-                editor_set_cursor(state, buffer->cursor_index - (selection_end - selection_start));
+                editor_set_cursor(state, selection_end - (selection_end - selection_start));
             }
         } break;
         
