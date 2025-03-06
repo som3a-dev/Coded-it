@@ -1,4 +1,6 @@
+#pragma once
 
+#include <stdbool.h>
 
 typedef struct
 {
@@ -7,7 +9,8 @@ typedef struct
 } ArrayInt;
 
 
-void ArrayInt_push(ArrayInt* array, int a);
+void ArrayInt_push(ArrayInt* array, int val);
 int ArrayInt_pop(ArrayInt* array);
 
-void ArrayInt_get(ArrayInt* array, int index, int* out);
+bool ArrayInt_get(ArrayInt* array, int index, int* out);
+void ArrayInt_remove(ArrayInt* array, int val);

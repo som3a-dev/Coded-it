@@ -4,7 +4,7 @@
 
 
 
-void ArrayInt_push(ArrayInt* array, int a)
+void ArrayInt_push(ArrayInt* array, int val)
 {
     if (!array) return;
     
@@ -12,13 +12,13 @@ void ArrayInt_push(ArrayInt* array, int a)
     {
         array->count++;
         array->elements = realloc(array->elements, sizeof(int) * array->count);
-        array->elements[array->count-1] = a;
+        array->elements[array->count-1] = val;
     }
     else
     {
         array->count = 1;
         array->elements = malloc(sizeof(int) * array->count);
-        array->elements[0] = a;
+        array->elements[0] = val;
     }
 }
 
@@ -49,7 +49,29 @@ bool ArrayInt_get(ArrayInt* array, int index, int* out)
 }
 
 
+void ArrayInt_remove(ArrayInt* array, int val)
+{
+    if (!array) return;
 
+    int index = -1;
+    for (int i = 0; i < array->count; i++)
+    {
+        if (array->elements[i] == val)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) return;
+
+    for (int i = index; i < array->count; i++)
+    {
+        array->elements[i] = array->elements[i + 1];
+    }
+
+    array->count--;
+    array->elements = realloc(array->elements, sizeof(int) * array->count);
+}
 
 
 
