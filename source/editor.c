@@ -104,6 +104,9 @@ void editor_init(ProgramState* state)
         config.on_input = Button_open_on_input;
         Button_init(state->buttons + 1, &config);
     }
+    Button_add_child(state->buttons + 0, state, 0);
+    Button_remove_child(state->buttons + 0, 0);
+
 
     Queue_init(&(state->messages), sizeof(String));
 

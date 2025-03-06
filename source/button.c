@@ -35,6 +35,25 @@ void Button_init(Button* button, ButtonConfig* config)
 
 }
 
+void Button_add_child(Button* button, ProgramState* state, int child_index)
+{
+    if (!button) return;
+
+    Button* child = state->buttons + child_index;
+    if (child->state != BUTTON_STATE_NONE)
+    {
+        ArrayInt_push(&(button->child_buttons), child_index);
+    }
+}
+
+
+void Button_remove_child(Button* button, int child_index)
+{
+    if (!button) return;
+
+    ArrayInt_remove(&(button->child_buttons), child_index);
+}
+
 
 void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface)
 {
