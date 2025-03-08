@@ -79,34 +79,41 @@ void editor_init(ProgramState* state)
         state->editor_area_h = state->window_h - char_h * 2.5f;
 
     }
+
+    ButtonConfig config = {0};
+    config.pressed_r = 110;
+    config.pressed_g = 100;
+    config.pressed_b = 100;
+    config.font = state->font;
+    config.h = state->char_h;
+
     {
-        ButtonConfig config = {0};
-        config.pressed_r = 110;
-        config.pressed_g = 100;
-        config.pressed_b = 100;
-        config.h = state->char_h;
         config.text = "Save";
-        config.font = state->font;
         config.on_click = Button_save_on_click;
         config.on_input = Button_save_on_input;
+        config.disabled = true;
         Button_init(state->buttons + 0, &config);
     }
     {
-        ButtonConfig config = {0};
-        config.pressed_r = 110;
-        config.pressed_g = 100;
-        config.pressed_b = 100;
         config.text = "Open";
-        config.font = state->font;
-        config.h = state->char_h;
         config.y = config.h;
         config.on_click = Button_save_on_click; //this is not an oversight.
         config.on_input = Button_open_on_input;
+        config.disabled = true;
         Button_init(state->buttons + 1, &config);
     }
-    Button_add_child(state->buttons + 0, state, 0);
-    Button_remove_child(state->buttons + 0, 0);
+    {
+        config.text = "File";
+        config.y = 400;
+        config.x = 0;
+        config.on_click = Button_file_on_click;
+        config.on_input = NULL;
+        config.disabled = false;
+        Button_init(state->buttons + 2, &config);
 
+        Button_add_child(state->buttons + 2, state, 1);
+        Button_add_child(state->buttons + 2, state, 0);
+    }
 
     Queue_init(&(state->messages), sizeof(String));
 
@@ -308,7 +315,7 @@ void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e)
         {
             if (state->clicked_button == NULL)
             {
-                state->clicked_button = state->buttons + 0;
+                editor_select_first_enabled_button(state);
             }
             else
             {
@@ -336,7 +343,7 @@ void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e)
         {
             if (state->clicked_button == NULL)
             {
-                state->clicked_button = state->buttons + 0;
+                editor_select_first_enabled_button(state);
             }
             else
             {
@@ -363,7 +370,13 @@ void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e)
 
         case SDLK_RETURN:
         {
-            state->clicked_button->on_click(state);
+            if (state->clicked_button)
+            {
+                if (state->clicked_button->on_click)
+                {
+                    state->clicked_button->on_click(state->clicked_button, state);
+                }
+            }
         } break;
     }
 }
@@ -703,14 +716,17 @@ void editor_update(ProgramState* state)
                 for (int i = 0; i < 10; i++)
                 {
                     Button* button = state->buttons + i;
-                    if (Button_is_mouse_hovering(button))
+                    if (button->state == BUTTON_STATE_ENABLED)
                     {
-                        //do
-                        if (button->on_click)
+                        if (Button_is_mouse_hovering(button))
                         {
-                            button->on_click(state);
-                            state->clicked_button = button;
-                            break;
+                            //do
+                            if (button->on_click)
+                            {
+                                button->on_click(button, state);
+                                state->clicked_button = button;
+                                break;
+                            }
                         }
                     }
                 }
@@ -1076,7 +1092,7 @@ void editor_set_state(ProgramState* state, int new_state)
             {
                 if (state->clicked_button->on_input)
                 {
-                    state->clicked_button->on_input(state, &(buffer->text));
+                    state->clicked_button->on_input(state->clicked_button, state, &(buffer->text));
                 }
                 state->clicked_button->mouse_hovering = false;
                 state->clicked_button = NULL;
@@ -1181,4 +1197,18 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char
 void editor_push_message(ProgramState* state, String* msg)
 {
     Queue_push(&(state->messages), msg);
+}
+
+
+void editor_select_first_enabled_button(ProgramState* state)
+{
+    int button_count = sizeof(state->buttons) / sizeof(Button);
+    for (int i = 0; i < button_count; i++)
+    {
+        Button* button = state->buttons + i;
+        if (button->state == BUTTON_STATE_ENABLED)
+        {
+            state->clicked_button = button;
+        }
+    }
 }

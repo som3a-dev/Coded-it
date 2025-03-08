@@ -19,7 +19,7 @@ typedef struct _ProgramState ProgramState;
 //NOTE(omar): AFTER CHANGING/ADDING ANYTHING TO THE BUTTON STRUCT
 //            MAKE SURE TO EDIT THE Button_init() FUNCTION ACCORDINGLY
 
-typedef struct
+typedef struct _Button
 {
     int state;
     int x;
@@ -40,8 +40,8 @@ typedef struct
 
     ArrayInt child_buttons;
 
-    void (*on_click)(ProgramState*);
-    void (*on_input)(ProgramState*, String*);
+    void (*on_click)(struct _Button*, ProgramState*);
+    void (*on_input)(struct _Button*, ProgramState*, String*);
 } Button;
 
 
@@ -64,8 +64,8 @@ typedef struct
     bool text_centered;
     TTF_Font* font;
 
-    void (*on_click)(ProgramState*);
-    void (*on_input)(ProgramState*, String*);
+    void (*on_click)(Button*, ProgramState*, Button*);
+    void (*on_input)(Button*, ProgramState*, String*);
 } ButtonConfig;
 
 
@@ -80,10 +80,11 @@ bool Button_is_mouse_hovering(Button* button);
 
 void Button_resize_text(Button* button, TTF_Font* font);
 
-void Button_save_on_click(ProgramState* state);
-void Button_save_on_input(ProgramState* state, String* input);
+void Button_save_on_click(Button* button, ProgramState* state);
+void Button_save_on_input(Button* button, ProgramState* state, String* input);
 
-void Button_open_on_input(ProgramState* state, String* input);
+void Button_open_on_input(Button* button, ProgramState* state, String* input);
 
+void Button_file_on_click(Button* button, ProgramState* state);
 
 

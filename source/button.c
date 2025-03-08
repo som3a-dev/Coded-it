@@ -136,15 +136,15 @@ void Button_resize_text(Button* button, TTF_Font* font)
 }
 
 
-void Button_save_on_click(ProgramState* state)
+void Button_save_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;
 
-    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT); 
+    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
 }
 
 
-void Button_save_on_input(ProgramState* state, String* input)
+void Button_save_on_input(Button* button, ProgramState* state, String* input)
 {
     if (!state) return;
 
@@ -163,7 +163,7 @@ void Button_save_on_input(ProgramState* state, String* input)
 }
 
 
-void Button_open_on_input(ProgramState* state, String* input)
+void Button_open_on_input(Button* button, ProgramState* state, String* input)
 {
     if (!state) return;
 
@@ -177,6 +177,28 @@ void Button_open_on_input(ProgramState* state, String* input)
         else
         {
             printf("Please specify a filename.\n");
+        }
+    }
+}
+
+
+void Button_file_on_click(Button* button, ProgramState* state)
+{
+    if (!state) return;
+
+    if (button->child_buttons.elements)
+    {
+        for (int i = 0; i < button->child_buttons.count; i++)
+        {
+            Button* child = state->buttons + i;
+            if (child->state == BUTTON_STATE_ENABLED)
+            {
+                child->state = BUTTON_STATE_DISABLED;
+            }
+            else
+            {
+                child->state = BUTTON_STATE_ENABLED;
+            }
         }
     }
 }

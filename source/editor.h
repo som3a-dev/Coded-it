@@ -128,3 +128,5 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y,
                            int char_w, int char_h);
 
 void editor_push_message(ProgramState* state, String* msg);
+
+void editor_select_first_enabled_button(ProgramState* state);
