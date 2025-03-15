@@ -1105,6 +1105,13 @@ void editor_set_state(ProgramState* state, int new_state)
 
         case EDITOR_STATE_COMMAND:
         {
+            //reset to main buttons like File
+            for (int i = 0; i < 10; i++)
+            {
+                Button* button = state->buttons + i;
+                Button_disable_children(button, state);
+            } 
+
             if (new_state != EDITOR_STATE_COMMAND_INPUT)
             {
                 if (state->clicked_button)

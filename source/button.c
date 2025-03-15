@@ -136,6 +136,19 @@ void Button_resize_text(Button* button, TTF_Font* font)
 }
 
 
+void Button_disable_children(Button* button, ProgramState* state)
+{
+    for (int i = 0; i < button->child_buttons.count; i++)
+    {
+        int index;
+        ArrayInt_get(&(button->child_buttons), i, &index);
+
+        Button* child = state->buttons + index;
+        child->state = BUTTON_STATE_DISABLED;
+    }
+}
+
+
 void Button_save_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;

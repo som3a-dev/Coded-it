@@ -80,6 +80,8 @@ bool Button_is_mouse_hovering(Button* button);
 
 void Button_resize_text(Button* button, TTF_Font* font);
 
+void Button_disable_children(Button* button, ProgramState* state);
+
 void Button_save_on_click(Button* button, ProgramState* state);
 void Button_save_on_input(Button* button, ProgramState* state, String* input);
 
