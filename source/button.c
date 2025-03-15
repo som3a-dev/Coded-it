@@ -190,7 +190,11 @@ void Button_file_on_click(Button* button, ProgramState* state)
     {
         for (int i = 0; i < button->child_buttons.count; i++)
         {
-            Button* child = state->buttons + i;
+            int index;
+            ArrayInt_get(&(button->child_buttons), i, &index);
+
+            Button* child = state->buttons + index;
+
             if (child->state == BUTTON_STATE_ENABLED)
             {
                 child->state = BUTTON_STATE_DISABLED;
