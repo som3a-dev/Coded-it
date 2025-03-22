@@ -851,6 +851,7 @@ void editor_save_file(const ProgramState* state)
     {
         //fucking text.text.text
         fwrite(state->text.text.text, sizeof(char), state->text.text.len, fp);
+        fclose(fp);
 
         msg_format = "Saved to file '%s'.";
     }
@@ -866,8 +867,6 @@ void editor_save_file(const ProgramState* state)
     free(msg);
 
     editor_push_message(state, &str);
-
-    fclose(fp);
 }
 
 
