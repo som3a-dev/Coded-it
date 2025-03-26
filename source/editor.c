@@ -71,14 +71,14 @@ void editor_init(ProgramState* state)
     state->editor_area_w = state->window_w;
  //   state->editor_area_h = state->window_h - state->char_h * 2.5f;
 
-    {
+/*    {
         int char_h;
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
 
-        state->command_input.y = state->window_h - char_h*2;
-        state->editor_area_h = state->window_h - char_h * 2.5f;
+        state->command_input.y = state->window_h - char_h*6;
+        state->editor_area_h = state->window_h - char_h * 6.5f;
 
-    }
+    }*/
 
     ButtonConfig config = {0};
     config.pressed_r = 110;
@@ -125,6 +125,8 @@ void editor_init(ProgramState* state)
     state->current_file = "CODE.c";
     editor_open_file(state);
     state->current_file = NULL;
+
+    editor_resize_and_position_buttons(state);
 }
 
 
@@ -747,7 +749,7 @@ void editor_draw(ProgramState* state)
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
         SDL_Rect border_line = 
         {
-            0, state->window_h - char_h*2.5,
+            0, state->editor_area_h,
             state->window_w, 4
         };
         SDL_FillRect(state->window_surface, &border_line, 0xbbbbbbff);
@@ -788,7 +790,7 @@ void editor_draw(ProgramState* state)
 
             draw_text(state->static_font, state->window_surface, state->message->text,
                     0,
-                    state->window_h - char_h*2,
+                    state->command_input.y,
                     255, 230, 230);
         }
     }
@@ -1155,8 +1157,8 @@ void editor_resize_and_position_buttons(ProgramState* state)
         int char_h;
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
 
-        state->command_input.y = state->window_h - char_h*2;
-        state->editor_area_h = state->window_h - char_h * 2.5f;
+        state->command_input.y = state->window_h - char_h * 1.1f;
+        state->editor_area_h = state->window_h - char_h * 4;
     }
 
 }
