@@ -3,6 +3,7 @@
 #include "editor_fileio.h"
 #include "editor_input_buffer.h"
 
+#include "util.h"
 #include "button.h"
 #include "draw.h"
 #include <memory.h>
@@ -73,16 +74,7 @@ void editor_init(ProgramState* state)
     state->editor_area_x = 0;
     state->editor_area_y = 0;
     state->editor_area_w = state->window_w;
- //   state->editor_area_h = state->window_h - state->char_h * 2.5f;
-
-/*    {
-        int char_h;
-        TTF_SizeText(state->static_font, "A", NULL, &char_h);
-
-        state->command_input.y = state->window_h - char_h*6;
-        state->editor_area_h = state->window_h - char_h * 6.5f;
-
-    }*/
+    state->editor_area_border_thickness = 4;
 
     ButtonConfig config = {0};
     config.pressed_r = 110;
@@ -280,7 +272,7 @@ void editor_draw(ProgramState* state)
         SDL_Rect border_line = 
         {
             0, state->editor_area_h,
-            state->window_w, 4
+            state->window_w, state->editor_area_border_thickness 
         };
         SDL_FillRect(state->window_surface, &border_line, 0xbbbbbbff);
     }
@@ -303,6 +295,27 @@ void editor_draw(ProgramState* state)
         case EDITOR_STATE_EDIT:
         {
             editor_draw_input_buffer(state);
+
+            //draw status bar
+            int line;
+            int col;
+            editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
+            line /= state->char_h;
+            col /= state->char_w;
+
+            const char* format = "Ln %d, Col %d";
+
+            int text_len = (strlen(format) - 4) + ulen_helper(line) + ulen_helper(col) + 1;
+            char* text = malloc(sizeof(char) * text_len);
+
+            snprintf(text, text_len, format, line, col);
+
+            int text_w;
+            TTF_SizeText(state->font, text, &text_w, NULL);
+
+            draw_text(state->font, state->window_surface, text, state->window_w - text_w - state->char_w, 
+                      state->editor_area_h + state->editor_area_border_thickness,
+                      255, 255, 255);
         } break;
     }
 

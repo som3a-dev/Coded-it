@@ -54,6 +54,7 @@ typedef struct _ProgramState
     int editor_area_y;
     int editor_area_w;
     int editor_area_h;
+    int editor_area_border_thickness;
 
     int state;
 
