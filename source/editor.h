@@ -47,8 +47,6 @@ typedef struct _ProgramState
     //NOTE(omar): this is the offset at which we render the
     //            file's text.
     //            used for scrolling.
-    //            you can thank my gamedev background for it
-    //            being named camera
     int camera_x;
     int camera_y;
 
@@ -94,26 +92,14 @@ void editor_destroy(ProgramState* state);
 
 void editor_loop(ProgramState* state);
 
-void editor_handle_events(ProgramState* state);
-void editor_handle_events_keydown(ProgramState* state, SDL_Event e);
-void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e);
-void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e);
-
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
-void editor_draw_input_buffer(ProgramState* state);
 
 //TODO(omar): move this function from editor.h/.c into another more suitable file
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
                 int x, int y, int r, int g, int b);
 
 void editor_set_cursor(ProgramState* state, int index);
-
-void editor_save_file(const ProgramState* state);
-
-void editor_open_file(ProgramState* state);
-
-InputBuffer* editor_get_current_input_buffer(const ProgramState* state);
 
 void editor_set_state(ProgramState* state, int new_state);
 
