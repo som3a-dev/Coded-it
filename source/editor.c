@@ -116,6 +116,14 @@ void editor_init(ProgramState* state)
 
     Queue_init(&(state->messages), sizeof(String));
 
+    String msg = {0};
+    String_set(&msg, "msg1");
+    editor_push_message(state, &msg);
+
+    String msg2 = {0};
+    String_set(&msg2, "msg2");
+    editor_push_message(state, &msg2);
+
     state->selection_start_index = -2;
 
     state->current_file = "CODE.c";

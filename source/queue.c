@@ -42,21 +42,21 @@ char* Queue_pop(Queue* queue, bool return_element)
     char* copy = NULL;
     if (return_element)
     {
-        char* element = queue->arr + (queue->len-1) * queue->element_size;
+        char* element = queue->arr;
         copy = malloc(queue->element_size);
         memcpy(copy, element, queue->element_size);
     }
 
+    for (int i = 0; i < (queue->len - 1); i++)
+    {
+        char* element = queue->arr + (i * queue->element_size);
+        char* next = queue->arr + ((i + 1) * queue->element_size);
+
+        memcpy(element, next, queue->element_size);
+    }
+
     queue->len--;
-    if (queue->len > 0)
-    {
-        queue->arr = realloc(queue->arr, queue->len * queue->element_size);
-    }
-    else
-    {
-        free(queue->arr);
-        queue->arr = NULL;
-    }
+    queue->arr = realloc(queue->arr, queue->len * queue->element_size);
 
     return copy;
 }
