@@ -5,7 +5,7 @@
 
 void Stack_init(Stack* stack, size_t element_size)
 {
-    memset(stack, 0 sizeof(Stack));
+    memset(stack, 0, sizeof(Stack));
 
     stack->element_size = element_size;
 }

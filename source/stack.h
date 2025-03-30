@@ -1,5 +1,6 @@
 /*GENERAL PURPOSE STACK*/
 #pragma once
+#include <stdbool.h>
 
 typedef struct
 {
