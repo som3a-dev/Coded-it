@@ -29,6 +29,13 @@ void editor_handle_events(ProgramState* state)
                 //printf("%s\n", state->text);
                 
                 editor_set_cursor(state, buffer->cursor_index + 1);
+
+                TextAction action = {0};
+                action.type = TEXT_ACTION_WRITE; 
+                action.character_index = buffer->cursor_index - 1;
+                action.character = e.text.text[0];
+
+                editor_push_text_action(state, &action);
             }
         } break;
 
@@ -260,6 +267,22 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                 state->selection_start_index = buffer->cursor_index;
             }
         } break;
+        
+        case SDLK_z: //undo
+        {
+            if (keystate[SDL_SCANCODE_LCTRL])
+            {
+                TextAction* last_action = Stack_pop(&(state->undo_tree), true);
+
+                if (last_action)
+                {
+                    printf("Last action\n{\n    Type: %d\n    Character: %c\n    Index: %d\n}\n",
+                    last_action->type, last_action->character, last_action->character_index);
+
+                    editor_undo_text_action(state, last_action);
+                }
+            }
+        }
 
         case SDLK_c:
         {

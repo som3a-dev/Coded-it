@@ -114,6 +114,7 @@ void editor_init(ProgramState* state)
         Button_add_child(state->buttons + 0, state, 2);
     }
 
+    Stack_init(&(state->undo_tree), sizeof(TextAction));
     Queue_init(&(state->messages), sizeof(String));
 
     String msg = {0};
@@ -505,9 +506,15 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char
 }
 
 
-void editor_push_message(ProgramState* state, String* msg)
+void editor_push_message(ProgramState* state, const String* msg)
 {
     Queue_push(&(state->messages), msg);
+}
+
+
+void editor_push_text_action(ProgramState* state, const TextAction* action)
+{
+    Stack_push(&(state->undo_tree), action);
 }
 
 
@@ -522,4 +529,19 @@ void editor_select_first_enabled_button(ProgramState* state)
             state->clicked_button = button;
         }
     }
+}
+
+
+void editor_undo_text_action(ProgramState* state, const TextAction* action)
+{
+    switch (action->type)
+    {
+        case TEXT_ACTION_WRITE:
+        {
+           String_remove(&(state->text.text), action->character_index); 
+           editor_set_cursor(state, action->character_index);
+        } break;
+    } 
+
+    free(action);
 }
