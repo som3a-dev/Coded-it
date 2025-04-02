@@ -79,6 +79,7 @@ typedef struct _ProgramState
     const char* current_file;
 
     Stack undo_tree;
+    Stack redo_tree;
 
     Queue messages;
     String* message;
@@ -142,3 +143,4 @@ void editor_select_first_enabled_button(ProgramState* state);
 
 //also frees the action and any malloced variables it has
 void editor_undo_text_action(ProgramState* state, const TextAction* action);
+void editor_redo_text_action(ProgramState* state, const TextAction* action);

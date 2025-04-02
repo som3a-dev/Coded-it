@@ -282,7 +282,23 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     editor_undo_text_action(state, last_action);
                 }
             }
-        }
+        } break;
+
+        case SDLK_r: //redo
+        {
+            if (keystate[SDL_SCANCODE_LCTRL])
+            {
+                TextAction* last_action = Stack_pop(&(state->redo_tree), true);
+                
+                if (last_action)
+                {
+                    printf("Last action\n{\n    Type: %d\n    Character: %c\n    Index: %d\n}\n",
+                    last_action->type, last_action->character, last_action->character_index);
+
+                    editor_redo_text_action(state, last_action);
+                }
+            }
+        } break;
 
         case SDLK_c:
         {

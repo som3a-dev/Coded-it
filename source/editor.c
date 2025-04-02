@@ -115,6 +115,7 @@ void editor_init(ProgramState* state)
     }
 
     Stack_init(&(state->undo_tree), sizeof(TextAction));
+    Stack_init(&(state->redo_tree), sizeof(TextAction));
     Queue_init(&(state->messages), sizeof(String));
 
     String msg = {0};
@@ -543,5 +544,42 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
         } break;
     } 
 
+    Stack_push(&(state->redo_tree), action);
     free(action);
 }
+
+
+void editor_redo_text_action(ProgramState* state, const TextAction* action)
+{
+    switch (action->type)
+    {
+        case TEXT_ACTION_WRITE:
+        {
+            String_insert(&(state->text.text), action->character, action->character_index);
+            editor_set_cursor(state, action->character_index+1);
+        } break;
+    }
+
+    Stack_push(&(state->undo_tree), action);
+    free(action);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
