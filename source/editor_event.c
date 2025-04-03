@@ -97,7 +97,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
         {
             uint8_t* keystate = SDL_GetKeyboardState(NULL);
 
-            if (keystate[SDL_SCANCODE_LCTRL])
+            if (SDL_is_ctrl_pressed(keystate))
             {
                 int new_state = state->state + 1;
 
@@ -133,7 +133,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
         {
             uint8_t* keystate = SDL_GetKeyboardState(NULL);
 
-            if (keystate[SDL_SCANCODE_LCTRL])
+            if (SDL_is_ctrl_pressed(keystate))
             {
                 TTF_CloseFont(state->font);
 
@@ -154,7 +154,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
         {
             uint8_t* keystate = SDL_GetKeyboardState(NULL);
 
-            if (keystate[SDL_SCANCODE_LCTRL])
+            if (SDL_is_ctrl_pressed(keystate))
             {
                 TTF_CloseFont(state->font);
 
@@ -270,7 +270,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
         
         case SDLK_z: //undo
         {
-            if (keystate[SDL_SCANCODE_LCTRL])
+            if (SDL_is_ctrl_pressed(keystate))
             {
                 TextAction* last_action = Stack_pop(&(state->undo_tree), true);
 
@@ -286,7 +286,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
 
         case SDLK_r: //redo
         {
-            if (keystate[SDL_SCANCODE_LCTRL])
+            if (SDL_is_ctrl_pressed(keystate))
             {
                 TextAction* last_action = Stack_pop(&(state->redo_tree), true);
                 
@@ -304,7 +304,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
         {
             if (state->selection_start_index != -2)
             {
-                if (keystate[SDL_SCANCODE_LCTRL])
+                if (SDL_is_ctrl_pressed(keystate))
                 {
                     int selection_start = -2;
                     int selection_end = -2;
@@ -340,7 +340,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
         {
             if (state->clipboard.text)
             {
-                if (keystate[SDL_SCANCODE_LCTRL])
+                if (SDL_is_ctrl_pressed(keystate))
                 {
                     InputBuffer* buffer = editor_get_current_input_buffer(state);
                     printf("%s\n", state->clipboard.text);
@@ -507,6 +507,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
         } break;
 
         case SDLK_LCTRL:
+        case SDLK_RCTRL:
         {
             abort_selection = false;
         } break;

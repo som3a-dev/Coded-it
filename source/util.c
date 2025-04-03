@@ -1,3 +1,6 @@
+#include <SDL.h>
+
+#include "util.h"
 
 
 int ulen_helper(unsigned x)
@@ -12,4 +15,10 @@ int ulen_helper(unsigned x)
     if (x >= 100)        return 3;
     if (x >= 10)         return 2;
     return 1;
+}
+
+
+bool SDL_is_ctrl_pressed(uint8_t* keystate)
+{
+    return keystate[SDL_SCANCODE_LCTRL] || keystate[SDL_SCANCODE_RCTRL];
 }
