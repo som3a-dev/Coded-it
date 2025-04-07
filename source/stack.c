@@ -63,6 +63,17 @@ char* Stack_pop(Stack* stack, bool return_element)
 }
 
 
+char* Stack_get(Stack* stack, int index)
+{
+   if (!stack) return NULL;
+   if (index >= stack->len) return NULL;
+   if (index < 0) return NULL;
+
+    char* element = stack->arr + (index * stack->element_size);
+    return element;
+}
+
+
 void Stack_clear(Stack* stack)
 {
     if (!stack) return;
