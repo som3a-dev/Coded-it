@@ -12,6 +12,7 @@
 #include "button.h"
 #include "queue.h"
 #include "stack.h"
+#include "text_action.h"
 
 enum
 {
@@ -21,32 +22,17 @@ enum
     EDITOR_STATE_COUNT //not an actual state. used for counting
 };
 
-enum
-{
-    TEXT_ACTION_NONE,
-    TEXT_ACTION_WRITE,
-    TEXT_ACTION_CLEAR,
-    TEXT_ACTION_COUNT
-};
-
 
 typedef struct
 {
     String text;
     int cursor_index;
+    int cursor_line;
+    int cursor_col;
 
     int x;
     int y;
 } InputBuffer;
-
-
-typedef struct
-{
-    int type;
-    String text; //used if the text was more than 1 character
-    char character; //used if the text was 1 character
-    int character_index; //the index at which the action happened in the file's text 
-} TextAction;
 
 
 typedef struct _ProgramState
@@ -137,7 +123,7 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y,
 
 void editor_push_message(ProgramState* state, const String* msg);
 
-void editor_push_text_action(ProgramState* state, TextAction* action);
+void editor_push_text_action(ProgramState* state, TextAction* new_action);
 
 void editor_select_first_enabled_button(ProgramState* state);
 

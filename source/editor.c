@@ -378,13 +378,13 @@ void editor_set_cursor(ProgramState* state, int index)
         buffer->cursor_index = buffer->text.len;
     }
 
-    
+    editor_get_cursor_pos(state, &(buffer->cursor_col), &(buffer->cursor_line),
+                          state->char_w, state->char_h);
     
     //don't blink while typing
     state->last_cursor_blink_tic = SDL_GetTicks();
     state->draw_cursor = true;
 }
-
 
 
 void editor_set_state(ProgramState* state, int new_state)
@@ -513,9 +513,9 @@ void editor_push_message(ProgramState* state, const String* msg)
 }
 
 
-void editor_push_text_action(ProgramState* state, const TextAction* action)
+void editor_push_text_action(ProgramState* state, const TextAction* new_action)
 {
-    Stack_push(&(state->undo_tree), action);
+    Stack_push(&(state->undo_tree), new_action);
 }
 
 
@@ -539,8 +539,8 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
     {
         case TEXT_ACTION_WRITE:
         {
-           String_remove(&(state->text.text), action->character_index); 
-           editor_set_cursor(state, action->character_index);
+            String_remove(&(state->text.text), action->character_index); 
+            editor_set_cursor(state, action->character_index);
         } break;
     } 
 
@@ -563,23 +563,4 @@ void editor_redo_text_action(ProgramState* state, const TextAction* action)
     Stack_push(&(state->undo_tree), action);
     free(action);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

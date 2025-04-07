@@ -34,7 +34,6 @@ void editor_handle_events(ProgramState* state)
                 action.type = TEXT_ACTION_WRITE; 
                 action.character_index = buffer->cursor_index - 1;
                 action.character = e.text.text[0];
-
                 editor_push_text_action(state, &action);
             }
         } break;
@@ -393,6 +392,12 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                 {
                     String_insert(&(buffer->text), '\n', buffer->cursor_index);
                     editor_set_cursor(state, buffer->cursor_index + 1);
+
+                    TextAction action = {0};
+                    action.type = TEXT_ACTION_WRITE; 
+                    action.character_index = buffer->cursor_index - 1;
+                    action.character = '\n';
+                    editor_push_text_action(state, &action);
                 } break;
 
                 case EDITOR_STATE_COMMAND_INPUT:
@@ -499,6 +504,17 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
             editor_set_cursor(state, buffer->cursor_index+1);
             String_insert(&(buffer->text), ' ', buffer->cursor_index);
             editor_set_cursor(state, buffer->cursor_index+1);
+
+            //TODO(omar): rewrite this when we start using action.text
+            TextAction action = {0};
+            action.type = TEXT_ACTION_WRITE; 
+            action.character_index = buffer->cursor_index - 2;
+            action.character = ' ';
+
+            editor_push_text_action(state, &action);
+
+            action.character_index++;
+            editor_push_text_action(state, &action);
         } break;
 
         case SDLK_INSERT:
