@@ -539,8 +539,14 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
     {
         case TEXT_ACTION_WRITE:
         {
-            String_remove(&(state->text.text), action->character_index); 
+            String_remove(&(state->text.text), action->character_index, NULL); 
             editor_set_cursor(state, action->character_index);
+        } break;
+
+        case TEXT_ACTION_REMOVE:
+        {
+            String_insert(&(state->text.text), action->character, action->character_index);
+            editor_set_cursor(state, action->character_index+1);
         } break;
     } 
 
@@ -557,6 +563,12 @@ void editor_redo_text_action(ProgramState* state, const TextAction* action)
         {
             String_insert(&(state->text.text), action->character, action->character_index);
             editor_set_cursor(state, action->character_index+1);
+        } break;
+
+        case TEXT_ACTION_REMOVE:
+        {
+            String_remove(&(state->text.text), action->character_index, NULL); 
+            editor_set_cursor(state, action->character_index);
         } break;
     }
 

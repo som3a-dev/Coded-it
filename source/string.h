@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 
 //NOTE(omar): PLEASE INITIALIZE THIS TO ZERO.
 typedef struct
@@ -17,7 +18,7 @@ void String_insert(String* str, char c, int index);
 
 void String_insert_string(String* str, const char* str2, int index);
 
-void String_remove(String* str, int index);
+bool String_remove(String* str, int index, char* removed_character);
 
 
 //TODO(omar): im not sure if this function should be here as part of the String class.

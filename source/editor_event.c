@@ -357,8 +357,18 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
 
             if (state->selection_start_index == -2)
             {
-                String_remove(&(buffer->text), buffer->cursor_index - 1);
+                char removed_char = '\0';
+                bool removed = String_remove(&(buffer->text), buffer->cursor_index - 1, &removed_char);
                 editor_set_cursor(state, buffer->cursor_index - 1);
+
+                if (removed)
+                {
+                    TextAction action = {0};
+                    action.type = TEXT_ACTION_REMOVE; 
+                    action.character_index = buffer->cursor_index; 
+                    action.character = removed_char;
+                    editor_push_text_action(state, &action);
+                }
             }
             else
             {
@@ -376,7 +386,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
 
                 for (int i = selection_start; i <= selection_end; i++)
                 {
-                    String_remove(&(state->text.text), selection_start);
+                    String_remove(&(state->text.text), selection_start, NULL);
                 }
 
                 editor_set_cursor(state, selection_end - (selection_end - selection_start));

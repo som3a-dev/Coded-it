@@ -100,11 +100,16 @@ void String_insert_string(String* str, const char* str2, int index)
 }
 
 
-void String_remove(String* str, int index)
+bool String_remove(String* str, int index, char* removed_character)
 {
-    if (!str) return;
-    if (index < 0) return;
-    if (index > str->len - 1) return;
+    if (!str) return false;
+    if (index < 0) return false;
+    if (index > str->len - 1) return false;
+
+    if (removed_character)
+    {
+        *removed_character = str->text[index];
+    }
 
     for (int i = index; i < str->len-1; i++)
     {
@@ -114,6 +119,8 @@ void String_remove(String* str, int index)
     str->len--;
     str->text = realloc(str->text, sizeof(char) * str->len + 1);
     str->text[str->len] = '\0';
+
+    return true;
 }
 
 
