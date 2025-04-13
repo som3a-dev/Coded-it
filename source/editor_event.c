@@ -32,7 +32,7 @@ void editor_handle_events(ProgramState* state)
 
                 TextAction action = {0};
                 action.type = TEXT_ACTION_WRITE; 
-                action.character_index = buffer->cursor_index - 1;
+                action.start_index = buffer->cursor_index - 1;
                 action.character = e.text.text[0];
                 editor_push_text_action(state, &action);
             }
@@ -276,7 +276,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                 if (last_action)
                 {
                     printf("Last action\n{\n    Type: %d\n    Character: %c\n    Index: %d\n}\n",
-                    last_action->type, last_action->character, last_action->character_index);
+                    last_action->type, last_action->character, last_action->start_index);
 
                     editor_undo_text_action(state, last_action);
                 }
@@ -292,7 +292,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                 if (last_action)
                 {
                     printf("Last action\n{\n    Type: %d\n    Character: %c\n    Index: %d\n}\n",
-                    last_action->type, last_action->character, last_action->character_index);
+                    last_action->type, last_action->character, last_action->start_index);
 
                     editor_redo_text_action(state, last_action);
                 }
@@ -365,7 +365,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                 {
                     TextAction action = {0};
                     action.type = TEXT_ACTION_REMOVE; 
-                    action.character_index = buffer->cursor_index; 
+                    action.start_index = buffer->cursor_index; 
                     action.character = removed_char;
                     editor_push_text_action(state, &action);
                 }
@@ -384,12 +384,21 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     selection_end = MAX(state->selection_start_index, buffer->cursor_index);
                 }
 
+                TextAction action = {0};
+                action.type = TEXT_ACTION_REMOVE; 
+                action.start_index = selection_start; 
+
+                char removed_char = '\0';
                 for (int i = selection_start; i <= selection_end; i++)
                 {
-                    String_remove(&(state->text.text), selection_start, NULL);
+                    String_remove(&(state->text.text), selection_start, &removed_char);
+                    String_push(&(action.text), removed_char);
                 }
 
                 editor_set_cursor(state, selection_end - (selection_end - selection_start));
+
+                editor_push_text_action(state, &action);
+ 
             }
         } break;
         
@@ -405,7 +414,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
 
                     TextAction action = {0};
                     action.type = TEXT_ACTION_WRITE; 
-                    action.character_index = buffer->cursor_index - 1;
+                    action.start_index = buffer->cursor_index - 1;
                     action.character = '\n';
                     editor_push_text_action(state, &action);
                 } break;
@@ -518,12 +527,12 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
             //TODO(omar): rewrite this when we start using action.text
             TextAction action = {0};
             action.type = TEXT_ACTION_WRITE; 
-            action.character_index = buffer->cursor_index - 2;
+            action.start_index = buffer->cursor_index - 2;
             action.character = ' ';
 
             editor_push_text_action(state, &action);
 
-            action.character_index++;
+            action.start_index++;
             editor_push_text_action(state, &action);
         } break;
 

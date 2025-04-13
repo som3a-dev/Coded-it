@@ -539,14 +539,33 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
     {
         case TEXT_ACTION_WRITE:
         {
-            String_remove(&(state->text.text), action->character_index, NULL); 
-            editor_set_cursor(state, action->character_index);
+            if (action->text.text)
+            {
+
+            }
+            else
+            {
+                String_remove(&(state->text.text), action->start_index, NULL); 
+                editor_set_cursor(state, action->start_index);
+            }
         } break;
 
         case TEXT_ACTION_REMOVE:
         {
-            String_insert(&(state->text.text), action->character, action->character_index);
-            editor_set_cursor(state, action->character_index+1);
+            if (action->text.text)
+            {
+                for (int i = 0; i < action->text.len; i++)
+                {
+                    char c = action->text.text[i];
+                    String_insert(&(state->text.text), c, action->start_index + i);
+                }
+                editor_set_cursor(state, action->start_index + action->text.len);
+            }
+            else
+            {
+                String_insert(&(state->text.text), action->character, action->start_index);
+                editor_set_cursor(state, action->start_index+1);
+            }
         } break;
     } 
 
@@ -561,18 +580,48 @@ void editor_redo_text_action(ProgramState* state, const TextAction* action)
     {
         case TEXT_ACTION_WRITE:
         {
-            String_insert(&(state->text.text), action->character, action->character_index);
-            editor_set_cursor(state, action->character_index+1);
+            if (action->text.text)
+            {
+
+            }
+            else
+            {
+                String_insert(&(state->text.text), action->character, action->start_index);
+                editor_set_cursor(state, action->start_index+1);
+            }
         } break;
 
         case TEXT_ACTION_REMOVE:
         {
-            String_remove(&(state->text.text), action->character_index, NULL); 
-            editor_set_cursor(state, action->character_index);
+            if (action->text.text)
+            {
+                int end_index = action->start_index + action->text.len;
+                for (int i = end_index; i >= action->start_index; i--)
+                {
+                    String_remove(&(state->text.text), i, NULL);
+                }
+
+                editor_set_cursor(state, action->start_index);
+            }
+            else
+            {
+                String_remove(&(state->text.text), action->start_index, NULL); 
+                editor_set_cursor(state, action->start_index);
+            }
         } break;
     }
 
     Stack_push(&(state->undo_tree), action);
     free(action);
 }
+
+
+
+
+
+
+
+
+
+
 

@@ -20,6 +20,6 @@ typedef struct
     String text; //used if the text was more than 1 character
     char character; //used if the text was 1 character
 
-    int character_index; //the index at which the action happened in the file's text 
+    int start_index; //the index at which the action happened in the file's text 
 } TextAction;
 
