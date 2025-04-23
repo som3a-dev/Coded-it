@@ -398,16 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 *.ttf
 *.dll
-*.vcxproj
-*.filters
-Coded-it.vcxproj.filters
-Coded-it.vcxproj.filters
-*.json
-*.swp
-*.filters
-*.vcxproj
-*.json
-*.vcxproj
 *.filters
 test.txt
 *.txt
@@ -418,3 +408,4 @@ dasda
 *.exe
 1414
 ada
+source/.vscode/c_cpp_properties.json
