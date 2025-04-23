@@ -541,7 +541,11 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
         {
             if (action->text.text)
             {
-
+                for (int i = action->text.len; i >= 0; i--) 
+                {
+                    String_remove(&(state->text.text), action->start_index + i, NULL);
+                }
+                editor_set_cursor(state, action->start_index);
             }
             else
             {
@@ -582,7 +586,8 @@ void editor_redo_text_action(ProgramState* state, const TextAction* action)
         {
             if (action->text.text)
             {
-
+                String_insert_string(&(state->text.text), action->text.text,
+                action->start_index);
             }
             else
             {

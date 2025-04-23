@@ -327,10 +327,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     text_copy[len] = '\0';
                     
                     String_set(&(state->clipboard), text_copy);
-
                     free(text_copy);
-
-                    printf("%s\n", state->clipboard.text);
                 }
             }
         } break;
@@ -345,7 +342,13 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     printf("%s\n", state->clipboard.text);
                     String_insert_string(&(buffer->text), state->clipboard.text,
                     buffer->cursor_index);
-                    
+
+                    TextAction action = {0};
+                    action.type = TEXT_ACTION_WRITE; 
+                    action.start_index = buffer->cursor_index; 
+                    String_set(&(action.text), state->clipboard.text);
+                    editor_push_text_action(state, &action);
+
                     buffer->cursor_index += state->clipboard.len;
                 }
             }
