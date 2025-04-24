@@ -30,6 +30,7 @@
     <ClCompile Include="source\queue.c" />
     <ClCompile Include="source\stack.c" />
     <ClCompile Include="source\string.c" />
+    <ClCompile Include="source\syntax_highlight.c" />
     <ClCompile Include="source\text_action.c" />
     <ClCompile Include="source\util.c" />
   </ItemGroup>
@@ -44,6 +45,7 @@
     <ClInclude Include="source\queue.h" />
     <ClInclude Include="source\stack.h" />
     <ClInclude Include="source\string.h" />
+    <ClInclude Include="source\syntax_highlight.h" />
     <ClInclude Include="source\text_action.h" />
     <ClInclude Include="source\util.h" />
   </ItemGroup>

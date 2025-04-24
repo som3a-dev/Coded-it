@@ -59,7 +59,8 @@ void editor_init(ProgramState* state)
         printf("Initializing SDL_ttf failed!\nError Message: '%s'\n", error);
         return 3;
     }
-    
+
+
     state->font_size = 24;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
