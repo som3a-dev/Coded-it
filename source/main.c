@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     parse(code);
 
 
-/*    ProgramState state;
+/*   ProgramState state;
     editor_init(&state);
     
     editor_loop(&state);

@@ -110,8 +110,8 @@
     <LibraryPath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>vendor/include;$(IncludePath)</IncludePath>
+    <LibraryPath>vendor/lib/x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\include;$(IncludePath)</IncludePath>
