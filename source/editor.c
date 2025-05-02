@@ -221,7 +221,7 @@ void editor_update(ProgramState* state)
 
             int cursor_x = 0;
             int cursor_y = 0;
-            editor_get_cursor_pos(state, &cursor_x, &cursor_y, state->char_w, state->char_h);
+            editor_get_cursor_pos(state, &cursor_x, &cursor_y, state->char_h);
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
 
@@ -310,7 +310,7 @@ void editor_draw(ProgramState* state)
             //draw status bar
             int line;
             int col;
-            editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
+            editor_get_cursor_pos(state, &col, &line, state->char_h);
             line /= state->char_h;
             col /= state->char_w;
 
@@ -380,7 +380,7 @@ void editor_set_cursor(ProgramState* state, int index)
     }
 
     editor_get_cursor_pos(state, &(buffer->cursor_col), &(buffer->cursor_line),
-                          state->char_w, state->char_h);
+                          state->char_h);
     
     //don't blink while typing
     state->last_cursor_blink_tic = SDL_GetTicks();
@@ -467,7 +467,7 @@ void editor_resize_and_position_buttons(ProgramState* state)
 
 }
 
-bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_w, int char_h)
+bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_h)
 {
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return false;
@@ -480,6 +480,19 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char
     for (int i = 0; i < buffer->text.len; i++)
     {
         char c = buffer->text.text[i];
+        int char_w;
+        {
+            char text[2] = {c, '\0'};
+            if (state->state == EDITOR_STATE_EDIT)
+            {
+                TTF_SizeText(state->font, text, &char_w, NULL);
+            }
+            else
+            {
+                TTF_SizeText(state->static_font, text, &char_w, NULL);
+            }
+        }
+
         if (c == '\n')
         {
             cursor_y += char_h;

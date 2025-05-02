@@ -30,7 +30,7 @@
     <ClCompile Include="source\queue.c" />
     <ClCompile Include="source\stack.c" />
     <ClCompile Include="source\string.c" />
-    <ClCompile Include="source\syntax_highlight.c" />
+    <ClCompile Include="source\syntax_parser.c" />
     <ClCompile Include="source\text_action.c" />
     <ClCompile Include="source\util.c" />
   </ItemGroup>
@@ -45,7 +45,7 @@
     <ClInclude Include="source\queue.h" />
     <ClInclude Include="source\stack.h" />
     <ClInclude Include="source\string.h" />
-    <ClInclude Include="source\syntax_highlight.h" />
+    <ClInclude Include="source\syntax_parser.h" />
     <ClInclude Include="source\text_action.h" />
     <ClInclude Include="source\util.h" />
   </ItemGroup>
@@ -110,12 +110,12 @@
     <LibraryPath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>vendor/include;$(IncludePath)</IncludePath>
+    <IncludePath>vendor/include</IncludePath>
     <LibraryPath>vendor/lib/x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\admin\source\SDL2-devel-2.30.10-VC\SDL2-2.30.10\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>vendor/include</IncludePath>
+    <LibraryPath>vendor/lib/x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

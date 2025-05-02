@@ -53,7 +53,7 @@ void editor_draw_input_buffer(ProgramState* state)
     {
         int cursor_x = 0;
         int cursor_y = 0;
-        editor_get_cursor_pos(state, &cursor_x, &cursor_y, char_w, char_h);
+        editor_get_cursor_pos(state, &cursor_x, &cursor_y, char_h);
 
         bool draw_cursor = true;
 
@@ -92,9 +92,6 @@ void editor_draw_input_buffer(ProgramState* state)
         }
     }
 
-    int x = startx;
-    int y = starty;
-
     int selection_start = -2;
     int selection_end = -2;
 
@@ -112,57 +109,122 @@ void editor_draw_input_buffer(ProgramState* state)
         }
     }
 
-    for (int i = 0; i < buffer->text.len; i++)
+    int x = startx;
+    int y = starty;
+    if (buffer->text.text)
     {
-        bool draw_char = true;
-        
-        char c = buffer->text.text[i];
-        if (c == '\n')
+        String current_token = {0};
+        for (int i = 0; i <= buffer->text.len; i++)
         {
-            y += state->char_h;
-            x = startx;
-            draw_char = false;
-        }
+            switch (buffer->text.text[i])
+            {
+                case ' ':
+                case '\n':
+                case '(':
+                case ')':
+                case '\0':
+                {
+                    if (current_token.text != NULL)
+                    {
+                        int draw_x = x;
+                        int draw_y = y;
+                        if (state->state == EDITOR_STATE_EDIT)
+                        {
+                            draw_x -= state->camera_x;
+                            draw_y -= state->camera_y;
+                        }
 
-        int draw_x = x;
-        int draw_y = y;
 
-        if (state->state == EDITOR_STATE_EDIT)
-        {
-            draw_x -= state->camera_x;
-            draw_y -= state->camera_y;
-            if ((draw_x + char_w) > state->editor_area_w)
-            {
-                draw_char = false;
-            }
-            if ((draw_y + char_h) > state->editor_area_h)
-            {
-                draw_char = false;
-            }
-            if (draw_y < state->editor_area_y)
-            {
-                draw_char = false;
-            }
-            if (draw_x < state->editor_area_x)
-            {
-                draw_char = false;
+                        printf("%s", current_token.text);
+                        //Draw token text
+                        draw_text(font, state->window_surface,
+                        current_token.text, draw_x, draw_y, 255, 255, 255);
+                        
+                        int token_text_w;
+                        TTF_SizeText(font, current_token.text, &token_text_w, NULL);
+                        x += token_text_w;
+
+                        String_clear(&current_token);
+                    }
+
+                    //draw the delimiter
+                    if (buffer->text.text[i] == '\0')
+                    {
+                        continue;
+                    }
+                    int draw_x = x;
+                    int draw_y = y;
+                    if (state->state == EDITOR_STATE_EDIT)
+                    {
+                        draw_x -= state->camera_x;
+                        draw_y -= state->camera_y;
+                    }
+
+                    int char_w;
+                    {
+                        char text[2] = {buffer->text.text[i], '\0'};
+                        TTF_SizeText(font, text, &char_w, NULL);
+                    }
+                    switch (buffer->text.text[i])
+                    {
+                        case ' ':
+                        {
+                            x += char_w;
+                        } break;
+
+                        case '\n':
+                        {
+                            y += state->char_h; 
+                            x = startx;
+                        } break;
+
+                        default:
+                        {
+                            printf("%c", buffer->text.text[i]);
+
+                            bool draw_delimiter = true;
+                            if (state->state == EDITOR_STATE_EDIT)
+                            {
+                                if ((draw_x + char_w) > state->editor_area_w)
+                                {
+                                    draw_delimiter = false;
+                                }
+                                if ((draw_y + char_h) > state->editor_area_h)
+                                {
+                                    draw_delimiter = false;
+                                }
+                                if (draw_y < state->editor_area_y)
+                                {
+                                    draw_delimiter = false;
+                                }
+                                if (draw_x < state->editor_area_x)
+                                {
+                                    draw_delimiter = false;
+                                }
+                            }
+
+                            if (draw_delimiter)
+                            {
+                                char text[2] = {buffer->text.text[i], '\0'};
+                                draw_text(font, state->window_surface,
+                                text, draw_x, draw_y, 255, 255, 255);
+                            }
+                            x += char_w;
+                        } break;
+                    }
+                } break;
+
+                default:
+                {
+                    if (buffer->text.text[i] != '\0')
+                    {
+                        String_push(&current_token, buffer->text.text[i]);
+                    }
+                } break;
             }
         }
-        
-        if (draw_char)
-        {
-            //draw selection box if being selected
-            if ((selection_start <= i) && (i <= selection_end))
-            {
-                SDL_Rect cursor_rect = { draw_x, draw_y, char_w, char_h};
-                SDL_FillRect(state->window_surface, &cursor_rect,
-                             SDL_MapRGB(state->window_surface->format, 100, 100, 255));
-                
-            }            
- 
-            char str[2] = { c, '\0' };
-            draw_text(font, state->window_surface, str, draw_x, draw_y, 255, 255, 255);
-            x += char_w;
-       }
+        printf("\n\n");
+
+        String_clear(&current_token);
     }
 }
