@@ -31,19 +31,14 @@ void editor_draw_input_buffer(ProgramState* state)
     if (!buffer) return;
 
     TTF_Font* font;
-    int char_w;
-    int char_h;
 
     if (state->state == EDITOR_STATE_COMMAND_INPUT)
     {
         font = state->static_font;
-        TTF_SizeText(font, "A", &char_w, &char_h);
     }
     else
     {
         font = state->font;
-        char_w = state->char_w;
-        char_h = state->char_h;
     }
 
     int startx = buffer->x;
@@ -51,6 +46,10 @@ void editor_draw_input_buffer(ProgramState* state)
 
     if (state->draw_cursor)
     {
+        int char_w = state->char_w;
+        int char_h = state->char_h;
+        TTF_SizeText(font, "A", &char_w, &char_h);
+
         int cursor_x = 0;
         int cursor_y = 0;
         editor_get_cursor_pos(state, &cursor_x, &cursor_y, char_h);
@@ -126,23 +125,45 @@ void editor_draw_input_buffer(ProgramState* state)
                 {
                     if (current_token.text != NULL)
                     {
-                        int draw_x = x;
-                        int draw_y = y;
-                        if (state->state == EDITOR_STATE_EDIT)
-                        {
-                            draw_x -= state->camera_x;
-                            draw_y -= state->camera_y;
-                        }
-
-
                         printf("%s", current_token.text);
                         //Draw token text
-                        draw_text(font, state->window_surface,
-                        current_token.text, draw_x, draw_y, 255, 255, 255);
                         
-                        int token_text_w;
-                        TTF_SizeText(font, current_token.text, &token_text_w, NULL);
-                        x += token_text_w;
+                        //TODO(omar): understand why the fuck len+1 works but
+                        //only len makes the last character of the token not render
+                        //probably some null terminator fuckery
+                        for (int j = 0; j < current_token.len; j++)
+                        {
+                            char text[2] = {current_token.text[j], '\0'};
+
+                            int draw_x = x;
+                            int draw_y = y;
+                            if (state->state == EDITOR_STATE_EDIT)
+                            {
+                                draw_x -= state->camera_x;
+                                draw_y -= state->camera_y;
+                            }
+
+                            int char_w;
+                            int char_h;
+                            TTF_SizeText(font, text, &char_w, &char_h);
+
+                            //check if part of selection start or end
+                            int char_index_in_text = j + (i - current_token.len);
+                            if ((selection_start <= char_index_in_text) &&
+                                (selection_end >= char_index_in_text))
+                            {
+                                SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
+                                SDL_FillRect(state->window_surface, &rect,
+                                SDL_MapRGB(state->window_surface->format,
+                                200, 200, 200));
+                                
+                            }
+
+                            draw_text(font, state->window_surface,
+                            text, draw_x, draw_y, 255, 255, 255);
+
+                            x += char_w;
+                        }
 
                         String_clear(&current_token);
                     }
@@ -161,10 +182,24 @@ void editor_draw_input_buffer(ProgramState* state)
                     }
 
                     int char_w;
+                    int char_h;
                     {
                         char text[2] = {buffer->text.text[i], '\0'};
-                        TTF_SizeText(font, text, &char_w, NULL);
+                        TTF_SizeText(font, text, &char_w, &char_h);
                     }
+
+                    //draw selection highlight
+                    if ((selection_start <= i) &&
+                        (selection_end >= i))
+                    {
+                        SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
+                        SDL_FillRect(state->window_surface, &rect,
+                        SDL_MapRGB(state->window_surface->format,
+                        200, 200, 200));
+                        
+                    }
+
+
                     switch (buffer->text.text[i])
                     {
                         case ' ':
