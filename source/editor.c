@@ -150,10 +150,36 @@ void editor_loop(ProgramState* state)
 {
     while (state->running)
     {
-        editor_handle_events(state);
-        editor_update(state);
-        editor_draw(state);
+        bool should_update = false;
+        should_update =  editor_handle_events(state);
+
+        //check for timed interrupts/things we have to do. if its time to do something then
+        //we should update
+        should_update = editor_do_timed_events(state);
+        
+        if (should_update)
+        {
+            editor_update(state);
+            editor_draw(state);
+            printf("update\n");
+        }
     }
+}
+
+
+bool editor_do_timed_events(ProgramState* state)
+{
+    if (state->selection_start_index == -2)
+    {
+        if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= CURSOR_BLINK_TIME)
+        {
+            state->draw_cursor = !(state->draw_cursor);
+            state->last_cursor_blink_tic = SDL_GetTicks();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
@@ -162,11 +188,6 @@ void editor_update(ProgramState* state)
     if (state->selection_start_index != -2)
     {
         state->draw_cursor = true;
-    }
-    else if ((SDL_GetTicks() - state->last_cursor_blink_tic) >= CURSOR_BLINK_TIME)
-    {
-        state->draw_cursor = !(state->draw_cursor);
-        state->last_cursor_blink_tic = SDL_GetTicks();
     }
 
     if (state->message)

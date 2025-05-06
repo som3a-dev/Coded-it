@@ -6,11 +6,15 @@
 
 
 
-void editor_handle_events(ProgramState* state)
+bool editor_handle_events(ProgramState* state)
 {
     SDL_Event e;
     
-    SDL_WaitEventTimeout(&e, 1000);
+//    SDL_WaitEvent(&e);
+    if (SDL_PollEvent(&e) == 0)
+    {
+        return false;
+    }
     
     switch (e.type)
     {
@@ -76,6 +80,8 @@ void editor_handle_events(ProgramState* state)
             editor_handle_events_keydown(state, e);
         } break;
     }
+
+    return true;
 }
 
 
