@@ -1,4 +1,5 @@
 #include "editor_input_buffer.h"
+#include "syntax_parser.h"
 
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -125,10 +126,12 @@ void editor_draw_input_buffer(ProgramState* state)
                 {
                     if (current_token.text != NULL)
                     {
-                        printf("%s", current_token.text);
+//                        printf("%s", current_token.text);
 
                         SDL_Color token_color = {255, 255, 255, 255};
-                        if (sp_is_keyword(current_token.text))
+                        int token_type = sp_get_token_type(current_token.text);
+
+                        if (token_type == TOKEN_KEYWORD)
                         {
                             token_color.r = 0x96;
                             token_color.g = 0x4b;
@@ -272,7 +275,7 @@ void editor_draw_input_buffer(ProgramState* state)
             }
             end_text_rendering:;
         }
-        printf("\n\n");
+//        printf("\n\n");
 
         String_clear(&current_token);
     }
