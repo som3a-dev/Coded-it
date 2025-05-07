@@ -151,11 +151,11 @@ void editor_loop(ProgramState* state)
     while (state->running)
     {
         bool should_update = false;
-        should_update =  editor_handle_events(state);
+        editor_handle_events(state, &should_update);
 
         //check for timed interrupts/things we have to do. if its time to do something then
         //we should update
-        should_update = editor_do_timed_events(state);
+        editor_do_timed_events(state, &should_update);
         
         if (should_update)
         {
@@ -167,7 +167,7 @@ void editor_loop(ProgramState* state)
 }
 
 
-bool editor_do_timed_events(ProgramState* state)
+void editor_do_timed_events(ProgramState* state, bool* should_update)
 {
     if (state->selection_start_index == -2)
     {
@@ -175,11 +175,9 @@ bool editor_do_timed_events(ProgramState* state)
         {
             state->draw_cursor = !(state->draw_cursor);
             state->last_cursor_blink_tic = SDL_GetTicks();
-            return true;
+            *should_update = true;
         }
     }
-
-    return false;
 }
 
 

@@ -5,15 +5,14 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 
-
-bool editor_handle_events(ProgramState* state)
+void editor_handle_events(ProgramState* state, bool* should_update)
 {
     SDL_Event e;
     
 //    SDL_WaitEvent(&e);
     if (SDL_PollEvent(&e) == 0)
     {
-        return false;
+        return;
     }
     
     switch (e.type)
@@ -81,7 +80,7 @@ bool editor_handle_events(ProgramState* state)
         } break;
     }
 
-    return true;
+    *should_update = true;
 }
 
 
