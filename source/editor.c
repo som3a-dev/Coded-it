@@ -346,6 +346,8 @@ void editor_draw(ProgramState* state)
             draw_text(state->font, state->window_surface, text, state->window_w - text_w - state->char_w, 
                       state->editor_area_h + state->editor_area_border_thickness,
                       255, 255, 255);
+
+            free(text);
         } break;
     }
 

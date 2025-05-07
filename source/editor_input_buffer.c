@@ -159,8 +159,15 @@ void editor_draw_input_buffer(ProgramState* state)
                                 
                             }
 
-                            draw_text(font, state->window_surface,
-                            text, draw_x, draw_y, 255, 255, 255);
+                            if ((draw_y + char_h) <= state->editor_area_h)
+                            {
+                                draw_text(font, state->window_surface,
+                                text, draw_x, draw_y, 255, 255, 255);
+                            }
+                            else
+                            {
+                                goto end_text_rendering;
+                            }
 
                             x += char_w;
                         }
@@ -257,6 +264,7 @@ void editor_draw_input_buffer(ProgramState* state)
                     }
                 } break;
             }
+            end_text_rendering:;
         }
         printf("\n\n");
 
