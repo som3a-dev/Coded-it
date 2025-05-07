@@ -126,11 +126,16 @@ void editor_draw_input_buffer(ProgramState* state)
                     if (current_token.text != NULL)
                     {
                         printf("%s", current_token.text);
+
+                        SDL_Color token_color = {255, 255, 255, 255};
+                        if (sp_is_keyword(current_token.text))
+                        {
+                            token_color.r = 0x96;
+                            token_color.g = 0x4b;
+                            token_color.b = 0x00;
+                        }
+
                         //Draw token text
-                        
-                        //TODO(omar): understand why the fuck len+1 works but
-                        //only len makes the last character of the token not render
-                        //probably some null terminator fuckery
                         for (int j = 0; j < current_token.len; j++)
                         {
                             char text[2] = {current_token.text[j], '\0'};
@@ -158,16 +163,18 @@ void editor_draw_input_buffer(ProgramState* state)
                                 200, 200, 200));
                                 
                             }
+                            
+                            if (state->state == EDITOR_STATE_EDIT)
+                            {
+                                if ((draw_y + char_h) > state->editor_area_h)
+                                {
+                                    goto end_text_rendering;
+                                }
+                            }
 
-                            if ((draw_y + char_h) <= state->editor_area_h)
-                            {
-                                draw_text(font, state->window_surface,
-                                text, draw_x, draw_y, 255, 255, 255);
-                            }
-                            else
-                            {
-                                goto end_text_rendering;
-                            }
+                            draw_text(font, state->window_surface,
+                            text, draw_x, draw_y,
+                            token_color.r, token_color.g, token_color.b);
 
                             x += char_w;
                         }
@@ -205,7 +212,6 @@ void editor_draw_input_buffer(ProgramState* state)
                         200, 200, 200));
                         
                     }
-
 
                     switch (buffer->text.text[i])
                     {
