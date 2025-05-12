@@ -10,15 +10,83 @@ const char* keywords = "auto:break:case:char:const:continue:default:do:double:el
 
 
 
-
 int sp_get_token_type(const char* token)
 {
     if (sp_is_keyword(token))
     {
         return TOKEN_KEYWORD;
     }
+    if (sp_is_numeric(token))
+    {
+        return TOKEN_NUMERIC;
+    }
+    if (sp_is_string_literal(token))
+    {
+        return TOKEN_STRING_LITERAL;
+    }
+
+    if (strlen(token) == 1)
+    {
+        switch (token[0])
+        {
+            case '{':
+            case '}':
+            {
+                return TOKEN_BRACES;
+            } break;
+        }
+    }
 
     return TOKEN_NONE;
+}
+
+
+bool sp_is_string_literal(const char* text)
+{
+    int len = strlen(text);
+
+    if ((text[0] == '\'') || (text[len-1] == '\''))
+    {
+        return true;
+    }
+
+    if ((text[0] == '"') || (text[len-1] == '"'))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool sp_is_numeric(const char* text)
+{
+    char c;
+    for (int i = 0; i < strlen(text); i++)
+    {
+        c = text[i];
+
+        if ((c != '.')) 
+        {
+            if ((c < '0') || (c > '9'))
+            {
+                if (i != (strlen(text)-1))
+                {
+                    return false;
+                }
+                
+                //this is the last character. being an f or F (float) is valid
+                if ((c == 'F') || (c == 'f'))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 

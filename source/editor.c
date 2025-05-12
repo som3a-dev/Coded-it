@@ -6,6 +6,7 @@
 #include "util.h"
 #include "button.h"
 #include "draw.h"
+#include "syntax_parser.h"
 #include <memory.h>
 #include <string.h>
 #include <SDL_syswm.h>
@@ -134,6 +135,44 @@ void editor_init(ProgramState* state)
     state->current_file = NULL;
 
     editor_resize_and_position_buttons(state);
+
+    state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
+    {
+        SDL_Color* color = state->token_colors + TOKEN_NONE;
+        color->r = 165;
+        color->g = 255;
+        color->b = 255;
+        color->a = 255;
+    }
+    {
+        SDL_Color* color = state->token_colors + TOKEN_KEYWORD;
+        color->r = 0x96;
+        color->g = 0x4b;
+        color->b = 0x00;
+        color->a = 255;
+    }
+    {
+        SDL_Color* color = state->token_colors + TOKEN_NUMERIC;
+        color->r = 165;
+        color->g = 255;
+        color->b = 120;
+        color->a = 255;
+    }
+    {
+        SDL_Color* color = state->token_colors + TOKEN_STRING_LITERAL;
+        color->r = 50;
+        color->g = 255;
+        color->b = 60;
+        color->a = 255;
+    }
+    {
+        SDL_Color* color = state->token_colors + TOKEN_BRACES;
+        color->r = 128;
+        color->g = 0;
+        color->b = 128;
+        color->a = 255;
+    }
+
 }
 
 

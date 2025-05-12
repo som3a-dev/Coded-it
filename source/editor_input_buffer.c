@@ -122,21 +122,17 @@ void editor_draw_input_buffer(ProgramState* state)
                 case '\n':
                 case '(':
                 case ')':
+                case '{':
+                case '}':
+                case ';':
                 case '\0':
                 {
                     if (current_token.text != NULL)
                     {
 //                        printf("%s", current_token.text);
 
-                        SDL_Color token_color = {255, 255, 255, 255};
                         int token_type = sp_get_token_type(current_token.text);
-
-                        if (token_type == TOKEN_KEYWORD)
-                        {
-                            token_color.r = 0x96;
-                            token_color.g = 0x4b;
-                            token_color.b = 0x00;
-                        }
+                        SDL_Color* token_color = state->token_colors + token_type;
 
                         //Draw token text
                         for (int j = 0; j < current_token.len; j++)
@@ -177,7 +173,7 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             draw_text(font, state->window_surface,
                             text, draw_x, draw_y,
-                            token_color.r, token_color.g, token_color.b);
+                            token_color->r, token_color->g, token_color->b);
 
                             x += char_w;
                         }
@@ -256,9 +252,15 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             if (draw_delimiter)
                             {
+
                                 char text[2] = {buffer->text.text[i], '\0'};
+
+                                int token_type = sp_get_token_type(text);
+                                SDL_Color* token_color = state->token_colors + token_type;
+
                                 draw_text(font, state->window_surface,
-                                text, draw_x, draw_y, 255, 255, 255);
+                                text, draw_x, draw_y,
+                                token_color->r, token_color->g, token_color->b);
                             }
                             x += char_w;
                         } break;

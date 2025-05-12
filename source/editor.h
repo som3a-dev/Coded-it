@@ -92,6 +92,12 @@ typedef struct _ProgramState
 
     int selection_start_index; //if selecting text. this is the index of the character we began selecting from
     String clipboard; //copied text if any
+
+    //Themes/syntax highlighting/whatever stuff
+
+    //every token type (TOKEN_NONE, TOKEN_KEYWORD) will work as an index into this colors array
+    //to get the color of keywords in the current theme, state->token_colors[TOKEN_KEYWORD];
+    SDL_Color* token_colors;
 } ProgramState;
 
 
