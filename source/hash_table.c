@@ -50,6 +50,7 @@ void hash_table_clear(hash_table* table)
 
 void hash_table_set(hash_table* table, const char* key, const char* val)
 {
+    assert(table->element_size && "Trying to use hash table without an element size. call hash_table_init() first");
     uint64_t hash = fnv_hash(key);
     uint64_t index = hash % table->len;
 
