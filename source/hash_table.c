@@ -28,6 +28,19 @@ void hash_table_init(hash_table* table, int initial_len,
 }
 
 
+void hash_table_clear(hash_table* table)
+{
+    if (!table) return;
+
+    free(table->vals);
+    free(table->key_hashes);
+    
+    table->vals = NULL;
+    table->key_hashes = NULL;
+    table->len = 0;
+}
+
+
 void hash_table_set(hash_table* table, const char* key, const char* val)
 {
     uint64_t hash = fnv_hash(key);

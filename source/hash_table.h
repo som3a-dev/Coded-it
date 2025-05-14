@@ -18,6 +18,10 @@ typedef struct
 void hash_table_init(hash_table* table, int initial_len,
                      size_t element_size);
 
+//NOTE(omar): doesn't change element size to zero
+//but frees vals and key_hashes and sets len to 0
+void hash_table_clear(hash_table* table);
+
 void hash_table_set(hash_table* table, const char* key,
                     const char* val);
 
