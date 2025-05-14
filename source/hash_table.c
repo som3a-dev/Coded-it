@@ -19,7 +19,6 @@ static uint64_t fnv_hash(const char* key);
 void hash_table_init(hash_table* table, int initial_len,
                      size_t element_size)
 {
-    assert(initial_len >= 0 && "Length of container less than 0 ?");
     assert(element_size >= 0 && "Size of element less than 0 ?");
 
     if (initlal_len == 0)
@@ -99,18 +98,6 @@ char* hash_table_get(const hash_table* table, const char* key)
 
 void _hash_table_resize(hash_table* table, int new_len)
 {
-    // table->vals = realloc(table->vals, new_len * table->element_size);
-
-    // table->key_hashes = realloc(table->key_hashes, new_len * sizeof(uint64_t));
-
-    // memset(table->key_hashes + table->len, 0,
-    //        sizeof(uint64_t) * (new_len - table->len));
-    
-    // memset(table->vals + table->len, 0,
-    //        table->element_size * (new_len - table->len));
-        // 
-    // table->len = new_len;
-
     //create new key hashes and values arrays of the new_len. and recopy the
     //key value pairs while updating their indices to be the hash % the new length of
     //the table
