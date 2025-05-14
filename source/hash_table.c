@@ -11,6 +11,8 @@
 #define TABLE_EXPAND_COUNT 5 //the amount of elements the table is expanded by
                              //when a resize is needed (in case of an index collision)
 
+#define TABLE_DEFAULT_START_CAPACITY 1
+
 static uint64_t fnv_hash(const char* key);
 
 
@@ -19,6 +21,11 @@ void hash_table_init(hash_table* table, int initial_len,
 {
     assert(initial_len >= 0 && "Length of container less than 0 ?");
     assert(element_size >= 0 && "Size of element less than 0 ?");
+
+    if (initlal_len == 0)
+    {
+        initial_len = TABLE_DEFAULT_START_CAPACITY;
+    }
 
     table->len = initial_len;
     table->element_size = element_size;
