@@ -26,6 +26,7 @@
     <ClCompile Include="source\editor_event.c" />
     <ClCompile Include="source\editor_fileio.c" />
     <ClCompile Include="source\editor_input_buffer.c" />
+    <ClCompile Include="source\hash_table.c" />
     <ClCompile Include="source\main.c" />
     <ClCompile Include="source\queue.c" />
     <ClCompile Include="source\stack.c" />
@@ -42,6 +43,7 @@
     <ClInclude Include="source\editor_event.h" />
     <ClInclude Include="source\editor_fileio.h" />
     <ClInclude Include="source\editor_input_buffer.h" />
+    <ClInclude Include="source\hash_table.h" />
     <ClInclude Include="source\queue.h" />
     <ClInclude Include="source\stack.h" />
     <ClInclude Include="source\string.h" />
