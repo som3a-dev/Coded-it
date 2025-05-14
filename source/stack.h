@@ -6,7 +6,7 @@ typedef struct
 {
     char* arr;
     int len;
-    int element_size;
+    size_t element_size;
 } Stack;
 
 
