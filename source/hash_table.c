@@ -113,7 +113,7 @@ void _hash_table_resize(hash_table* table, int new_len)
     //key value pairs while updating their indices to be the hash % the new length of
     //the table
 
-    char* new_vals = calloc(new_len, sizeof(char));
+    char* new_vals = calloc(new_len, table->element_size);
     uint64_t* new_key_hashes = calloc(new_len, sizeof(uint64_t));
 
     uint64_t hash;
