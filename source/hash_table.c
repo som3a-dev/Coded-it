@@ -73,9 +73,10 @@ void hash_table_set(hash_table* table, const char* key, const char* val)
         }
     }
     
+    char* dst_val = table->vals + (index * table->element_size);
     for (int i = 0; i < table->element_size; i++)
     {
-        table->vals[index + i] = val[i];
+        dst_val[i] = val[i];
     }
 
     table->key_hashes[index] = hash;
@@ -92,7 +93,7 @@ char* hash_table_get(const hash_table* table, const char* key)
 {
     uint64_t index = fnv_hash(key) % table->len;
     
-    return table->vals + index;
+    return table->vals + (index * table->element_size);
 }
 
 
@@ -115,16 +116,24 @@ void _hash_table_resize(hash_table* table, int new_len)
         val = table->vals + (i * table->element_size);
 
         //generate the new index (since the hash table's length changed)
-        new_index = hash % new_len; 
+        new_index = hash % new_len;
+        if (new_key_hashes[new_index])
+        {
+            //TODO(omar): find a better way to handle this collision rather than expanding again and again
+            free(new_vals);
+            free(new_key_hashes);
+            _hash_table_resize(table, new_len + TABLE_EXPAND_COUNT);
+            return;
+        }
 
         //set the new index of the hash to the hash in the new key hashes array
         new_key_hashes[new_index] = hash;
         
         //same for the values array
-        val = table->vals + (i * table->element_size);
+        char* new_val = new_vals + (new_index * table->element_size);
         for (int j = 0; j < table->element_size; j++)
         {
-            new_vals[new_index + j] = *(val + j);
+            new_val[j] = *(val + j);
         }
     }
 
