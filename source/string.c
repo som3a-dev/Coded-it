@@ -172,6 +172,19 @@ void String_clear(String* str)
 }
 
 
+void String_clear_without_freeing(String* str)
+{
+    if (!str) return;
+
+    if (str->text)
+    {
+        str->text = NULL;
+    }
+
+    str->len = 0;
+}
+
+
 void String_set(String* str, const char* text)
 {
     if (!str) return;

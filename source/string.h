@@ -36,5 +36,9 @@ int String_get_next_newline(String* str, int index);
 
 void String_clear(String* str);
 
+//same as String_clear except it doesn't free() the text. useful for when
+//the text pointer is copied somewhere else and needs to remain intact
+void String_clear_without_freeing(String* str);
+
 void String_set(String* str, const char* text);
 
