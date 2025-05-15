@@ -5,6 +5,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "json_parser.h"
+#include "hash_table.h"
 #include "string.h"
 #include "syntax_parser.h"
 #include "array.h"
@@ -14,12 +16,33 @@
 
 int main(int argc, char** argv)
 {
-    ProgramState state;
+/*    ProgramState state;
     editor_init(&state);
     
     editor_loop(&state);
     
-    editor_destroy(&state);
+    editor_destroy(&state);*/
+
+    jp_parse_file("test.json");
+
+    // hash_table table;
+    // hash_table_init(&table, 0, sizeof(String));
+
+    // String str = {0};
+    // String_set(&str, "omar");
+
+    // hash_table_set(&table, "name", &str);
+
+    // str.text = NULL;
+    // String_set(&str, "mora");
+
+    // hash_table_set(&table, "type", &str);
+
+
+    // {
+    //     String* str2 = hash_table_get(&table, "type");
+    //     printf("%s\n", str2->text);
+    // }
 
     return EXIT_SUCCESS;
 }
