@@ -21,7 +21,7 @@ void hash_table_init(hash_table* table, int initial_len,
 {
     assert(element_size >= 0 && "Size of element less than 0 ?");
 
-    if (initlal_len == 0)
+    if (initial_len == 0)
     {
         initial_len = TABLE_DEFAULT_START_CAPACITY;
     }
