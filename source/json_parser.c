@@ -19,22 +19,44 @@ enum
     JSON_TOKEN_CHAR
 };
 
+enum
+{
+    JSON_OBJECT_NONE,
+    JSON_OBJECT_STRING,
+    JSON_OBJECT_INT,
+    JSON_OBJECT_BOOL,
+    JSON_OBJECT_CHAR,
+    JSON_OBJECT_OBJECT,
+    JSON_OBJECT_ARRAY
+};
+
 typedef struct
 {
     int type;
 
     //this is a real allocated pointer only in the case of strings
     //in other cases (int, char) this is an encoded pointer
-    //meaning the pointer variable directly stores the value of the token
-    //no memory allocation needed
     char* val;
 } json_token;
 
+typedef struct
+{
+    int type;
 
+    //this is a real allocated pointer only in the case of strings
+    //in other cases (int, char) this is an encoded pointer
+    char* val;
+} json_object;
+
+
+
+//use them for json_object too its alr
 static inline void json_token_set_int(json_token* token, int val);
 static inline void json_token_set_string(json_token* token, char* val);
 static inline void json_token_set_bool(json_token* token, bool val);
 static inline void json_token_set_char(json_token* token, char val);
+
+
 
 void json_token_print(json_token* token);
 
@@ -47,7 +69,12 @@ static void _resize_tokens_array(json_token** tokens, int* tokens_count, int new
 
 bool is_index_part_of_literal(const char* text, int index);
 
-void jp_lex(const char* str);
+void jp_parse(json_token* tokens, const int tokens_count);
+int jp_parse_key_value(json_token* tokens, const int tokens_count,
+                        int token_index, hash_table* json_objects);
+
+
+json_token* jp_lex(const char* str, int* out_tokens_count);
 
 String jp_lex_string(const char* str);
 
@@ -84,14 +111,87 @@ void jp_parse_file(const char* path)
     printf("%s\n", file_string);
 
     //lexing
-    jp_lex(file_string);
+    int tokens_count;
+    json_token* tokens = jp_lex(file_string, &tokens_count);
+    jp_parse(tokens, tokens_count);
 
+    free(tokens);
     fclose(fp);
     free(file_string);
 }
 
 
-void jp_lex(const char* str)
+void jp_parse(json_token* tokens, const int tokens_count)
+{
+    if (tokens == NULL)
+    {
+        return;
+    }
+
+    hash_table json_objects;
+    hash_table_init(&json_objects, 1, sizeof(json_object));
+
+    for (int i = 0; i < tokens_count; i++)
+    {
+        switch (tokens->type)
+        {
+            case JSON_TOKEN_STRING:
+            {
+                jp_parse_key_value(tokens, tokens_count, i, &json_objects);
+            } break;
+        }
+        tokens++;
+    }
+
+    json_object* object = hash_table_get(&json_objects, "\"far\"");
+    json_token_print(object);
+}
+
+
+int jp_parse_key_value(json_token* tokens, const int tokens_count,
+                        int token_index, hash_table* json_objects)
+{
+    if (token_index == (tokens_count-1))
+    {
+        //TODO(omar):
+        //There is no next token ? print an error
+        printf("No next token\n");
+        return 1;
+    }
+
+    json_token* next_token = tokens + 1;
+    if (next_token->type != JSON_TOKEN_CHAR)
+    {
+        //TODO(omar):
+        //Next token is not a character? print an error
+        printf("Unexpected token\n");
+        return 2;
+    }
+    
+    if (next_token->val == ':')
+    {
+        printf("%s is a key\n", tokens->val);
+        
+        if (token_index == (tokens_count-2))
+        {
+            //TODO(omar):
+            //Token has no value token ? print an error
+            printf("No value\n");
+            return 3;
+        }
+
+        json_token* value_token = next_token + 1;
+        hash_table_set(json_objects, tokens->val, value_token);
+
+        json_token_print(value_token);
+        printf(" is a val\n");
+    }
+    
+    return 0;
+}
+
+
+json_token* jp_lex(const char* str, int* out_tokens_count)
 {
     json_token* tokens = NULL;
     int tokens_count = 0;
@@ -102,7 +202,7 @@ void jp_lex(const char* str)
         if (json_str.text)
         {
             str += json_str.len;
-
+            
             _resize_tokens_array(&tokens, &tokens_count, tokens_count+1);
 
             //DON'T CLEAR THE json_str.
@@ -168,12 +268,16 @@ void jp_lex(const char* str)
     for (int i = 0; i < tokens_count; i++)
     {
         json_token_print(tokens + i);
+        printf(" | ");
+    }
+    printf("\n");
+
+    if (out_tokens_count)
+    {
+        *out_tokens_count = tokens_count;
     }
 
-    for (int i = 0; i < tokens_count; i++)
-    {
-        json_token_destroy(tokens + i);
-    }
+    return tokens;
 }
 
 
@@ -317,12 +421,12 @@ void json_token_print(json_token* token)
     {
         case JSON_TOKEN_STRING:
         {
-            printf("%s\n", token->val);
+            printf("%s", token->val);
         } break;
 
         case JSON_TOKEN_INT:
         {
-            printf("%d\n", token->val);
+            printf("%d", token->val);
         } break;
 
         case JSON_TOKEN_BOOL:
@@ -332,12 +436,12 @@ void json_token_print(json_token* token)
             {
                 str = "false";
             }
-            printf("%s\n", str);
+            printf("%s", str);
         } break;
 
         case JSON_TOKEN_CHAR:
         {
-            printf("%c\n", token->val);
+            printf("%c", token->val);
         } break;
     }
 }

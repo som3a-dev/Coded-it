@@ -1,7 +1,5 @@
 {
-    "name": "test",
-    "type": 1,
-    "id": 2516,
-    "is_done": false,
-    "has_meta": true
+    "foo": 2,
+    "bar": 4,
+    "far": "TEST"
 }

@@ -139,9 +139,9 @@ void editor_init(ProgramState* state)
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
     {
         SDL_Color* color = state->token_colors + TOKEN_NONE;
-        color->r = 165;
-        color->g = 255;
-        color->b = 255;
+        color->r = 200;
+        color->g = 200;
+        color->b = 200;
         color->a = 255;
     }
     {

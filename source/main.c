@@ -16,12 +16,12 @@
 
 int main(int argc, char** argv)
 {
-/*    ProgramState state;
-    editor_init(&state);
+    ProgramState state;
+//    editor_init(&state);
     
-    editor_loop(&state);
+ //   editor_loop(&state);
     
-    editor_destroy(&state);*/
+  //  editor_destroy(&state);
 
     jp_parse_file("test.json");
 

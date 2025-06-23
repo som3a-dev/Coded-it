@@ -2,4 +2,4 @@
 
 
 
-void jp_parse_file(const char* path);
+//void jp_parse_file(const char* path);
