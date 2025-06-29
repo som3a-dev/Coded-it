@@ -233,14 +233,18 @@ void jp_parse(json_token* tokens, const int tokens_count)
 }
 
 
-json_array* jp_parse_array(json_token* token, const int tokens_count,
-                    int token_index)
+json_array* jp_parse_array(json_token** token, const int tokens_count,
+                    int* token_index)
 {
     json_array* array = calloc(1, sizeof(json_array));
 
-    json_token* t = token + 1;
-    for (int i = (token_index + 3); i < tokens_count; i++)
+    //to get the next token after the '['
+    (*token)++;
+    (*token_index)++;
+
+    for (; (*token_index) < tokens_count; (*token_index)++)
     {
+        json_token* t = (*token);
         if (t->type == JSON_TOKEN_CHAR)
         {
             char c = (char)t->val;
@@ -248,12 +252,20 @@ json_array* jp_parse_array(json_token* token, const int tokens_count,
             {
                 break;
             }
+
+            if (c == '[')
+            {
+                json_array* sub_array = jp_parse_array(token, tokens_count, token_index);
+                json_object array_obj = {JSON_OBJECT_ARRAY, sub_array};
+                json_array_push(array, &array_obj);
+            }
         }
         else
         {
             json_array_push(array, t);
         }
-        t++;
+
+        (*token)++;
     }
 
     return array;
@@ -272,6 +284,7 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
     }
 
     json_token* next_token = tokens + 1;
+    token_index++;
     if (next_token->type != JSON_TOKEN_CHAR)
     {
         //TODO(omar):
@@ -282,7 +295,7 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
     
     if (next_token->val == ':')
     {
-        if (token_index == (tokens_count-2))
+        if (token_index == (tokens_count-1))
         {
             //TODO(omar):
             //Token has no value token ? print an error
@@ -291,6 +304,7 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
         }
 
         json_token* value_token = next_token + 1;
+        token_index++;
 
         switch (value_token->type)
         {
@@ -300,8 +314,12 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
                 {
                     case '[':
                     {
-                        json_array* array = jp_parse_array(value_token, tokens_count,
-                        token_index);
+                        //Made into variables because jp_parse_array messes with them
+                        json_token* array_start_token = value_token;
+                        int array_start_token_index = token_index;
+
+                        json_array* array = jp_parse_array(&array_start_token, tokens_count,
+                        &array_start_token_index);
 
                         json_object array_obj = {JSON_OBJECT_ARRAY, array};
                         hash_table_set(json_objects, tokens->val, &array_obj);

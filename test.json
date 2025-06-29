@@ -1,7 +1,9 @@
 {
-    "foo": 2,
-    "bar": 4,
-    "far": "TEST",
-    "car": ["1", "2", 3],
-    "war": [1, 2, 3, "string"]
+    "foo": [1, 2, [4, 5]],
+    
+    "bar": ["this", "is", ["test", ["ing", ["sub arrays", "trippy"]]]],
+
+    "id": 5,
+
+    "name": "Module1"
 }
