@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <malloc.h>
 #include <memory.h>
 #include <stdbool.h>
@@ -19,6 +20,9 @@ enum
     JSON_TOKEN_CHAR
 };
 
+//THE ENUM OF JSON_TOKEN MUST BE A SUBSET OF JSON_OBJECT THAT IS ALWAYS
+//AT THE START AND IN THE SAME ORDER IN JSON_OBJECT
+//NOT ABIDING BY THAT CAN AND WILL BREAK BEHAVIOR FOR NOW
 enum
 {
     JSON_OBJECT_NONE,
@@ -49,6 +53,16 @@ typedef struct
 } json_object;
 
 
+typedef struct
+{
+    json_object* objects;
+    int objects_count;
+} json_array; //an array of json_objects. Also considered a json_object
+
+
+static void json_array_push(json_array* array, const json_object* obj);
+static json_object* json_array_get(const json_array* array, int index);
+
 
 //use them for json_object too its alr
 static inline void json_token_set_int(json_token* token, int val);
@@ -57,10 +71,11 @@ static inline void json_token_set_bool(json_token* token, bool val);
 static inline void json_token_set_char(json_token* token, char val);
 
 
-
-void json_token_print(json_token* token);
+void json_object_print(const json_object* obj);
+void json_token_print(const json_token* token);
 
 void json_token_destroy(json_token* token);
+void json_object_destroy(json_object* obj);
 
 
 //helper for jp_lex()
@@ -70,6 +85,11 @@ static void _resize_tokens_array(json_token** tokens, int* tokens_count, int new
 bool is_index_part_of_literal(const char* text, int index);
 
 void jp_parse(json_token* tokens, const int tokens_count);
+
+//token is the token of the '[' character of the array
+json_array* jp_parse_array(json_token* token, const int tokens_count,
+                    int token_index);
+
 int jp_parse_key_value(json_token* tokens, const int tokens_count,
                         int token_index, hash_table* json_objects);
 
@@ -128,6 +148,29 @@ void jp_parse(json_token* tokens, const int tokens_count)
         return;
     }
 
+/*    json_array array = {0};
+    json_object obj;
+    obj.type = JSON_OBJECT_CHAR;
+    obj.val = 'a';
+    json_array_push(&array, &obj);
+    
+    obj.val = 'b';
+    json_array_push(&array, &obj);
+
+    obj.val = 'c';
+    json_array_push(&array, &obj);
+
+    obj.val = 'd';
+    json_array_push(&array, &obj);
+
+    for (int i = 0; i < array.objects_count; i++)
+    {
+        json_token_print(json_array_get(&array, i));
+        printf("\n")
+    }
+
+    return;*/
+
     hash_table json_objects;
     hash_table_init(&json_objects, 1, sizeof(json_object));
 
@@ -139,12 +182,81 @@ void jp_parse(json_token* tokens, const int tokens_count)
             {
                 jp_parse_key_value(tokens, tokens_count, i, &json_objects);
             } break;
+
+            case JSON_TOKEN_CHAR:
+            {
+                switch ((char)(tokens->val))
+                {
+                    case '{':
+                    {
+                        //PARSE OBJECT
+                    } break;
+
+                    case '[':
+                    {
+                        //PARSE ARRAY
+                    } break;
+
+                    default:
+                    {
+                        //TODO(omar): Unexpected character. error ?
+                    } break;
+                }
+            } break;
         }
         tokens++;
     }
 
-    json_object* object = hash_table_get(&json_objects, "\"far\"");
-    json_token_print(object);
+//    json_object* object = hash_table_get(&json_objects, "\"bar\"");
+//    json_object_print(object);
+
+    printf("\n");
+
+    json_object* object = (json_object*)(json_objects.vals);
+    for (int i = 0; i < json_objects.len; i++)
+    {
+        if (json_objects.key_hashes[i])
+        {
+            json_object_print(object);
+            printf("\n");
+        }
+
+        json_object_destroy(object);
+        
+        object++;
+    }
+
+    printf("\n");
+    hash_table_print(&json_objects);
+
+    hash_table_clear(&json_objects);
+}
+
+
+json_array* jp_parse_array(json_token* token, const int tokens_count,
+                    int token_index)
+{
+    json_array* array = calloc(1, sizeof(json_array));
+
+    json_token* t = token + 1;
+    for (int i = (token_index + 3); i < tokens_count; i++)
+    {
+        if (t->type == JSON_TOKEN_CHAR)
+        {
+            char c = (char)t->val;
+            if ((c == '\n') || (c == ']'))
+            {
+                break;
+            }
+        }
+        else
+        {
+            json_array_push(array, t);
+        }
+        t++;
+    }
+
+    return array;
 }
 
 
@@ -170,8 +282,6 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
     
     if (next_token->val == ':')
     {
-        printf("%s is a key\n", tokens->val);
-        
         if (token_index == (tokens_count-2))
         {
             //TODO(omar):
@@ -181,10 +291,29 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
         }
 
         json_token* value_token = next_token + 1;
-        hash_table_set(json_objects, tokens->val, value_token);
 
-        json_token_print(value_token);
-        printf(" is a val\n");
+        switch (value_token->type)
+        {
+            case JSON_TOKEN_CHAR:
+            {
+                switch ((char)(value_token->val))
+                {
+                    case '[':
+                    {
+                        json_array* array = jp_parse_array(value_token, tokens_count,
+                        token_index);
+
+                        json_object array_obj = {JSON_OBJECT_ARRAY, array};
+                        hash_table_set(json_objects, tokens->val, &array_obj);
+                    } break;
+                }
+            } break;
+
+            default:
+            {
+                hash_table_set(json_objects, tokens->val, value_token);
+            } break;
+        }
     }
     
     return 0;
@@ -415,7 +544,39 @@ static inline void json_token_set_char(json_token* token, char val)
 }
 
 
-void json_token_print(json_token* token)
+void json_object_print(const json_object* obj)
+{
+    switch (obj->type)
+    {
+        case JSON_OBJECT_ARRAY:
+        {
+            json_array* arr = (json_array*)obj->val;
+            printf("[");
+            for (int i = 0; i < arr->objects_count; i++)
+            {
+                json_object_print(arr->objects + i);
+                if (i != ((arr->objects_count)-1))
+                {
+                    printf(", ");
+                }
+            }
+            printf("]");
+        } break;
+
+        case JSON_OBJECT_OBJECT:
+        {
+
+        } break;
+
+        default:
+        {
+            json_token_print(obj);
+        } break;
+    }
+}
+
+
+void json_token_print(const json_token* token)
 {
     switch (token->type)
     {
@@ -457,6 +618,60 @@ void json_token_destroy(json_token* token)
             token->val = NULL;
         }
     }
+}
+
+
+void json_object_destroy(json_object* obj)
+{
+    switch (obj->type)
+    {
+        case JSON_OBJECT_ARRAY:
+        {
+            json_array* array = (json_array*)(obj->val);
+            for (int i = 0; i < array->objects_count; i++)
+            {
+                json_object_destroy(array->objects + i);
+            }
+
+            free(obj->val);
+            obj->val = NULL;
+        } break;
+
+        case JSON_OBJECT_OBJECT:
+        {
+            assert(false && "Desturction of json object of type JSON_OBJECT_OBJECT not yet implemented\n");
+        } break;
+
+        default:
+        {
+            json_token_destroy(obj);
+        } break;
+    }
+}
+
+
+static void json_array_push(json_array* array, const json_object* obj)
+{
+    //NOTE(omar): THIS IS FINE AS LONG AS json_token and json_object
+    //are the same thing (a int type and char* val)
+    //this shit will all be rewritten if they ever have to 
+    //stop being interchangable
+    _resize_tokens_array(&(array->objects), &(array->objects_count),
+    (array->objects_count)+1);
+
+    json_object* last_obj = array->objects + (array->objects_count-1);
+    memcpy(last_obj, obj, sizeof(json_object));
+}
+
+
+static json_object* json_array_get(const json_array* array, int index)
+{
+    if (index >= array->objects_count)
+    {
+        return NULL;
+    }
+
+    return array->objects + index;
 }
 
 

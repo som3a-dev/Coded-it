@@ -26,7 +26,7 @@ void hash_table_set(hash_table* table, const char* key,
                     const char* val);
 
 //returns a reference to the element in the hash table's
-//internal valsay. not a copy of the element
+//internal vals array. not a copy of the element
 char* hash_table_get(const hash_table* table, const char* key);
 
 char* hash_table_get_by_index(const hash_table* table, int index);

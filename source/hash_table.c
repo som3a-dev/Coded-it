@@ -11,7 +11,7 @@
 #define TABLE_EXPAND_COUNT 5 //the amount of elements the table is expanded by
                              //when a resize is needed (in case of an index collision)
 
-#define TABLE_DEFAULT_START_CAPACITY 1
+#define TABLE_DEFAULT_START_CAPACITY 5
 
 static uint64_t fnv_hash(const char* key);
 
@@ -65,6 +65,7 @@ void hash_table_set(hash_table* table, const char* key, const char* val)
 
     if (table->key_hashes[index])
     {
+        printf("KEY: %s, %lld vs %lld, %d\n", key, hash, table->key_hashes[index], index);
         if (table->key_hashes[index] != hash)
         {
             _hash_table_resize(table, table->len + TABLE_EXPAND_COUNT);

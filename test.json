@@ -1,5 +1,7 @@
 {
     "foo": 2,
     "bar": 4,
-    "far": "TEST"
+    "far": "TEST",
+    "car": ["1", "2", 3],
+    "war": [1, 2, 3, "string"]
 }
