@@ -65,10 +65,11 @@ void hash_table_set(hash_table* table, const char* key, const char* val)
 
     if (table->key_hashes[index])
     {
-        printf("KEY: %s, %lld vs %lld, %d\n", key, hash, table->key_hashes[index], index);
+        printf("KEY: %s, %llu vs %llu, %d\n", key, hash, table->key_hashes[index], index);
         if (table->key_hashes[index] != hash)
         {
             _hash_table_resize(table, table->len + TABLE_EXPAND_COUNT);
+            printf("resize\n");
             hash_table_set(table, key, val);
             return;
         }
