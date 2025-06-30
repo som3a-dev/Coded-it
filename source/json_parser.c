@@ -20,18 +20,18 @@ enum
     JSON_TOKEN_CHAR
 };
 
-//THE ENUM OF JSON_TOKEN MUST BE A SUBSET OF JSON_OBJECT THAT IS ALWAYS
-//AT THE START AND IN THE SAME ORDER IN JSON_OBJECT
+//THE ENUM OF JSON_TOKEN MUST BE A SUBSET OF JSON_VALUE THAT IS ALWAYS
+//AT THE START AND IN THE SAME ORDER IN JSON_VALUE
 //NOT ABIDING BY THAT CAN AND WILL BREAK BEHAVIOR FOR NOW
 enum
 {
-    JSON_OBJECT_NONE,
-    JSON_OBJECT_STRING,
-    JSON_OBJECT_INT,
-    JSON_OBJECT_BOOL,
-    JSON_OBJECT_CHAR,
-    JSON_OBJECT_OBJECT,
-    JSON_OBJECT_ARRAY
+    JSON_VALUE_NONE,
+    JSON_VALUE_STRING,
+    JSON_VALUE_INT,
+    JSON_VALUE_BOOL,
+    JSON_VALUE_CHAR,
+    JSON_VALUE_OBJECT,
+    JSON_VALUE_ARRAY
 };
 
 typedef struct
@@ -50,32 +50,32 @@ typedef struct
     //this is a real allocated pointer only in the case of strings
     //in other cases (int, char) this is an encoded pointer
     char* val;
-} json_object;
+} json_value;
 
 
 typedef struct
 {
-    json_object* objects;
-    int objects_count;
-} json_array; //an array of json_objects. Also considered a json_object
+    json_value* values;
+    int values_count;
+} json_array; //an array of json_values. Also considered a json_value
 
 
-static void json_array_push(json_array* array, const json_object* obj);
-static json_object* json_array_get(const json_array* array, int index);
+static void json_array_push(json_array* array, const json_value* val);
+static json_value* json_array_get(const json_array* array, int index);
 
 
-//use them for json_object too its alr
+//use them for json_value too its alr
 static inline void json_token_set_int(json_token* token, int val);
 static inline void json_token_set_string(json_token* token, char* val);
 static inline void json_token_set_bool(json_token* token, bool val);
 static inline void json_token_set_char(json_token* token, char val);
 
 
-void json_object_print(const json_object* obj);
+void json_value_print(const json_value* val);
 void json_token_print(const json_token* token);
 
 void json_token_destroy(json_token* token);
-void json_object_destroy(json_object* obj);
+void json_value_destroy(json_value* val);
 
 
 //helper for jp_lex()
@@ -91,7 +91,7 @@ json_array* jp_parse_array(json_token* token, const int tokens_count,
                     int token_index);
 
 int jp_parse_key_value(json_token* tokens, const int tokens_count,
-                        int token_index, hash_table* json_objects);
+                        int token_index, hash_table* json_values);
 
 
 json_token* jp_lex(const char* str, int* out_tokens_count);
@@ -148,31 +148,8 @@ void jp_parse(json_token* tokens, const int tokens_count)
         return;
     }
 
-/*    json_array array = {0};
-    json_object obj;
-    obj.type = JSON_OBJECT_CHAR;
-    obj.val = 'a';
-    json_array_push(&array, &obj);
-    
-    obj.val = 'b';
-    json_array_push(&array, &obj);
-
-    obj.val = 'c';
-    json_array_push(&array, &obj);
-
-    obj.val = 'd';
-    json_array_push(&array, &obj);
-
-    for (int i = 0; i < array.objects_count; i++)
-    {
-        json_token_print(json_array_get(&array, i));
-        printf("\n")
-    }
-
-    return;*/
-
-    hash_table json_objects;
-    hash_table_init(&json_objects, 1, sizeof(json_object));
+    hash_table json_values;
+    hash_table_init(&json_values, 10, sizeof(json_value));
 
     for (int i = 0; i < tokens_count; i++)
     {
@@ -180,7 +157,7 @@ void jp_parse(json_token* tokens, const int tokens_count)
         {
             case JSON_TOKEN_STRING:
             {
-                jp_parse_key_value(tokens, tokens_count, i, &json_objects);
+                jp_parse_key_value(tokens, tokens_count, i, &json_values);
             } break;
 
             case JSON_TOKEN_CHAR:
@@ -207,29 +184,29 @@ void jp_parse(json_token* tokens, const int tokens_count)
         tokens++;
     }
 
-//    json_object* object = hash_table_get(&json_objects, "\"bar\"");
-//    json_object_print(object);
+//    json_value* valect = hash_table_get(&json_values, "\"bar\"");
+//    json_value_print(valect);
 
     printf("\n");
 
-    json_object* object = (json_object*)(json_objects.vals);
-    for (int i = 0; i < json_objects.len; i++)
+    json_value* valect = (json_value*)(json_values.vals);
+    for (int i = 0; i < json_values.len; i++)
     {
-        if (json_objects.key_hashes[i])
+        if (json_values.key_hashes[i])
         {
-            json_object_print(object);
+            json_value_print(valect);
             printf("\n");
         }
 
-        json_object_destroy(object);
+        json_value_destroy(valect);
         
-        object++;
+        valect++;
     }
 
     printf("\n");
-    hash_table_print(&json_objects);
+    hash_table_print(&json_values);
 
-    hash_table_clear(&json_objects);
+    hash_table_clear(&json_values);
 }
 
 
@@ -256,8 +233,8 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
             if (c == '[')
             {
                 json_array* sub_array = jp_parse_array(token, tokens_count, token_index);
-                json_object array_obj = {JSON_OBJECT_ARRAY, sub_array};
-                json_array_push(array, &array_obj);
+                json_value array_val = {JSON_VALUE_ARRAY, sub_array};
+                json_array_push(array, &array_val);
             }
         }
         else
@@ -273,7 +250,7 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
 
 
 int jp_parse_key_value(json_token* tokens, const int tokens_count,
-                        int token_index, hash_table* json_objects)
+                        int token_index, hash_table* json_values)
 {
     if (token_index == (tokens_count-1))
     {
@@ -321,15 +298,15 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
                         json_array* array = jp_parse_array(&array_start_token, tokens_count,
                         &array_start_token_index);
 
-                        json_object array_obj = {JSON_OBJECT_ARRAY, array};
-                        hash_table_set(json_objects, tokens->val, &array_obj);
+                        json_value array_val = {JSON_VALUE_ARRAY, array};
+                        hash_table_set(json_values, tokens->val, &array_val);
                     } break;
                 }
             } break;
 
             default:
             {
-                hash_table_set(json_objects, tokens->val, value_token);
+                hash_table_set(json_values, tokens->val, value_token);
             } break;
         }
     }
@@ -562,18 +539,18 @@ static inline void json_token_set_char(json_token* token, char val)
 }
 
 
-void json_object_print(const json_object* obj)
+void json_value_print(const json_value* val)
 {
-    switch (obj->type)
+    switch (val->type)
     {
-        case JSON_OBJECT_ARRAY:
+        case JSON_VALUE_ARRAY:
         {
-            json_array* arr = (json_array*)obj->val;
+            json_array* arr = (json_array*)val->val;
             printf("[");
-            for (int i = 0; i < arr->objects_count; i++)
+            for (int i = 0; i < arr->values_count; i++)
             {
-                json_object_print(arr->objects + i);
-                if (i != ((arr->objects_count)-1))
+                json_value_print(arr->values + i);
+                if (i != ((arr->values_count)-1))
                 {
                     printf(", ");
                 }
@@ -581,14 +558,14 @@ void json_object_print(const json_object* obj)
             printf("]");
         } break;
 
-        case JSON_OBJECT_OBJECT:
+        case JSON_VALUE_OBJECT:
         {
 
         } break;
 
         default:
         {
-            json_token_print(obj);
+            json_token_print(val);
         } break;
     }
 }
@@ -639,57 +616,57 @@ void json_token_destroy(json_token* token)
 }
 
 
-void json_object_destroy(json_object* obj)
+void json_value_destroy(json_value* val)
 {
-    switch (obj->type)
+    switch (val->type)
     {
-        case JSON_OBJECT_ARRAY:
+        case JSON_VALUE_ARRAY:
         {
-            json_array* array = (json_array*)(obj->val);
-            for (int i = 0; i < array->objects_count; i++)
+            json_array* array = (json_array*)(val->val);
+            for (int i = 0; i < array->values_count; i++)
             {
-                json_object_destroy(array->objects + i);
+                json_value_destroy(array->values + i);
             }
 
-            free(obj->val);
-            obj->val = NULL;
+            free(val->val);
+            val->val = NULL;
         } break;
 
-        case JSON_OBJECT_OBJECT:
+        case JSON_VALUE_OBJECT:
         {
-            assert(false && "Desturction of json object of type JSON_OBJECT_OBJECT not yet implemented\n");
+            assert(false && "Desturction of json valect of type JSON_VALUE_OBJECT not yet implemented\n");
         } break;
 
         default:
         {
-            json_token_destroy(obj);
+            json_token_destroy(val);
         } break;
     }
 }
 
 
-static void json_array_push(json_array* array, const json_object* obj)
+static void json_array_push(json_array* array, const json_value* val)
 {
-    //NOTE(omar): THIS IS FINE AS LONG AS json_token and json_object
+    //NOTE(omar): THIS IS FINE AS LONG AS json_token and json_value
     //are the same thing (a int type and char* val)
     //this shit will all be rewritten if they ever have to 
     //stop being interchangable
-    _resize_tokens_array(&(array->objects), &(array->objects_count),
-    (array->objects_count)+1);
+    _resize_tokens_array(&(array->values), &(array->values_count),
+    (array->values_count)+1);
 
-    json_object* last_obj = array->objects + (array->objects_count-1);
-    memcpy(last_obj, obj, sizeof(json_object));
+    json_value* last_val = array->values + (array->values_count-1);
+    memcpy(last_val, val, sizeof(json_value));
 }
 
 
-static json_object* json_array_get(const json_array* array, int index)
+static json_value* json_array_get(const json_array* array, int index)
 {
-    if (index >= array->objects_count)
+    if (index >= array->values_count)
     {
         return NULL;
     }
 
-    return array->objects + index;
+    return array->values + index;
 }
 
 
