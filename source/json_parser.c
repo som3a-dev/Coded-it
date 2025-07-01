@@ -91,7 +91,7 @@ json_array* jp_parse_array(json_token* token, const int tokens_count,
                     int token_index);
 
 int jp_parse_key_value(json_token* tokens, const int tokens_count,
-                        int token_index, hash_table* json_values);
+                        int* token_index, hash_table* json_values);
 
 
 json_token* jp_lex(const char* str, int* out_tokens_count);
@@ -157,7 +157,7 @@ void jp_parse(json_token* tokens, const int tokens_count)
         {
             case JSON_TOKEN_STRING:
             {
-                jp_parse_key_value(tokens, tokens_count, i, &json_values);
+                jp_parse_key_value(&tokens, tokens_count, &i, &json_values);
             } break;
 
             case JSON_TOKEN_CHAR:
@@ -169,14 +169,33 @@ void jp_parse(json_token* tokens, const int tokens_count)
                         //PARSE OBJECT
                     } break;
 
+                    case '}':
+                    {
+
+                    } break;
+
                     case '[':
                     {
                         //PARSE ARRAY
                     } break;
 
+                    case ']':
+                    {
+
+                    } break;
+
+                    case ',':
+                    {
+                        //TODO(omar): check if its a valid comma or not
+                        //maybe its only valid if we are parsing a json object
+                    } break;
+
                     default:
                     {
-                        //TODO(omar): Unexpected character. error ?
+                        //NOTE(omar): We shouldn't ever be here because the lexer shouldn't spit out
+                        //an invalid character as a token
+                        printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", tokens->val, i);
+                        assert(false);
                     } break;
                 }
             } break;
@@ -220,21 +239,36 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
     json_array* array = calloc(1, sizeof(json_array));
 
     //to get the next token after the '['
+    json_token* prev_token = *token;
+
     (*token)++;
     (*token_index)++;
 
     for (; (*token_index) < tokens_count; (*token_index)++)
     {
         json_token* t = (*token);
+        
+        if ((t->type == JSON_TOKEN_CHAR) && (t->val == ','))
+        {
+            goto next_token;
+        }
+        if ((t->type == JSON_TOKEN_CHAR) && (t->val == ']'))
+        {
+            break;
+        }
+
+        if (prev_token->type != JSON_TOKEN_CHAR)
+        {
+            assert(false && "Invalid token");
+        }
+        if ((prev_token->val != '[') && (prev_token->val != ','))
+        {
+            assert(false && "Invalid token");
+        }
+
         if (t->type == JSON_TOKEN_CHAR)
         {
-            char c = (char)t->val;
-            if ((c == '\n') || (c == ']'))
-            {
-                break;
-            }
-
-            if (c == '[')
+            if (t->val == '[')
             {
                 json_array* sub_array = jp_parse_array(token, tokens_count, token_index);
                 json_value array_val = {JSON_VALUE_ARRAY, sub_array};
@@ -246,6 +280,8 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
             json_array_push(array, t);
         }
 
+        next_token:
+        prev_token = t;
         (*token)++;
     }
 
@@ -253,10 +289,10 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
 }
 
 
-int jp_parse_key_value(json_token* tokens, const int tokens_count,
-                        int token_index, hash_table* json_values)
+int jp_parse_key_value(json_token** token, const int tokens_count,
+                        int* token_index, hash_table* json_values)
 {
-    if (token_index == (tokens_count-1))
+    if ((*token_index) == (tokens_count-1))
     {
         //TODO(omar):
         //There is no next token ? print an error
@@ -264,9 +300,11 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
         return 1;
     }
 
-    json_token* next_token = tokens + 1;
-    token_index++;
-    if (next_token->type != JSON_TOKEN_CHAR)
+    json_token* key = *token;
+
+    (*token)++;
+    (*token_index)++;
+    if ((*token)->type != JSON_TOKEN_CHAR)
     {
         //TODO(omar):
         //Next token is not a character? print an error
@@ -274,9 +312,9 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
         return 2;
     }
     
-    if (next_token->val == ':')
+    if ((*token)->val == ':')
     {
-        if (token_index == (tokens_count-1))
+        if ((*token_index) == (tokens_count-1))
         {
             //TODO(omar):
             //Token has no value token ? print an error
@@ -284,33 +322,33 @@ int jp_parse_key_value(json_token* tokens, const int tokens_count,
             return 3;
         }
 
-        json_token* value_token = next_token + 1;
-        token_index++;
+        (*token)++;
+        (*token_index)++;
 
-        switch (value_token->type)
+        switch ((*token)->type)
         {
             case JSON_TOKEN_CHAR:
             {
-                switch ((char)(value_token->val))
+                switch ((char)((*token)->val))
                 {
                     case '[':
                     {
                         //Made into variables because jp_parse_array messes with them
-                        json_token* array_start_token = value_token;
-                        int array_start_token_index = token_index;
+                        json_token* array_token = *token;
+                        int array_token_index = *token_index;
 
-                        json_array* array = jp_parse_array(&array_start_token, tokens_count,
-                        &array_start_token_index);
+                        json_array* array = jp_parse_array(token, tokens_count,
+                        token_index);
 
                         json_value array_val = {JSON_VALUE_ARRAY, array};
-                        hash_table_set(json_values, tokens->val, &array_val);
+                        hash_table_set(json_values, key->val, &array_val);
                     } break;
                 }
             } break;
 
             default:
             {
-                hash_table_set(json_values, tokens->val, value_token);
+                hash_table_set(json_values, key->val, *token);
             } break;
         }
     }
