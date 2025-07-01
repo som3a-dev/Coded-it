@@ -324,12 +324,16 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
     json_token* tokens = NULL;
     int tokens_count = 0;
 
+    //used for debugging and errors
+    int char_index = 0;
+
     while (str[0])
     {
         String json_str = jp_lex_string(str);
         if (json_str.text)
         {
             str += json_str.len;
+            char_index += json_str.len;
             
             _resize_tokens_array(&tokens, &tokens_count, tokens_count+1);
 
@@ -346,6 +350,7 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
         if (json_numeric.text)
         {
             str += json_numeric.len;
+            char_index += json_numeric.len;
 
             _resize_tokens_array(&tokens, &tokens_count, tokens_count+1);
 
@@ -361,6 +366,7 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
         {
 //            printf("%s\n", json_bool.text);
             str += json_bool.len;
+            char_index += json_bool.len;
 
             _resize_tokens_array(&tokens, &tokens_count, tokens_count+1);
 
@@ -388,9 +394,23 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
                 _resize_tokens_array(&tokens, &tokens_count, tokens_count+1);
                 json_token_set_char(tokens + (tokens_count-1), str[0]);
             } break;
+
+            case '\n':
+            case '\r':
+            case ' ':
+            {
+
+            } break;
+
+            default:
+            {
+                printf("\n\nERROR: Unexpected character '%c', index: %d\n\n", str[0], char_index);
+                assert(false);
+            } break;
         }
         
         str++;
+        char_index++;
     }
 
     for (int i = 0; i < tokens_count; i++)
