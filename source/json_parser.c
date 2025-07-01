@@ -184,25 +184,29 @@ void jp_parse(json_token* tokens, const int tokens_count)
         tokens++;
     }
 
-//    json_value* valect = hash_table_get(&json_values, "\"bar\"");
-//    json_value_print(valect);
+//    json_value* value = hash_table_get(&json_values, "\"bar\"");
+//    json_value_print(value);
 
     printf("\n");
 
-    json_value* valect = (json_value*)(json_values.vals);
+    json_value* value = hash_table_get(&json_values, "\"bar\"");
+    json_value_print(value);
+    printf("\n");
+
+/*    json_value* value = (json_value*)(json_values.vals);
     for (int i = 0; i < json_values.len; i++)
     {
         if (json_values.key_hashes[i])
         {
-            json_value_print(valect);
+            json_value_print(value);
             printf("\n");
         }
 
-        json_value_destroy(valect);
+        json_value_destroy(value);
         
-        valect++;
+        value++;
     }
-
+*/
     printf("\n");
     hash_table_print(&json_values);
 
@@ -541,6 +545,8 @@ static inline void json_token_set_char(json_token* token, char val)
 
 void json_value_print(const json_value* val)
 {
+    if (val == NULL) return;
+
     switch (val->type)
     {
         case JSON_VALUE_ARRAY:
@@ -573,6 +579,7 @@ void json_value_print(const json_value* val)
 
 void json_token_print(const json_token* token)
 {
+    if (token == NULL) return;
     switch (token->type)
     {
         case JSON_TOKEN_STRING:
@@ -634,7 +641,7 @@ void json_value_destroy(json_value* val)
 
         case JSON_VALUE_OBJECT:
         {
-            assert(false && "Desturction of json valect of type JSON_VALUE_OBJECT not yet implemented\n");
+            assert(false && "Desturction of json value of type JSON_VALUE_OBJECT not yet implemented\n");
         } break;
 
         default:
