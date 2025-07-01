@@ -93,9 +93,15 @@ void hash_table_set(hash_table* table, const char* key, const char* val)
 
 char* hash_table_get(const hash_table* table, const char* key)
 {
-    uint64_t index = fnv_hash(key) % table->len;
+    uint64_t hash = fnv_hash(key);
+    uint64_t index = hash % table->len;
 
     if (index >= table->len) return NULL;
+
+    if (table->key_hashes[index] != hash)
+    {
+        return NULL;
+    }
     
     return table->vals + (index * table->element_size);
 }
