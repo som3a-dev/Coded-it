@@ -151,6 +151,7 @@ void jp_parse(json_token* tokens, const int tokens_count)
     hash_table json_values;
     hash_table_init(&json_values, 10, sizeof(json_value));
 
+    bool just_parsed_key_value = false;
     for (int i = 0; i < tokens_count; i++)
     {
         switch (tokens->type)
@@ -158,6 +159,9 @@ void jp_parse(json_token* tokens, const int tokens_count)
             case JSON_TOKEN_STRING:
             {
                 jp_parse_key_value(&tokens, tokens_count, &i, &json_values);
+                just_parsed_key_value = true;
+                tokens++;
+                continue;
             } break;
 
             case JSON_TOKEN_CHAR:
@@ -179,17 +183,16 @@ void jp_parse(json_token* tokens, const int tokens_count)
                         //PARSE ARRAY
                     } break;
 
-                    case ']':
-                    {
-
-                    } break;
-
                     case ',':
                     {
-                        //TODO(omar): check if its a valid comma or not
-                        //maybe its only valid if we are parsing a json object
+                        if (just_parsed_key_value == false)
+                        {
+                            printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", tokens->val, i);
+                            assert(false);
+                        }
                     } break;
 
+                    case ']':
                     default:
                     {
                         //NOTE(omar): We shouldn't ever be here because the lexer shouldn't spit out
@@ -200,6 +203,8 @@ void jp_parse(json_token* tokens, const int tokens_count)
                 }
             } break;
         }
+
+        just_parsed_key_value = false;
         tokens++;
     }
 
@@ -309,6 +314,7 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
         //TODO(omar):
         //Next token is not a character? print an error
         printf("Unexpected token\n");
+        assert(false);
         return 2;
     }
     
@@ -319,6 +325,7 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
             //TODO(omar):
             //Token has no value token ? print an error
             printf("No value\n");
+            assert(false);
             return 3;
         }
 
@@ -342,6 +349,12 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
 
                         json_value array_val = {JSON_VALUE_ARRAY, array};
                         hash_table_set(json_values, key->val, &array_val);
+                    } break;
+
+                    default:
+                    {
+                        printf("Unexpected token\n");
+                        assert(false);
                     } break;
                 }
             } break;
