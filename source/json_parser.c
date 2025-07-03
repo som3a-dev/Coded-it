@@ -89,6 +89,7 @@ hash_table* jp_parse(json_token* tokens, const int tokens_count);
 //token is the token of the '[' character of the array
 json_array* jp_parse_array(json_token** token, const int tokens_count,
                     int token_index);
+                    int* token_index);
 
 int jp_parse_key_value(json_token** tokens, const int tokens_count,
                         int* token_index, hash_table* json_values);
