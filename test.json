@@ -1,9 +1,7 @@
 {
-    "foo": [1, 2, [4, 5]],
-    
-    "bar": ["this", "that", ["test", ["ing", ["sub arrays", "trippy"]]]],
-
-    "id": 5,
-
-    "name": "Module1"
+    "object": 
+    {
+        "key1": 1,
+        "key2": 3
+    }
 }

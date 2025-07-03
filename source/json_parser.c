@@ -59,6 +59,11 @@ typedef struct
     int values_count;
 } json_array; //an array of json_values. Also considered a json_value
 
+typedef struct
+{
+    hash_table* table; //a hash table of json_valu
+} json_object;
+
 
 static void json_array_push(json_array* array, const json_value* val);
 static json_value* json_array_get(const json_array* array, int index);
@@ -88,8 +93,9 @@ hash_table* jp_parse(json_token* tokens, const int tokens_count);
 
 //token is the token of the '[' character of the array
 json_array* jp_parse_array(json_token** token, const int tokens_count,
-                    int token_index);
                     int* token_index);
+
+json_object* jp_parse_object(json_token** token, const int tokens_count, int* token_index);
 
 int jp_parse_key_value(json_token** tokens, const int tokens_count,
                         int* token_index, hash_table* json_values);
@@ -136,7 +142,7 @@ void jp_parse_file(const char* path)
     json_token* tokens = jp_lex(file_string, &tokens_count);
     hash_table* json_values = jp_parse(tokens, tokens_count);
 
-    json_value* value = hash_table_get(json_values, "\"bar\"");
+    json_value* value = hash_table_get(json_values, "\"object\"");
     json_value_print(value);
     printf("\n");
     printf("\n");
@@ -287,6 +293,77 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
 }
 
 
+json_object* jp_parse_object(json_token** token, const int tokens_count, int* token_index)
+{
+    json_object* obj = calloc(1, sizeof(json_object));
+    hash_table_init(&(obj->table), 0, sizeof(json_value));
+
+    json_token* prev_token = *token;
+
+    (*token)++;
+    (*token_index)++;
+
+    json_token* t;
+    for (; (*token_index) < tokens_count; (*token_index)++)
+    {
+        t = (*token);
+
+        switch (t->type)
+        {
+            case JSON_TOKEN_CHAR:
+            {
+                if (t->val == '}')
+                {
+                    if (prev_token->type == JSON_TOKEN_CHAR)
+                    {
+                        if (prev_token->val != '}')
+                        {
+                            printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
+                            assert(false);
+                        }
+                    }
+                    break;
+                }
+                if (t->val == ',')
+                {
+                    goto next_token;
+                }
+                
+                printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
+                assert(false);
+            } break;
+
+            case JSON_TOKEN_STRING:
+            {
+                if (prev_token->type != JSON_TOKEN_CHAR)
+                {
+                    assert(false && "Invalid token");
+                }
+
+                if ((prev_token->val != '{') && (prev_token->val != ','))
+                {
+                    assert(false && "Invalid token");
+                }
+
+                jp_parse_key_value(token, tokens_count, token_index, &(obj->table));
+            } break;
+
+            default:
+            {
+                printf("Unexpected token\n");
+                assert(false);
+            } break;
+        }
+        
+        next_token:
+        prev_token = t;
+        (*token)++;
+    }
+
+    return obj;
+}
+
+
 int jp_parse_key_value(json_token** token, const int tokens_count,
                         int* token_index, hash_table* json_values)
 {
@@ -338,6 +415,16 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
 
                         json_value array_val = {JSON_VALUE_ARRAY, array};
                         hash_table_set(json_values, key->val, &array_val);
+                    } break;
+
+                    case '{':
+                    {
+                        json_object* obj = jp_parse_object(token, tokens_count, token_index);
+
+                        json_value obj_val = {JSON_VALUE_OBJECT, obj};
+                        hash_table_set(json_values, key->val, &obj_val);
+
+                        json_value_print(&obj_val);
                     } break;
 
                     default:
@@ -626,7 +713,14 @@ void json_value_print(const json_value* val)
 
         case JSON_VALUE_OBJECT:
         {
+            hash_table* table = (hash_table*)val->val;
+            for (int i = 0; i < table->len; i++)
+            {
+                json_value_print(hash_table_get_by_index(table, i));
+                printf("\n");
+            }
 
+            printf("\n");
         } break;
 
         default:
