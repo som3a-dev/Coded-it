@@ -84,13 +84,13 @@ static void _resize_tokens_array(json_token** tokens, int* tokens_count, int new
 
 bool is_index_part_of_literal(const char* text, int index);
 
-void jp_parse(json_token* tokens, const int tokens_count);
+hash_table* jp_parse(json_token* tokens, const int tokens_count);
 
 //token is the token of the '[' character of the array
-json_array* jp_parse_array(json_token* token, const int tokens_count,
+json_array* jp_parse_array(json_token** token, const int tokens_count,
                     int token_index);
 
-int jp_parse_key_value(json_token* tokens, const int tokens_count,
+int jp_parse_key_value(json_token** tokens, const int tokens_count,
                         int* token_index, hash_table* json_values);
 
 
@@ -133,7 +133,14 @@ void jp_parse_file(const char* path)
     //lexing
     int tokens_count;
     json_token* tokens = jp_lex(file_string, &tokens_count);
-    jp_parse(tokens, tokens_count);
+    hash_table* json_values = jp_parse(tokens, tokens_count);
+
+    json_value* value = hash_table_get(json_values, "\"bar\"");
+    json_value_print(value);
+    printf("\n");
+    printf("\n");
+    hash_table_print(json_values);
+
 
     free(tokens);
     fclose(fp);
@@ -141,15 +148,15 @@ void jp_parse_file(const char* path)
 }
 
 
-void jp_parse(json_token* tokens, const int tokens_count)
+hash_table* jp_parse(json_token* tokens, const int tokens_count)
 {
     if (tokens == NULL)
     {
-        return;
+        return NULL;
     }
 
-    hash_table json_values;
-    hash_table_init(&json_values, 10, sizeof(json_value));
+    hash_table* json_values = malloc(sizeof(hash_table));
+    hash_table_init(json_values, 10, sizeof(json_value));
 
     bool just_parsed_key_value = false;
     for (int i = 0; i < tokens_count; i++)
@@ -158,7 +165,7 @@ void jp_parse(json_token* tokens, const int tokens_count)
         {
             case JSON_TOKEN_STRING:
             {
-                jp_parse_key_value(&tokens, tokens_count, &i, &json_values);
+                jp_parse_key_value(&tokens, tokens_count, &i, json_values);
                 just_parsed_key_value = true;
                 tokens++;
                 continue;
@@ -208,33 +215,7 @@ void jp_parse(json_token* tokens, const int tokens_count)
         tokens++;
     }
 
-//    json_value* value = hash_table_get(&json_values, "\"bar\"");
-//    json_value_print(value);
-
-    printf("\n");
-
-    json_value* value = hash_table_get(&json_values, "\"bar\"");
-    json_value_print(value);
-    printf("\n");
-
-/*    json_value* value = (json_value*)(json_values.vals);
-    for (int i = 0; i < json_values.len; i++)
-    {
-        if (json_values.key_hashes[i])
-        {
-            json_value_print(value);
-            printf("\n");
-        }
-
-        json_value_destroy(value);
-        
-        value++;
-    }
-*/
-    printf("\n");
-    hash_table_print(&json_values);
-
-    hash_table_clear(&json_values);
+    return json_values;
 }
 
 
@@ -351,10 +332,6 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
                 {
                     case '[':
                     {
-                        //Made into variables because jp_parse_array messes with them
-                        json_token* array_token = *token;
-                        int array_token_index = *token_index;
-
                         json_array* array = jp_parse_array(token, tokens_count,
                         token_index);
 
