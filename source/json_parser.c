@@ -255,6 +255,11 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
         
         if ((t->type == JSON_TOKEN_CHAR) && (t->val == ','))
         {
+            if (prev_token->type == JSON_TOKEN_CHAR)
+            {
+                printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
+                assert(false);
+            }
             goto next_token;
         }
         if ((t->type == JSON_TOKEN_CHAR) && (t->val == ']'))
@@ -268,7 +273,8 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
         }
         if ((prev_token->val != '[') && (prev_token->val != ','))
         {
-            assert(false && "Invalid token");
+            printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
+            assert(false);
         }
 
         if (t->type == JSON_TOKEN_CHAR)
@@ -278,6 +284,11 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
                 json_array* sub_array = jp_parse_array(token, tokens_count, token_index);
                 json_value array_val = {JSON_VALUE_ARRAY, sub_array};
                 json_array_push(array, &array_val);
+            }
+            else
+            {
+                printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
+                assert(false);
             }
         }
         else
