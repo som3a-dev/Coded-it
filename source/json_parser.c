@@ -61,7 +61,7 @@ typedef struct
 
 typedef struct
 {
-    hash_table* table; //a hash table of json_valu
+    hash_table table; //a hash table of json_value
 } json_object;
 
 
