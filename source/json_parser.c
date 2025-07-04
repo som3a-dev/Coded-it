@@ -89,7 +89,7 @@ static void _resize_tokens_array(json_token** tokens, int* tokens_count, int new
 
 bool is_index_part_of_literal(const char* text, int index);
 
-hash_table* jp_parse(json_token* tokens, const int tokens_count);
+json_object* jp_parse(json_token* tokens, const int tokens_count);
 
 //token is the token of the '[' character of the array
 json_array* jp_parse_array(json_token** token, const int tokens_count,
@@ -140,12 +140,12 @@ void jp_parse_file(const char* path)
     //lexing
     int tokens_count;
     json_token* tokens = jp_lex(file_string, &tokens_count);
-    hash_table* json_values = jp_parse(tokens, tokens_count);
+    json_object* json_object = jp_parse(tokens, tokens_count);
+
+    hash_table* json_values = &(json_object->table);
 
     json_value* value = hash_table_get(json_values, "\"object\"");
     json_value_print(value);
-    printf("\n");
-    printf("\n");
     hash_table_print(json_values);
 
 
@@ -155,75 +155,27 @@ void jp_parse_file(const char* path)
 }
 
 
-hash_table* jp_parse(json_token* tokens, const int tokens_count)
+json_object* jp_parse(json_token* tokens, const int tokens_count)
 {
     if (tokens == NULL)
     {
         return NULL;
     }
 
-    hash_table* json_values = malloc(sizeof(hash_table));
-    hash_table_init(json_values, 10, sizeof(json_value));
-
-    bool just_parsed_key_value = false;
-    for (int i = 0; i < tokens_count; i++)
+    int i = 0;
+    if (tokens->type == JSON_TOKEN_CHAR)
     {
-        switch (tokens->type)
+        if (tokens->val == '{')
         {
-            case JSON_TOKEN_STRING:
-            {
-                jp_parse_key_value(&tokens, tokens_count, &i, json_values);
-                just_parsed_key_value = true;
-                tokens++;
-                continue;
-            } break;
-
-            case JSON_TOKEN_CHAR:
-            {
-                switch ((char)(tokens->val))
-                {
-                    case '{':
-                    {
-                        //PARSE OBJECT
-                    } break;
-
-                    case '}':
-                    {
-
-                    } break;
-
-                    case '[':
-                    {
-                        //PARSE ARRAY
-                    } break;
-
-                    case ',':
-                    {
-                        if (just_parsed_key_value == false)
-                        {
-                            printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", tokens->val, i);
-                            assert(false);
-                        }
-                    } break;
-
-                    case ']':
-                    default:
-                    {
-                        //NOTE(omar): We shouldn't ever be here because the lexer shouldn't spit out
-                        //an invalid character as a token
-                        printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", tokens->val, i);
-                        assert(false);
-                    } break;
-                }
-            } break;
+            json_object* obj = jp_parse_object(&tokens, tokens_count, &i);
+            return obj;
         }
-
-        just_parsed_key_value = false;
-        tokens++;
     }
 
-    return json_values;
+    assert(false && "ERROR: Expected object at the start of the json file");
+    return NULL;
 }
+
 
 
 json_array* jp_parse_array(json_token** token, const int tokens_count,
