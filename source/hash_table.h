@@ -6,6 +6,8 @@ typedef struct
 {
     uint64_t* key_hashes; //the fnv hashes of each key.
                      //NOT the index (which is hash % table->len)
+    
+    char** keys;
 
     char* vals; //the values
     int len;
