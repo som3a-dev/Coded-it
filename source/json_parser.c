@@ -144,8 +144,8 @@ void jp_parse_file(const char* path)
 
     hash_table* json_values = &(json_object->table);
 
-    json_value* value = hash_table_get(json_values, "\"object\"");
-    json_value_print(value);
+//    json_value* value = hash_table_get(json_values, "\"object\"");
+//    json_value_print(value);
     hash_table_print(json_values);
 
 
@@ -274,7 +274,7 @@ json_object* jp_parse_object(json_token** token, const int tokens_count, int* to
                             assert(false);
                         }
                     }
-                    break;
+                    goto end;
                 }
                 if (t->val == ',')
                 {
@@ -311,6 +311,8 @@ json_object* jp_parse_object(json_token** token, const int tokens_count, int* to
         prev_token = t;
         (*token)++;
     }
+
+    end:
 
     return obj;
 }
@@ -375,8 +377,6 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
 
                         json_value obj_val = {JSON_VALUE_OBJECT, obj};
                         hash_table_set(json_values, key->val, &obj_val);
-
-                        json_value_print(&obj_val);
                     } break;
 
                     default:
