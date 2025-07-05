@@ -10,6 +10,11 @@ typedef struct
     char** keys;
 
     char* vals; //the values
+
+    //the actual number of key values in the table
+    int count;
+
+    //the amount of elements in vals and key_hashes, including empty
     int len;
     size_t element_size; //NEVER CHANGE on your own
 } hash_table;
@@ -32,6 +37,8 @@ void hash_table_set(hash_table* table, const char* key,
 char* hash_table_get(const hash_table* table, const char* key);
 
 char* hash_table_get_by_index(const hash_table* table, int index);
+
+char* hash_table_get_key(const hash_table* table, int index);
 
 void hash_table_print(const hash_table* table);
 

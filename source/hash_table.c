@@ -27,11 +27,11 @@ void hash_table_init(hash_table* table, int initial_len,
     }
 
     table->len = initial_len;
+    table->count = 0;
     table->element_size = element_size;
 
     table->vals = calloc(table->len, table->element_size);
     table->key_hashes = calloc(table->len, sizeof(uint64_t));
-    table->keys = calloc(table->len, sizeof(char*));
 }
 
 
@@ -92,15 +92,21 @@ void hash_table_set(hash_table* table, const char* key, const char* val)
     }
 
     table->key_hashes[index] = hash;
-    char** key_dst = (table->keys) + index;
-    *key_dst = malloc(sizeof(char) * (strlen(key)+1));
-    memcpy(*key_dst, key, sizeof(char) * (strlen(key) + 1));
 
-/*    for (int i = 0; i < table->len; i++)
+    table->count++;
+    if (table->keys)
     {
-        printf("%llu, ", table->key_hashes[i]);
+        table->keys = realloc(table->keys, sizeof(char*) * table->count);
     }
-    printf("\n");*/
+    else
+    {
+        table->keys = malloc(sizeof(char*) * table->count);
+    }
+
+    char** key_dst = table->keys + (table->count-1);
+    *key_dst = malloc(sizeof(char) * (strlen(key)+1));
+
+    memcpy(*key_dst, key, sizeof(char) * (strlen(key) + 1));
 }
 
 
@@ -128,6 +134,14 @@ char* hash_table_get_by_index(const hash_table* table, int index)
 }
 
 
+char* hash_table_get_key(const hash_table* table, int index)
+{
+    if (index >= table->count) return NULL;
+    
+    return table->keys[index];
+}
+
+
 void _hash_table_resize(hash_table* table, int new_len)
 {
     //create new key hashes and values arrays of the new_len. and recopy the
@@ -140,14 +154,12 @@ void _hash_table_resize(hash_table* table, int new_len)
 
     uint64_t hash;
     char* val;
-    char* key;
     int new_index = -1;
     for (int i = 0; i < table->len; i++)
     {
         //get the key, value pair at index i
         hash = table->key_hashes[i];
         val = table->vals + (i * table->element_size);
-        key = table->keys[i];
 
         //generate the new index (since the hash table's length changed)
         new_index = hash % new_len;
@@ -163,10 +175,7 @@ void _hash_table_resize(hash_table* table, int new_len)
 
         //set the new index of the hash to the hash in the new key hashes array
         new_key_hashes[new_index] = hash;
-
-        //set the key
-        new_keys[new_index] = key;
-        
+       
         //same for the values array
         char* new_val = new_vals + (new_index * table->element_size);
         for (int j = 0; j < table->element_size; j++)
@@ -180,7 +189,6 @@ void _hash_table_resize(hash_table* table, int new_len)
 
     table->vals = new_vals;
     table->key_hashes = new_key_hashes;
-    table->keys = new_keys;
 
     table->len = new_len;
 }
@@ -188,11 +196,12 @@ void _hash_table_resize(hash_table* table, int new_len)
 
 void hash_table_print(const hash_table* table)
 {
-    for (int i = 0; i < table->len; i++)
+    for (int i = 0; i < table->count; i++)
     {
-        printf("'%s', %d: %llu\n", table->keys[i], i, table->key_hashes[i]);
+        printf("%s\n", table->keys[i]);
     }
 }
+
 
 
 //FNV-1a

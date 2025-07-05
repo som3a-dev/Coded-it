@@ -143,11 +143,13 @@ void jp_parse_file(const char* path)
     json_object* json_object = jp_parse(tokens, tokens_count);
 
     hash_table* json_values = &(json_object->table);
+    char* key = hash_table_get_key(json_values, 3);
+    char* val = hash_table_get(json_values, key);
+    printf("%s: ", key);
+    json_value_print(val);
+    printf("\n");
 
-//    json_value* value = hash_table_get(json_values, "\"object\"");
-//    json_value_print(value);
-    hash_table_print(json_values);
-
+//    hash_table_print(json_values);
 
     free(tokens);
     fclose(fp);
