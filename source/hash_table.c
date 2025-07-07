@@ -113,6 +113,7 @@ void hash_table_set(hash_table* table, const char* key, const char* val)
 char* hash_table_get(const hash_table* table, const char* key)
 {
     if (table == NULL) return NULL;
+    if (key == NULL) return NULL;
 
     uint64_t hash = fnv_hash(key);
     uint64_t index = hash % table->len;
@@ -213,6 +214,7 @@ void hash_table_print(const hash_table* table)
 //FNV-1a
 static uint64_t fnv_hash(const char* key)
 {
+    if (key == NULL) return 0;
     uint64_t hash = FNV_OFFSET;
 
     for (int i = 0; i < strlen(key); i++)
