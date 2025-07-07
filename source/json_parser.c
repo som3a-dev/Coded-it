@@ -478,6 +478,7 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
 
             case '\n':
             case '\r':
+            case '\t':
             case ' ':
             {
 
