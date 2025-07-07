@@ -675,12 +675,15 @@ void json_value_print(const json_value* val)
         case JSON_VALUE_OBJECT:
         {
             hash_table* table = (hash_table*)val->val;
-            for (int i = 0; i < table->len; i++)
+
+            for (int i = 0; i < table->count; i++)
             {
-                json_value_print(hash_table_get_by_index(table, i));
+                char* key = hash_table_get_key(table, i);
+                char* val = hash_table_get(table, key);
+                printf("%s: ", key);
+                json_value_print(val);
                 printf("\n");
             }
-
             printf("\n");
         } break;
 
