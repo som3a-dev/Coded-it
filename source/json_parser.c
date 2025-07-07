@@ -141,22 +141,22 @@ void jp_parse_file(const char* path)
     fread_s(file_string, sizeof(char) * file_len, sizeof(char), file_len, fp);
     file_string[file_len] = '\0';
 
-    printf("%s\n", file_string);
-
     //lexing
     int tokens_count;
     json_token* tokens = jp_lex(file_string, &tokens_count);
-    json_object* json_object = jp_parse(tokens, tokens_count);
+    json_object* json_obj = jp_parse(tokens, tokens_count);
 
-    hash_table* json_values = &(json_object->table);
-    char* key = hash_table_get_key(json_values, 3);
-    char* val = hash_table_get(json_values, key);
-    printf("%s: ", key);
-    json_value_print(val);
-    printf("\n");
+    hash_table* json_values = &(json_obj->table);
+    json_value* val = hash_table_get(json_values, "semanticTokenColors");
 
-//    hash_table_print(json_values);
+    json_object* obj = (json_object*)(val->val);
+    json_value* number_literal_color = hash_table_get(&(obj->table), "numberLiteral");
+    json_value_print(number_literal_color);
 
+    for (int i = 0; i < tokens_count; i++)
+    {
+        json_token_destroy(tokens + i);
+    }
     free(tokens);
     fclose(fp);
     free(file_string);
@@ -254,7 +254,6 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
         }
 
         next_token:
-        prev_token = t;
         prev_token = (*token);
         (*token)++;
     }
@@ -387,7 +386,14 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
                         token_index);
 
                         json_value array_val = {JSON_VALUE_ARRAY, array};
-                        hash_table_set(json_values, key->val, &array_val);
+
+                        String key_str = {0};
+                        String_set(&key_str, key->val);
+                        String_remove(&key_str, key_str.len-1, NULL);
+                        String_remove(&key_str, 0, NULL);
+
+                        hash_table_set(json_values, key_str.text, &array_val);
+                        String_clear(&key_str);
                     } break;
 
                     case '{':
@@ -395,7 +401,14 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
                         json_object* obj = jp_parse_object(token, tokens_count, token_index);
 
                         json_value obj_val = {JSON_VALUE_OBJECT, obj};
-                        hash_table_set(json_values, key->val, &obj_val);
+
+                        String key_str = {0};
+                        String_set(&key_str, key->val);
+                        String_remove(&key_str, key_str.len-1, NULL);
+                        String_remove(&key_str, 0, NULL);
+
+                        hash_table_set(json_values, key_str.text, &obj_val);
+                        String_clear(&key_str);
                     } break;
 
                     default:
@@ -408,7 +421,14 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
 
             default:
             {
-                hash_table_set(json_values, key->val, *token);
+                String key_str = {0};
+                String_set(&key_str, key->val);
+                String_remove(&key_str, key_str.len-1, NULL);
+                String_remove(&key_str, 0, NULL);
+
+                hash_table_set(json_values, key_str.text, *token);
+                String_clear(&key_str);
+
             } break;
         }
     }
@@ -518,12 +538,12 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
         char_index++;
     }
 
-    for (int i = 0; i < tokens_count; i++)
+/*    for (int i = 0; i < tokens_count; i++)
     {
         json_token_print(tokens + i);
         printf(" | ");
     }
-    printf("\n");
+    printf("\n");*/
 
     if (out_tokens_count)
     {
