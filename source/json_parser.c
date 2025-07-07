@@ -11,6 +11,11 @@
 #include "hash_table.h"
 
 
+#define IS_OPEN_BRACKET(x) ((x == '{') || (x == '['))
+#define IS_CLOSED_BRACKET(x) ((x =='}') || (x == ']'))
+#define IS_BRACKET(x) (IS_OPEN_BRACKET(x) || IS_CLOSED_BRACKET(x))
+
+
 enum
 {
     JSON_TOKEN_NONE,
