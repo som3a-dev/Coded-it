@@ -395,6 +395,12 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
             } break;
         }
     }
+    else
+    {
+        printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n",
+        (*token)->val, *token_index);
+        assert(false);
+    }
     
     return 0;
 }
