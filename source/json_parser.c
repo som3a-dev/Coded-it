@@ -236,6 +236,12 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
                 json_value array_val = {JSON_VALUE_ARRAY, sub_array};
                 json_array_push(array, &array_val);
             }
+            else if (t->val == '{')
+            {
+                json_array* object = jp_parse_object(token, tokens_count, token_index);
+                json_value object_val = {JSON_VALUE_OBJECT, object};
+                json_array_push(array, &object_val);
+            }
             else
             {
                 printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
