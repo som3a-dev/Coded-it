@@ -240,6 +240,7 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
 
         next_token:
         prev_token = t;
+        prev_token = (*token);
         (*token)++;
     }
 
