@@ -270,7 +270,7 @@ json_object* jp_parse_object(json_token** token, const int tokens_count, int* to
                 {
                     if (prev_token->type == JSON_TOKEN_CHAR)
                     {
-                        if (prev_token->val != '}')
+                        if ((prev_token->val != '}') && (prev_token->val != '{'))
                         {
                             printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
                             assert(false);
