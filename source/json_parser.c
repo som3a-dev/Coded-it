@@ -13,6 +13,7 @@
 
 #define IS_OPEN_BRACKET(x) ((x == '{') || (x == '['))
 #define IS_CLOSED_BRACKET(x) ((x =='}') || (x == ']'))
+#define IS_CURLY_BRACKET(x) ((x == '{') || (x == '}'))
 #define IS_BRACKET(x) (IS_OPEN_BRACKET(x) || IS_CLOSED_BRACKET(x))
 
 
@@ -279,7 +280,8 @@ json_object* jp_parse_object(json_token** token, const int tokens_count, int* to
                 {
                     if (prev_token->type == JSON_TOKEN_CHAR)
                     {
-                        if ((prev_token->val != '}') && (prev_token->val != '{'))
+                        if (IS_CURLY_BRACKET(prev_token->val) == false &&
+                        (prev_token->val != ','))
                         {
                             printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
                             assert(false);
