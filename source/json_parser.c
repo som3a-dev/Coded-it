@@ -93,10 +93,6 @@ json_object* jp_parse_file(const char* path)
     json_value* number_literal_color = hash_table_get(&(obj->table), "numberLiteral");
     json_value_print(number_literal_color);*/
 
-    for (int i = 0; i < tokens_count; i++)
-    {
-        json_token_destroy(tokens + i);
-    }
     free(tokens);
     fclose(fp);
     free(file_string);
@@ -105,6 +101,9 @@ json_object* jp_parse_file(const char* path)
 }
 
 
+//NOTE(omar): right now we use the same json_token->val for the
+//json_object. maybe consider making copies of the vals instead
+//if needed. 
 json_object* jp_parse(json_token* tokens, const int tokens_count)
 {
     if (tokens == NULL)
