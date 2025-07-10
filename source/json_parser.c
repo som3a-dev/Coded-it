@@ -737,7 +737,15 @@ void json_value_destroy(json_value* val)
 
         case JSON_VALUE_OBJECT:
         {
-            assert(false && "Desturction of json value of type JSON_VALUE_OBJECT not yet implemented\n");
+//            assert(false && "Desturction of json value of type JSON_VALUE_OBJECT not yet implemented\n");
+            json_object* obj = (json_object*)(val->val);
+            for (int i = 0; i < obj->table.count; i++)
+            {
+                json_value* val = hash_table_get(&(obj->table),
+                hash_table_get_key(&(obj->table), i));
+
+                json_value_destroy(val);
+            }
         } break;
 
         default:

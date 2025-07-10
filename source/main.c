@@ -27,6 +27,8 @@ int main(int argc, char** argv)
     json_value val = {JSON_VALUE_OBJECT, obj};
     json_value_print(&val);
 
+    json_value_destroy(&val);
+
     // hash_table table;
     // hash_table_init(&table, 0, sizeof(String));
 
