@@ -17,60 +17,6 @@
 #define IS_BRACKET(x) (IS_OPEN_BRACKET(x) || IS_CLOSED_BRACKET(x))
 
 
-enum
-{
-    JSON_TOKEN_NONE,
-    JSON_TOKEN_STRING,
-    JSON_TOKEN_INT,
-    JSON_TOKEN_BOOL,
-    JSON_TOKEN_CHAR
-};
-
-//THE ENUM OF JSON_TOKEN MUST BE A SUBSET OF JSON_VALUE THAT IS ALWAYS
-//AT THE START AND IN THE SAME ORDER IN JSON_VALUE
-//NOT ABIDING BY THAT CAN AND WILL BREAK BEHAVIOR FOR NOW
-enum
-{
-    JSON_VALUE_NONE,
-    JSON_VALUE_STRING,
-    JSON_VALUE_INT,
-    JSON_VALUE_BOOL,
-    JSON_VALUE_CHAR,
-    JSON_VALUE_OBJECT,
-    JSON_VALUE_ARRAY
-};
-
-typedef struct
-{
-    int type;
-
-    //this is a real allocated pointer only in the case of strings
-    //in other cases (int, char) this is an encoded pointer
-    char* val;
-} json_token;
-
-typedef struct
-{
-    int type;
-
-    //this is a real allocated pointer only in the case of strings
-    //in other cases (int, char) this is an encoded pointer
-    char* val;
-} json_value;
-
-
-typedef struct
-{
-    json_value* values;
-    int values_count;
-} json_array; //an array of json_values. Also considered a json_value
-
-typedef struct
-{
-    hash_table table; //a hash table of json_value
-} json_object;
-
-
 static void json_array_push(json_array* array, const json_value* val);
 static json_value* json_array_get(const json_array* array, int index);
 
@@ -81,12 +27,6 @@ static inline void json_token_set_string(json_token* token, char* val);
 static inline void json_token_set_bool(json_token* token, bool val);
 static inline void json_token_set_char(json_token* token, char val);
 
-
-void json_value_print(const json_value* val);
-void json_token_print(const json_token* token);
-
-void json_token_destroy(json_token* token);
-void json_value_destroy(json_value* val);
 
 
 //helper for jp_lex()
@@ -119,7 +59,7 @@ String jp_lex_numeric(const char* str);
 String jp_lex_bool(char* str);
 
 
-void jp_parse_file(const char* path)
+json_object* jp_parse_file(const char* path)
 {
     FILE* fp;
     fopen_s(&fp, path, "rb");
@@ -146,12 +86,12 @@ void jp_parse_file(const char* path)
     json_token* tokens = jp_lex(file_string, &tokens_count);
     json_object* json_obj = jp_parse(tokens, tokens_count);
 
-    hash_table* json_values = &(json_obj->table);
+/*    hash_table* json_values = &(json_obj->table);
     json_value* val = hash_table_get(json_values, "semanticTokenColors");
 
     json_object* obj = (json_object*)(val->val);
     json_value* number_literal_color = hash_table_get(&(obj->table), "numberLiteral");
-    json_value_print(number_literal_color);
+    json_value_print(number_literal_color);*/
 
     for (int i = 0; i < tokens_count; i++)
     {
@@ -160,6 +100,8 @@ void jp_parse_file(const char* path)
     free(tokens);
     fclose(fp);
     free(file_string);
+
+    return json_obj;
 }
 
 
@@ -171,7 +113,7 @@ json_object* jp_parse(json_token* tokens, const int tokens_count)
     }
 
     int i = 0;
-    if (tokens->type == JSON_TOKEN_CHAR)
+    // if (tokens->type == JSON_TOKEN_CHAR)
     {
         if (tokens->val == '{')
         {

@@ -411,3 +411,5 @@ ada
 source/.vscode/c_cpp_properties.json
 .vcxproj
 vendor
+CODE2.c
+source/.vscode/settings.json

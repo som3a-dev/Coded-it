@@ -17,13 +17,15 @@
 int main(int argc, char** argv)
 {
     ProgramState state;
-//    editor_init(&state);
+/*    editor_init(&state);
     
- //   editor_loop(&state);
+    editor_loop(&state);
     
-  //  editor_destroy(&state);
+    editor_destroy(&state);*/
 
-    jp_parse_file("test.json");
+    json_object* obj = jp_parse_file("test.json");
+    json_value val = {JSON_VALUE_OBJECT, obj};
+    json_value_print(&val);
 
     // hash_table table;
     // hash_table_init(&table, 0, sizeof(String));
