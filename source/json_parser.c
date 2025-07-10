@@ -67,7 +67,7 @@ json_object* jp_parse_file(const char* path)
     if (!fp)
     {
         printf("JSON PARSER: invalid file path '%s'\n", path);
-        return;
+        return NULL;
     }
 
     char* file_string = NULL;
