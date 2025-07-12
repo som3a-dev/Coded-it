@@ -306,11 +306,8 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_BRACES;
-        
-        color->r = 128;
-        color->g = 0;
-        color->b = 128;
-        color->a = 255;
+        const char* dark_default = "FFD700";
+        rgb_hex_str_to_int(dark_default, &(color->r), &(color->g), &(color->b));
     }
 
 }
