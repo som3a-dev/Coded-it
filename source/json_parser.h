@@ -2,6 +2,12 @@
 
 #include "hash_table.h"
 
+//NOTE(omar): IMPORTANT NOTES
+// - Key strings are stripped of their quotations when stored. But value strings are not
+//   "Key": "Value"
+//   "Key" is stored as Key
+//   "Value" is stored as "Value"
+
 
 enum
 {

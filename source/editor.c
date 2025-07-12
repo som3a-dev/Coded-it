@@ -144,6 +144,15 @@ void editor_init(ProgramState* state)
     assert(parent_obj && "Loading theme failed.");
 
 
+    json_array* token_colors = NULL;
+    {
+        json_value* token_colors_val = jp_get_child_value_in_object(parent_obj, "tokenColors");
+        if (token_colors_val != NULL)
+        {
+            token_colors = (json_array*)(token_colors_val->val);
+        }
+    }
+
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
     {
         SDL_Color* color = state->token_colors + TOKEN_NONE;
@@ -172,10 +181,61 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_KEYWORD;
-        color->r = 0x96;
-        color->g = 0x4b;
-        color->b = 0x00;
-        color->a = 255;
+        json_value* token_color = NULL;
+        
+        for (int i = 0; i < token_colors->values_count; i++) 
+        {
+            json_value* val = token_colors->values + i;
+            if (val->type != JSON_VALUE_OBJECT)
+            {
+                //TODO(omar): this probably should never happen. maybe print an error
+                assert(false);
+                continue;
+            }
+
+            json_object* obj = (json_object*)(val->val);
+            assert(obj);
+
+            json_value* scope = hash_table_get(&(obj->table), "scope");
+            if (scope == NULL)
+            {
+                //TODO(omar): this probably should never happen. maybe print an error
+                assert(false);
+                continue;
+            }
+
+            if (scope->type == JSON_VALUE_STRING)
+            {
+                if (strcmp(scope->val, "\"keyword\"") == 0)
+                {
+                    json_value* settings = hash_table_get(&(obj->table), "settings");
+                    assert(settings);
+                    json_object* settings_obj = (json_object*)(settings->val);
+
+                    token_color = hash_table_get(&(settings_obj->table), "foreground");
+                    break;
+                }
+            }
+        }
+        
+        if (token_color)
+        {
+            assert(token_color->type == JSON_VALUE_STRING);
+            char* str = token_color->val;
+            str++;
+            str++;
+            str[strlen(str)-1] = '\0';
+
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            printf("%s\n", str);
+        }
+        else
+        {
+            color->r = 0x96;
+            color->g = 0x4b;
+            color->b = 0x00;
+            color->a = 255;
+        }
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_NUMERIC;
