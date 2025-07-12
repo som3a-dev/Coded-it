@@ -6,7 +6,10 @@
 #include "util.h"
 #include "button.h"
 #include "draw.h"
+#include "json_parser.h"
 #include "syntax_parser.h"
+
+#include <assert.h>
 #include <memory.h>
 #include <string.h>
 #include <SDL_syswm.h>
@@ -136,6 +139,11 @@ void editor_init(ProgramState* state)
 
     editor_resize_and_position_buttons(state);
 
+    //load theme file
+    json_object* obj = jp_parse_file("theme.json");
+    assert(obj && "Loading theme failed.");
+
+
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
     {
         SDL_Color* color = state->token_colors + TOKEN_NONE;
@@ -153,17 +161,47 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_NUMERIC;
-        color->r = 165;
-        color->g = 255;
-        color->b = 120;
-        color->a = 255;
+        json_value* theme_color = jp_get_child_value_in_object(obj, "semanticTokenColors/numberLiteral");
+        
+        if (theme_color)
+        {
+            char* str = theme_color->val;
+            str++;
+            str++;
+            str[strlen(str)-1] = '\0';
+
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            printf("%s\n", str);
+        }
+        else
+        {
+            color->r = 165;
+            color->g = 255;
+            color->b = 120;
+            color->a = 255;
+        }
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_STRING_LITERAL;
-        color->r = 50;
-        color->g = 255;
-        color->b = 60;
-        color->a = 255;
+        json_value* theme_color = jp_get_child_value_in_object(obj, "semanticTokenColors/stringLiteral");
+
+        if (theme_color)
+        {
+            char* str = theme_color->val;
+            str++;
+            str++;
+            str[strlen(str)-1] = '\0';
+
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            printf("%s\n", str);
+        }
+        else
+        {
+            color->r = 50;
+            color->g = 255;
+            color->b = 60;
+            color->a = 255;
+        }
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_BRACES;
@@ -200,7 +238,7 @@ void editor_loop(ProgramState* state)
         {
             editor_update(state);
             editor_draw(state);
-            printf("update\n");
+//            printf("update\n");
         }
     }
 }
@@ -232,8 +270,8 @@ void editor_update(ProgramState* state)
         int tic = SDL_GetTicks();
         if (tic > (state->message_change_tic + MESSAGE_DURATION))
         {
-            printf("Msg: %s\nChange tic: %d\nCurrent Tic: %d\nDuration: %d\n\n", state->message->text,
-            state->message_change_tic, tic, MESSAGE_DURATION);
+//            printf("Msg: %s\nChange tic: %d\nCurrent Tic: %d\nDuration: %d\n\n", state->message->text,
+//            state->message_change_tic, tic, MESSAGE_DURATION);
             String_clear(state->message);
             free(state->message);
             state->message = NULL;

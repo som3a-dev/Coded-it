@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "util.h"
 
@@ -21,4 +23,34 @@ int ulen_helper(unsigned x)
 bool SDL_is_ctrl_pressed(uint8_t* keystate)
 {
     return keystate[SDL_SCANCODE_LCTRL] || keystate[SDL_SCANCODE_RCTRL];
+}
+
+
+bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    if (strlen(str) != 6)
+    {
+        return false;
+    }
+
+    char rstr[3] = {str[0], str[1], 0};
+    char gstr[3] = {str[2], str[3], 0};
+    char bstr[3] = {str[4], str[5], 0};
+
+    printf("%s, %s, %s\n", rstr, gstr, bstr);
+    
+    if (r)
+    {
+        *r = strtol(rstr, NULL, 16);
+    }
+    if (g)
+    {
+        *g = strtol(gstr, NULL, 16);
+    }
+    if (b)
+    {
+        *b = strtol(bstr, NULL, 16);
+    }
+
+    return true;
 }
