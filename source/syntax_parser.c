@@ -217,8 +217,8 @@ Token* sp_parse(const char* text, int* out_tokens_count)
 
     for (int i = 0; i < tokens_count; i++)
     {
-        printf("'%s', %d, %d, %d\n", tokens[i].text.text,
-        tokens[i].start_index, tokens[i].end_index, tokens[i].type);
+//        printf("'%s', %d, %d, %d\n", tokens[i].text.text,
+//        tokens[i].start_index, tokens[i].end_index, tokens[i].type);
     }
     printf("\n");
 

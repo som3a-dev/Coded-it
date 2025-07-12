@@ -280,8 +280,8 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
 
                 if (last_action)
                 {
-                    printf("Last action\n{\n    Type: %d\n    Character: %c\n    Index: %d\n}\n",
-                    last_action->type, last_action->character, last_action->start_index);
+//                    printf("Last action\n{\n    Type: %d\n    Character: %c\n    Index: %d\n}\n",
+//                   last_action->type, last_action->character, last_action->start_index);
 
                     editor_undo_text_action(state, last_action);
                 }

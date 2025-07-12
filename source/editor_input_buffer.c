@@ -227,7 +227,7 @@ void editor_draw_input_buffer(ProgramState* state)
 
                         default:
                         {
-                            printf("%c", buffer->text.text[i]);
+//                            printf("%c", buffer->text.text[i]);
 
                             bool draw_delimiter = true;
                             if (state->state == EDITOR_STATE_EDIT)
