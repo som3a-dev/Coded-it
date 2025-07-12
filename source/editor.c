@@ -140,17 +140,35 @@ void editor_init(ProgramState* state)
     editor_resize_and_position_buttons(state);
 
     //load theme file
-    json_object* obj = jp_parse_file("theme.json");
-    assert(obj && "Loading theme failed.");
+    json_object* parent_obj = jp_parse_file("theme.json");
+    assert(parent_obj && "Loading theme failed.");
 
 
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
     {
         SDL_Color* color = state->token_colors + TOKEN_NONE;
-        color->r = 200;
-        color->g = 200;
-        color->b = 200;
-        color->a = 255;
+        json_value* token_color = jp_get_child_value_in_object(parent_obj, "colors/editor.foreground");
+        
+        if (token_color)
+        {
+            assert(token_color->type == JSON_VALUE_STRING);
+
+            char* str = token_color->val;
+            str++;
+            str++;
+            str[strlen(str)-1] = '\0';
+
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            printf("%s\n", str);
+        }
+        else
+        {
+            color->r = 200;
+            color->g = 200;
+            color->b = 200;
+            color->a = 255;
+        }
+
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_KEYWORD;
@@ -161,11 +179,12 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_NUMERIC;
-        json_value* theme_color = jp_get_child_value_in_object(obj, "semanticTokenColors/numberLiteral");
+        json_value* token_color = jp_get_child_value_in_object(parent_obj, "semanticTokenColors/numberLiteral");
         
-        if (theme_color)
+        if (token_color)
         {
-            char* str = theme_color->val;
+            assert(token_color->type == JSON_VALUE_STRING);
+            char* str = token_color->val;
             str++;
             str++;
             str[strlen(str)-1] = '\0';
@@ -183,11 +202,12 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_STRING_LITERAL;
-        json_value* theme_color = jp_get_child_value_in_object(obj, "semanticTokenColors/stringLiteral");
+        json_value* token_color = jp_get_child_value_in_object(parent_obj, "semanticTokenColors/stringLiteral");
 
-        if (theme_color)
+        if (token_color)
         {
-            char* str = theme_color->val;
+            assert(token_color->type == JSON_VALUE_STRING);
+            char* str = token_color->val;
             str++;
             str++;
             str[strlen(str)-1] = '\0';
@@ -205,6 +225,7 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_BRACES;
+        
         color->r = 128;
         color->g = 0;
         color->b = 128;
