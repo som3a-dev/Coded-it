@@ -67,3 +67,15 @@ void json_token_print(const json_token* token);
 void json_token_destroy(json_token* token);
 void json_value_destroy(json_value* val);
 
+json_value* jp_get_child_value_in_object(const json_object* object, const char* path);
+
+
+
+
+
+
+
+
+
+
+

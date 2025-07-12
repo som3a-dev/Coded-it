@@ -59,6 +59,64 @@ String jp_lex_numeric(const char* str);
 String jp_lex_bool(char* str);
 
 
+json_value* jp_get_child_value_in_object(const json_object* object, const char* path)
+{
+    int len = strlen(path);
+    char* pathcpy = malloc(sizeof(char) * (len+1));
+    memcpy(pathcpy, path, len+1);
+
+    for (int i = 0; i < len; i++)
+    {
+        if ((pathcpy[i] == '/') || (pathcpy[i] == '\\'))
+        {
+            pathcpy[i] = '\0';
+        }
+    }
+
+    json_value* val = NULL;
+    hash_table* table = &(object->table);
+    char* str = pathcpy;
+    for (int i = 0; i <= len; i++)
+    {
+        if (pathcpy[i] == '\0')
+        {
+            if (table == NULL)
+            {
+                //previous value in the tree was not an object. can't keep going
+                printf("ERROR: Trying to traverse into a non object json value!\n");
+                goto end;
+            }
+
+            val = hash_table_get(table, str);
+            if (val == NULL)
+            {
+                printf("ERROR: Invalid path for json value\n");
+                goto end;
+            }
+
+            //if val is an object. set table to its table to be able to traverse next layer in the path if needed
+            //or if we try to traverse an extra layer and the previous value was not an object. we can freak out
+            table = NULL;
+            if (val->type == JSON_VALUE_OBJECT)
+            {
+                json_object* val_obj = (json_object*)val->val;
+                assert(val_obj);
+
+                table = &(val_obj->table);
+            }
+
+            printf("%s|", str);
+            str = pathcpy + i + 1;
+        }
+    }
+
+    end:
+    printf("\n");
+    free(pathcpy);
+    return val;
+}
+
+
 json_object* jp_parse_file(const char* path)
 {
     FILE* fp;
