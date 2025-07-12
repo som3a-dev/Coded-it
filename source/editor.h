@@ -43,6 +43,8 @@ typedef struct _ProgramState
     int font_size;
     TTF_Font* static_font; //the font for text not affected by zooming. like the status bar
 
+    SDL_Color bg_color; //background color
+
     bool running;
 
     int window_w;

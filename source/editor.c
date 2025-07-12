@@ -144,6 +144,27 @@ void editor_init(ProgramState* state)
     assert(parent_obj && "Loading theme failed.");
 
 
+    //load background color
+    json_value* theme_bg_color = jp_get_child_value_in_object(parent_obj, "colors/editor.background");
+
+    if (theme_bg_color)
+    {
+        assert(theme_bg_color->type == JSON_VALUE_STRING);
+
+        char* str = theme_bg_color->val;
+        str++;
+        str++;
+        str[strlen(str)-1] = '\0';
+
+        rgb_hex_str_to_int(str,
+        &(state->bg_color.r),
+        &(state->bg_color.g),
+        &(state->bg_color.b));
+        printf("%s\n", str);
+
+    }
+
+
     json_array* token_colors = NULL;
     {
         json_value* token_colors_val = jp_get_child_value_in_object(parent_obj, "tokenColors");
@@ -452,7 +473,9 @@ void editor_update(ProgramState* state)
 
 void editor_draw(ProgramState* state)
 {
-    SDL_FillRect(state->window_surface, NULL, SDL_MapRGB(state->window_surface->format, 0, 0, 0)); //Clear
+    SDL_FillRect(state->window_surface, NULL,
+    SDL_MapRGB(state->window_surface->format,
+    state->bg_color.r, state->bg_color.g, state->bg_color.b)); //Clear
 
     {
         int char_h;
