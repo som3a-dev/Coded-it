@@ -26,5 +26,6 @@ typedef struct
 bool sp_is_keyword(const char* text);
 bool sp_is_numeric(const char* text);
 bool sp_is_string_literal(const char* text);
+bool sp_is_braces(const char* text);
 
 int sp_get_token_type(const char* token);

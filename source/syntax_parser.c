@@ -31,6 +31,10 @@ int sp_get_token_type(const char* token)
         {
             case '{':
             case '}':
+            case '(':
+            case ')':
+            case '[':
+            case ']':
             {
                 return TOKEN_BRACES;
             } break;
@@ -38,6 +42,28 @@ int sp_get_token_type(const char* token)
     }
 
     return TOKEN_NONE;
+}
+
+
+bool sp_is_braces(const char* text)
+{
+    if (strlen(text) == 1)
+    {
+        switch (text[0])
+        {
+            case '{':
+            case '}':
+            case '(':
+            case ')':
+            case '[':
+            case ']':
+            {
+                return true;
+            } break;
+        }
+    }
+
+    return false;
 }
 
 

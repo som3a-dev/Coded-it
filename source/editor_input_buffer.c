@@ -124,6 +124,8 @@ void editor_draw_input_buffer(ProgramState* state)
                 case ')':
                 case '{':
                 case '}':
+                case '[':
+                case ']':
                 case ';':
                 case '\0':
                 {
