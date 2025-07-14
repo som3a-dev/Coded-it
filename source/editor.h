@@ -40,7 +40,7 @@ typedef struct _ProgramState
     SDL_Window* window;
     SDL_Surface* window_surface;
     TTF_Font* font;
-    int font_size;
+    unsigned int font_size;
     TTF_Font* static_font; //the font for text not affected by zooming. like the status bar
 
     SDL_Color bg_color; //background color
