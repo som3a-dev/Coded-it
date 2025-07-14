@@ -482,7 +482,8 @@ void editor_draw(ProgramState* state)
             0, state->editor_area_h,
             state->window_w, state->editor_area_border_thickness 
         };
-        SDL_FillRect(state->window_surface, &border_line, 0xbbbbbbff);
+
+        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
     }
 
     switch (state->state)
