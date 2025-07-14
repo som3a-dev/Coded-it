@@ -63,15 +63,6 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_
     }
     SDL_Rect rect = {button->x, button->y, button->w, button->h};
 
-    if (button->mouse_hovering == false)
-    {
-        SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->color.r, button->color.g, button->color.b));
-    }
-    else
-    {
-        SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->pressed_color.r, button->pressed_color.g, button->pressed_color.b));
-    }
-
     int text_x = button->x;
     int text_y = button->y;
 
@@ -81,10 +72,22 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_
     }
     text_y += (button->h / 2) - (button->text_h / 2);
 
-    draw_text(font, dest_surface, button->text,
-              text_x, text_y,
-              255, 255, 255,
-              bg_color->r, bg_color->g, bg_color->b);
+    if (button->mouse_hovering == false)
+    {
+        SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->color.r, button->color.g, button->color.b));
+        draw_text(font, dest_surface, button->text,
+                text_x, text_y,
+                255, 255, 255,
+                button->color.r, button->color.g, button->color.b);
+    }
+    else
+    {
+        SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->pressed_color.r, button->pressed_color.g, button->pressed_color.b));
+        draw_text(font, dest_surface, button->text,
+                text_x, text_y,
+                255, 255, 255,
+                button->pressed_color.r, button->pressed_color.g, button->pressed_color.b);
+    }
 }
 
 
