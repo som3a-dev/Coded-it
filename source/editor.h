@@ -115,8 +115,13 @@ void editor_draw(ProgramState* state);
 void editor_do_timed_events(ProgramState* state, bool* should_update);
 
 //TODO(omar): move this function from editor.h/.c into another more suitable file
+
+//bg_color (br, bg, bb) is the color of the background of the editor. set by the theme.
+//this is used to color the box that is rendered around SDL ttf text when using RenderText_Shaded
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
-                int x, int y, int r, int g, int b);
+                int x, int y, int r, int g, int b,
+                int br, int bg, int bb);
+
 
 void editor_set_cursor(ProgramState* state, int index);
 

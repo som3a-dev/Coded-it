@@ -48,7 +48,7 @@ void editor_init(ProgramState* state)
     state->window_w = 800;
     state->window_h = 600; 
     state->window = SDL_CreateWindow("Coded-it", 100, 100, state->window_w, state->window_h,
-                                     SDL_WINDOW_SHOWN);
+                                     SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
     if (!state->window)
     {
         printf("SDL window creation failed!\n");
@@ -65,7 +65,7 @@ void editor_init(ProgramState* state)
     }
 
 
-    state->font_size = 24;
+    state->font_size = 32;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
     if (!(state->font) || !(state->static_font))
@@ -474,7 +474,7 @@ void editor_draw(ProgramState* state)
     SDL_MapRGB(state->window_surface->format,
     state->bg_color.r, state->bg_color.g, state->bg_color.b)); //Clear
 
-    {
+    { //draw border line
         int char_h;
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
         SDL_Rect border_line = 
@@ -492,7 +492,7 @@ void editor_draw(ProgramState* state)
         {
             for (int i = 0; i < 10; i++)
             {
-                Button_draw(state->buttons + i, state->font, state->window_surface);
+                Button_draw(state->buttons + i, state->font, state->window_surface, &(state->bg_color));
             }
         } break;
 
@@ -524,7 +524,8 @@ void editor_draw(ProgramState* state)
 
             draw_text(state->font, state->window_surface, text, state->window_w - text_w - state->char_w, 
                       state->editor_area_h + state->editor_area_border_thickness,
-                      255, 255, 255);
+                      255, 255, 255,
+                      state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
             free(text);
         } break;
@@ -545,17 +546,21 @@ void editor_draw(ProgramState* state)
             draw_text(state->static_font, state->window_surface, state->message->text,
                     0,
                     state->command_input.y,
-                    255, 230, 230);
+                    255, 230, 230 ,
+                    state->bg_color.r, state->bg_color.g, state->bg_color.b);
+
         }
     }
     SDL_UpdateWindowSurface(state->window);
 }
 
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
-                int x, int y, int r, int g, int b)
+                int x, int y, int r, int g, int b,
+                int br, int bg, int bb)
 {
     SDL_Color text_color = { r, g, b, 255 };
-    SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, text_color);
+    SDL_Color bg_color = {br, bg, bb, 255 };
+    SDL_Surface* text_surface = TTF_RenderText_Shaded(font, text, text_color, bg_color);
     
     SDL_Rect text_dst = { x, y, 0, 0 };
     TTF_SizeText(font, text, &(text_dst.w), &(text_dst.h));

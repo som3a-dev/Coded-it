@@ -55,7 +55,7 @@ void Button_remove_child(Button* button, int child_index)
 }
 
 
-void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface)
+void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_Color* bg_color)
 {
     if (button->state == BUTTON_STATE_DISABLED)
     {
@@ -83,7 +83,8 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface)
 
     draw_text(font, dest_surface, button->text,
               text_x, text_y,
-              255, 255, 255);
+              255, 255, 255,
+              bg_color->r, bg_color->g, bg_color->b);
 }
 
 

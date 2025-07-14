@@ -175,7 +175,8 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             draw_text(font, state->window_surface,
                             text, draw_x, draw_y,
-                            token_color->r, token_color->g, token_color->b);
+                            token_color->r, token_color->g, token_color->b,
+                            state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
                             x += char_w;
                         }
@@ -262,7 +263,8 @@ void editor_draw_input_buffer(ProgramState* state)
 
                                 draw_text(font, state->window_surface,
                                 text, draw_x, draw_y,
-                                token_color->r, token_color->g, token_color->b);
+                                token_color->r, token_color->g, token_color->b,
+                                state->bg_color.r, state->bg_color.g, state->bg_color.b);
                             }
                             x += char_w;
                         } break;
