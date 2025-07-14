@@ -520,9 +520,9 @@ void editor_draw(ProgramState* state)
             snprintf(text, text_len, format, line, col);
 
             int text_w;
-            TTF_SizeText(state->font, text, &text_w, NULL);
+            TTF_SizeText(state->static_font, text, &text_w, NULL);
 
-            draw_text(state->font, state->window_surface, text, state->window_w - text_w - state->char_w, 
+            draw_text(state->static_font, state->window_surface, text, state->window_w - text_w, 
                       state->editor_area_h + state->editor_area_border_thickness,
                       255, 255, 255,
                       state->bg_color.r, state->bg_color.g, state->bg_color.b);
