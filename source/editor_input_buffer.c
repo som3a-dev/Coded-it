@@ -162,6 +162,14 @@ void editor_draw_input_buffer(ProgramState* state)
                             int char_h;
                             TTF_SizeText(font, text, &char_w, &char_h);
 
+                            if (state->state == EDITOR_STATE_EDIT)
+                            {
+                                if ((draw_y + char_h) > state->editor_area_h)
+                                {
+                                    goto end_text_rendering;
+                                }
+                            }
+
                             //check if part of selection start or end
                             int char_index_in_text = j + (i - current_token.len);
                             if ((selection_start <= char_index_in_text) &&
@@ -171,18 +179,13 @@ void editor_draw_input_buffer(ProgramState* state)
                                 SDL_FillRect(state->window_surface, &rect,
                                 SDL_MapRGB(state->window_surface->format,
                                 200, 200, 200));
-                                
-                            }
-                            
-                            if (state->state == EDITOR_STATE_EDIT)
-                            {
-                                if ((draw_y + char_h) > state->editor_area_h)
-                                {
-                                    goto end_text_rendering;
-                                }
-                            }
 
-                            if (char_index_in_text == buffer->cursor_index)
+                                draw_text(font, state->window_surface,
+                                text, draw_x, draw_y,
+                                token_color->r, token_color->g, token_color->b,
+                                200, 200, 200); 
+                            }
+                            else if (char_index_in_text == buffer->cursor_index)
                             {
                                 draw_text(font, state->window_surface,
                                 text, draw_x, draw_y,
@@ -231,7 +234,6 @@ void editor_draw_input_buffer(ProgramState* state)
                         SDL_FillRect(state->window_surface, &rect,
                         SDL_MapRGB(state->window_surface->format,
                         200, 200, 200));
-                        
                     }
 
                     switch (buffer->text.text[i])
@@ -279,7 +281,20 @@ void editor_draw_input_buffer(ProgramState* state)
                                 int token_type = sp_get_token_type(text);
                                 SDL_Color* token_color = state->token_colors + token_type;
 
-                                if (i == buffer->cursor_index)
+                                if ((selection_start <= i) &&
+                                    (selection_end >= i))
+                                {
+                                    SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
+                                    SDL_FillRect(state->window_surface, &rect,
+                                    SDL_MapRGB(state->window_surface->format,
+                                    200, 200, 200));
+
+                                    draw_text(font, state->window_surface,
+                                    text, draw_x, draw_y,
+                                    token_color->r, token_color->g, token_color->b,
+                                    200, 200, 200); 
+                                }
+                                else if (i == buffer->cursor_index)
                                 {
                                     draw_text(font, state->window_surface,
                                     text, draw_x, draw_y,
