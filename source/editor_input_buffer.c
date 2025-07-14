@@ -26,25 +26,8 @@ InputBuffer* editor_get_current_input_buffer(const ProgramState* state)
 }
 
 
-void editor_draw_input_buffer(ProgramState* state) 
+void editor_draw_cursor(ProgramState* state, const TTF_Font* font)
 {
-    InputBuffer* buffer = editor_get_current_input_buffer(state);
-    if (!buffer) return;
-
-    TTF_Font* font;
-
-    if (state->state == EDITOR_STATE_COMMAND_INPUT)
-    {
-        font = state->static_font;
-    }
-    else
-    {
-        font = state->font;
-    }
-
-    int startx = buffer->x;
-    int starty = buffer->y;
-
     if (state->draw_cursor)
     {
         int char_w = state->char_w;
@@ -88,8 +71,34 @@ void editor_draw_input_buffer(ProgramState* state)
                 cursor_rect.h = char_h * 0.1;
             }
             SDL_FillRect(state->window_surface, &cursor_rect,
-                        SDL_MapRGB(state->window_surface->format, 200, 200, 200));
+                        SDL_MapRGB(state->window_surface->format,
+                        state->cursor_color.r,
+                        state->cursor_color.g,
+                        state->cursor_color.b));
         }
+    }
+}
+
+
+void editor_draw_input_buffer(ProgramState* state) 
+{
+    InputBuffer* buffer = editor_get_current_input_buffer(state);
+    if (!buffer) return;
+
+    TTF_Font* font;
+
+    if (state->state == EDITOR_STATE_COMMAND_INPUT)
+    {
+        font = state->static_font;
+    }
+    else
+    {
+        font = state->font;
+    }
+
+    if (state->draw_cursor)
+    {
+        editor_draw_cursor(state, font);
     }
 
     int selection_start = -2;
@@ -109,8 +118,10 @@ void editor_draw_input_buffer(ProgramState* state)
         }
     }
 
-    int x = startx;
-    int y = starty;
+    int x = buffer->x;
+    int y = buffer->y;
+   
+
     if (buffer->text.text)
     {
         String current_token = {0};
@@ -131,8 +142,6 @@ void editor_draw_input_buffer(ProgramState* state)
                 {
                     if (current_token.text != NULL)
                     {
-//                        printf("%s", current_token.text);
-
                         int token_type = sp_get_token_type(current_token.text);
                         SDL_Color* token_color = state->token_colors + token_type;
 
@@ -173,10 +182,20 @@ void editor_draw_input_buffer(ProgramState* state)
                                 }
                             }
 
-                            draw_text(font, state->window_surface,
-                            text, draw_x, draw_y,
-                            token_color->r, token_color->g, token_color->b,
-                            state->bg_color.r, state->bg_color.g, state->bg_color.b);
+                            if (char_index_in_text == buffer->cursor_index)
+                            {
+                                draw_text(font, state->window_surface,
+                                text, draw_x, draw_y,
+                                token_color->r, token_color->g, token_color->b,
+                                state->cursor_color.r, state->cursor_color.g, state->cursor_color.b);
+                            }
+                            else
+                            {
+                                draw_text(font, state->window_surface,
+                                text, draw_x, draw_y,
+                                token_color->r, token_color->g, token_color->b,
+                                state->bg_color.r, state->bg_color.g, state->bg_color.b);
+                            }
 
                             x += char_w;
                         }
@@ -225,7 +244,7 @@ void editor_draw_input_buffer(ProgramState* state)
                         case '\n':
                         {
                             y += state->char_h; 
-                            x = startx;
+                            x = buffer->x;
                         } break;
 
                         default:
@@ -255,16 +274,25 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             if (draw_delimiter)
                             {
-
                                 char text[2] = {buffer->text.text[i], '\0'};
 
                                 int token_type = sp_get_token_type(text);
                                 SDL_Color* token_color = state->token_colors + token_type;
 
-                                draw_text(font, state->window_surface,
-                                text, draw_x, draw_y,
-                                token_color->r, token_color->g, token_color->b,
-                                state->bg_color.r, state->bg_color.g, state->bg_color.b);
+                                if (i == buffer->cursor_index)
+                                {
+                                    draw_text(font, state->window_surface,
+                                    text, draw_x, draw_y,
+                                    token_color->r, token_color->g, token_color->b,
+                                    state->cursor_color.r, state->cursor_color.g, state->cursor_color.b);
+                                }
+                                else
+                                {
+                                    draw_text(font, state->window_surface,
+                                    text, draw_x, draw_y,
+                                    token_color->r, token_color->g, token_color->b,
+                                    state->bg_color.r, state->bg_color.g, state->bg_color.b);
+                                }
                             }
                             x += char_w;
                         } break;
@@ -285,4 +313,6 @@ void editor_draw_input_buffer(ProgramState* state)
 
         String_clear(&current_token);
     }
+
+
 }

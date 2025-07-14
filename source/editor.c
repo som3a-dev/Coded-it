@@ -64,7 +64,6 @@ void editor_init(ProgramState* state)
         return 3;
     }
 
-
     state->font_size = 32;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
@@ -138,6 +137,12 @@ void editor_init(ProgramState* state)
     state->current_file = NULL;
 
     editor_resize_and_position_buttons(state);
+
+    //Cursor color
+    state->cursor_color.r = 255;
+    state->cursor_color.g = 255;
+    state->cursor_color.b = 255;
+    state->cursor_color.a = 255;
 
     //load theme file
     json_object* parent_obj = jp_parse_file("theme.json");
