@@ -853,7 +853,7 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
         {
             if (action->text.text)
             {
-                for (int i = action->text.len; i >= 0; i--) 
+                for (int i = action->text.len-1; i >= 0; i--) 
                 {
                     String_remove(&(state->text.text), action->start_index + i, NULL);
                 }
@@ -875,7 +875,7 @@ void editor_undo_text_action(ProgramState* state, const TextAction* action)
                     char c = action->text.text[i];
                     String_insert(&(state->text.text), c, action->start_index + i);
                 }
-                editor_set_cursor(state, action->start_index + action->text.len);
+                editor_set_cursor(state, action->start_index + (action->text.len-1));
             }
             else
             {
@@ -912,7 +912,7 @@ void editor_redo_text_action(ProgramState* state, const TextAction* action)
         {
             if (action->text.text)
             {
-                int end_index = action->start_index + action->text.len;
+                int end_index = (action->start_index + action->text.len) -1;
                 for (int i = end_index; i >= action->start_index; i--)
                 {
                     String_remove(&(state->text.text), i, NULL);
