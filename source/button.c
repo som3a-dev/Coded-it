@@ -74,11 +74,22 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_
 
     if (button->mouse_hovering == false)
     {
-        SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->color.r, button->color.g, button->color.b));
-        draw_text(font, dest_surface, button->text,
-                text_x, text_y,
-                255, 255, 255,
-                button->color.r, button->color.g, button->color.b);
+        if (bg_color == NULL)
+        {
+            SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->color.r, button->color.g, button->color.b));
+            draw_text(font, dest_surface, button->text,
+                    text_x, text_y,
+                    255, 255, 255,
+                    button->color.r, button->color.g, button->color.b);
+        }
+        else
+        {
+            draw_text(font, dest_surface, button->text,
+                    text_x, text_y,
+                    255, 255, 255,
+                    bg_color->r, bg_color->g, bg_color->b);
+        }
+
     }
     else
     {
