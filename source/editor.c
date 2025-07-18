@@ -314,19 +314,19 @@ void editor_init(ProgramState* state)
 
 
     //draw areas
-    state->editor_area.x = state->window_w / 6.5;
+    state->editor_area.border_thickness = 4;
+    state->editor_area.x = (state->window_w / 6.5);
     state->editor_area.y = 0;
     state->editor_area.w = state->window_w;
-    state->editor_area.border_thickness = 4;
     state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
 
     editor_resize_and_position_buttons(state); //to set editor_area.h
 
+    state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.x = 0;
     state->file_explorer_area.y = state->char_h;
-    state->file_explorer_area.w = state->editor_area.x;
+    state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
     state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
-    state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
 
     //File explorer
