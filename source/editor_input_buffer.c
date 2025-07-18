@@ -185,7 +185,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                 token_color->r, token_color->g, token_color->b,
                                 200, 200, 200); 
                             }
-                            else if (char_index_in_text == buffer->cursor_index)
+                            else if ((state->draw_cursor) && (char_index_in_text == buffer->cursor_index))
                             {
                                 draw_text(font, state->window_surface,
                                 text, draw_x, draw_y,
@@ -294,7 +294,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                     token_color->r, token_color->g, token_color->b,
                                     200, 200, 200); 
                                 }
-                                else if (i == buffer->cursor_index)
+                                else if ((state->draw_cursor) && (i == buffer->cursor_index))
                                 {
                                     draw_text(font, state->window_surface,
                                     text, draw_x, draw_y,
