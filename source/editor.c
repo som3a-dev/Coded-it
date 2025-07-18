@@ -64,7 +64,7 @@ void editor_init(ProgramState* state)
         return 3;
     }
 
-    state->font_size = 32;
+    state->font_size = 24;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
     if (!(state->font) || !(state->static_font))
@@ -75,10 +75,15 @@ void editor_init(ProgramState* state)
 
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
-    state->editor_area_x = 0;
-    state->editor_area_y = 0;
-    state->editor_area_w = state->window_w;
-    state->editor_area_border_thickness = 4;
+    state->editor_area.x = state->window_w / 6.5;
+    state->editor_area.y = 0;
+    state->editor_area.w = state->window_w;
+    state->editor_area.border_thickness = 4;
+
+    state->file_explorer_area.x = 0;
+    state->file_explorer_area.y = 0;
+    state->file_explorer_area.w = state->editor_area.x;
+    state->file_explorer_area.h = state->window_h;
 
     ButtonConfig config = {0};
     config.pressed_r = 110;
@@ -315,12 +320,28 @@ void editor_init(ProgramState* state)
         rgb_hex_str_to_int(dark_default, &(color->r), &(color->g), &(color->b));
     }
 
+
+    //Init input buffers
+    state->text.x = state->editor_area.x;
+    state->text.y = state->editor_area.y;
+
+    //File explorer
+    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
+    editor_add_file_to_explorer(state, "code.c");
+    editor_add_file_to_explorer(state, "code.h");
+    editor_add_file_to_explorer(state, "cfg.json");
 }
 
 
 void editor_destroy(ProgramState* state)
 {
     TTF_CloseFont(state->font);
+    TTF_CloseFont(state->static_font);
+    TTF_CloseFont(state->file_explorer_font);
+
+    free(state->file_buttons);
+    free(state->token_colors);
+
     TTF_Quit();
     SDL_DestroyWindow(state->window);
     SDL_Quit();
@@ -425,48 +446,35 @@ void editor_update(ProgramState* state)
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
 
-            if ((cursor_x + state->char_w) > state->editor_area_w)
+            if ((cursor_x + state->char_w) > state->editor_area.w)
             {
                 state->camera_x += state->char_w;
             }
-            if ((cursor_y + state->char_h) > state->editor_area_h)
+            if ((cursor_y + state->char_h) > state->editor_area.h)
             {
                 state->camera_y += state->char_h;
             }
 
-            if (cursor_y < state->editor_area_y)
+            if (cursor_y < state->editor_area.y)
             {
                 state->camera_y -= state->char_h;
             }
-            if (cursor_x < state->editor_area_x)
+            if (cursor_x < state->editor_area.x)
             {
                 state->camera_x -= state->char_w;
             }
 
+            if (mouse_state)
+            {
+                editor_check_button_mouse_click(state, state->file_buttons, state->file_count);
+            }
         } break;
 
         case EDITOR_STATE_COMMAND:
         {
             if (mouse_state)
             {
-                state->clicked_button = NULL;
-                for (int i = 0; i < 10; i++)
-                {
-                    Button* button = state->buttons + i;
-                    if (button->state == BUTTON_STATE_ENABLED)
-                    {
-                        if (Button_is_mouse_hovering(button))
-                        {
-                            //do
-                            if (button->on_click)
-                            {
-                                button->on_click(button, state);
-                                state->clicked_button = button;
-                                break;
-                            }
-                        }
-                    }
-                }
+                editor_check_button_mouse_click(state, state->buttons, 10);
             }
         } break;
     }
@@ -484,8 +492,8 @@ void editor_draw(ProgramState* state)
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
         SDL_Rect border_line = 
         {
-            0, state->editor_area_h,
-            state->window_w, state->editor_area_border_thickness 
+            0, state->editor_area.h,
+            state->window_w, state->editor_area.border_thickness 
         };
 
         SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
@@ -503,7 +511,7 @@ void editor_draw(ProgramState* state)
         TTF_SizeText(state->font, text, &text_w, NULL);
 
         draw_text(state->static_font, state->window_surface, text, 0,
-                    state->editor_area_h + state->editor_area_border_thickness,
+                    state->editor_area.h + state->editor_area.border_thickness,
                     255, 255, 255,
                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
@@ -517,7 +525,7 @@ void editor_draw(ProgramState* state)
         {
             for (int i = 0; i < 10; i++)
             {
-                Button_draw(state->buttons + i, state->font, state->window_surface, &(state->bg_color));
+                Button_draw(state->buttons + i, state->window_surface, &(state->bg_color));
             }
         } break;
 
@@ -529,6 +537,12 @@ void editor_draw(ProgramState* state)
         case EDITOR_STATE_EDIT:
         {
             editor_draw_input_buffer(state);
+
+            for (int i = 0; i < state->file_count; i++)
+            {
+                Button_draw(state->file_buttons + i,
+                state->window_surface, &(state->bg_color));
+            }
 
             //draw status bar
             int line;
@@ -548,7 +562,7 @@ void editor_draw(ProgramState* state)
             TTF_SizeText(state->static_font, text, &text_w, NULL);
 
             draw_text(state->static_font, state->window_surface, text, state->window_w - text_w, 
-                      state->editor_area_h + state->editor_area_border_thickness,
+                      state->editor_area.h + state->editor_area.border_thickness,
                       255, 255, 255,
                       state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
@@ -576,8 +590,64 @@ void editor_draw(ProgramState* state)
 
         }
     }
+
+    //draw file explorer
+
     SDL_UpdateWindowSurface(state->window);
 }
+
+
+void editor_add_file_to_explorer(ProgramState* state, const char* filename)
+{
+    state->file_count++;
+    if (state->file_buttons == NULL)
+    {
+        state->file_buttons = calloc(state->file_count, sizeof(Button));
+    }
+    else
+    {
+        state->file_buttons = realloc(state->file_buttons,
+        sizeof(Button) * state->file_count);
+    }
+
+    Button* button = state->file_buttons + ((state->file_count)-1);
+    ButtonConfig cfg = {0};
+
+    TTF_SizeText(state->file_explorer_font, filename, &(cfg.w), &(cfg.h));
+    cfg.w = state->file_explorer_area.w;
+    cfg.text = filename;
+    cfg.font = state->file_explorer_font;
+
+    int margin_between_file_names = cfg.h * 0.3;
+
+    cfg.y = (cfg.h + margin_between_file_names) * ((state->file_count)-1);
+
+    Button_init(button, &cfg);
+}
+
+
+bool editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count)
+{
+    state->clicked_button = NULL;
+    for (int i = 0; i < button_count; i++)
+    {
+        Button* button = buttons + i;
+        if (button->state == BUTTON_STATE_ENABLED)
+        {
+            if (Button_is_mouse_hovering(button))
+            {
+                //do
+                if (button->on_click)
+                {
+                    button->on_click(button, state);
+                    state->clicked_button = button;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
                 int x, int y, int r, int g, int b,
@@ -682,17 +752,15 @@ void editor_resize_and_position_buttons(ProgramState* state)
         button->y = state->char_h * i;
     }
 
-    state->editor_area_x = 0;
-    state->editor_area_y = 0;
-    state->editor_area_w = state->window_w;
-    //state->editor_area_h = state->window_h - state->char_h * 2.5f;
+    state->editor_area.w = state->window_w;
+    //state->editor_area.h = state->window_h - state->char_h * 2.5f;
 
     {
         int char_h;
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
 
         state->command_input.y = state->window_h - char_h * 1.1f;
-        state->editor_area_h = state->window_h - char_h * 4;
+        state->editor_area.h = state->window_h - char_h * 4;
     }
 
 }

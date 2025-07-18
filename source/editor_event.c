@@ -47,6 +47,11 @@ void editor_handle_events(ProgramState* state, bool* should_update)
             {
                 Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y);
             }
+
+            for (int i = 0; i < state->file_count; i++)
+            {
+                Button_on_mouse_move(state->file_buttons + i, e.motion.x, e.motion.y);
+            }
         } break;
 
         case SDL_KEYUP:

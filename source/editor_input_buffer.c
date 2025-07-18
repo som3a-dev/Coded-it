@@ -44,19 +44,19 @@ void editor_draw_cursor(ProgramState* state, const TTF_Font* font)
         {
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
-            if ((cursor_x + char_w) > state->editor_area_w)
+            if ((cursor_x + char_w) > state->editor_area.w)
             {
                 draw_cursor = false;
             }
-            if ((cursor_y + char_h) > state->editor_area_h)
+            if ((cursor_y + char_h) > state->editor_area.h)
             {
                 draw_cursor = false;
             }
-            if (cursor_y < state->editor_area_y)
+            if (cursor_y < state->editor_area.y)
             {
                 draw_cursor = false;
             }
-            if (cursor_x < state->editor_area_x)
+            if (cursor_x < state->editor_area.x)
             {
                 draw_cursor = false;
             }
@@ -164,7 +164,7 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             if (state->state == EDITOR_STATE_EDIT)
                             {
-                                if ((draw_y + char_h) > state->editor_area_h)
+                                if ((draw_y + char_h) > state->editor_area.h)
                                 {
                                     goto end_text_rendering;
                                 }
@@ -256,19 +256,19 @@ void editor_draw_input_buffer(ProgramState* state)
                             bool draw_delimiter = true;
                             if (state->state == EDITOR_STATE_EDIT)
                             {
-                                if ((draw_x + char_w) > state->editor_area_w)
+                                if ((draw_x + char_w) > state->editor_area.w)
                                 {
                                     draw_delimiter = false;
                                 }
-                                if ((draw_y + char_h) > state->editor_area_h)
+                                if ((draw_y + char_h) > state->editor_area.h)
                                 {
                                     draw_delimiter = false;
                                 }
-                                if (draw_y < state->editor_area_y)
+                                if (draw_y < state->editor_area.y)
                                 {
                                     draw_delimiter = false;
                                 }
-                                if (draw_x < state->editor_area_x)
+                                if (draw_x < state->editor_area.x)
                                 {
                                     draw_delimiter = false;
                                 }

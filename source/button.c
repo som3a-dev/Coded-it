@@ -27,6 +27,7 @@ void Button_init(Button* button, ButtonConfig* config)
     button->text_centered = config->text_centered;
     button->on_click = config->on_click;
     button->on_input = config->on_input;
+    button->font = config->font;
 
     if (config->text && config->font)
     {
@@ -55,7 +56,7 @@ void Button_remove_child(Button* button, int child_index)
 }
 
 
-void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_Color* bg_color)
+void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color)
 {
     if (button->state == BUTTON_STATE_DISABLED)
     {
@@ -77,14 +78,14 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_
         if (bg_color == NULL)
         {
             SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->color.r, button->color.g, button->color.b));
-            draw_text(font, dest_surface, button->text,
+            draw_text(button->font, dest_surface, button->text,
                     text_x, text_y,
                     255, 255, 255,
                     button->color.r, button->color.g, button->color.b);
         }
         else
         {
-            draw_text(font, dest_surface, button->text,
+            draw_text(button->font, dest_surface, button->text,
                     text_x, text_y,
                     255, 255, 255,
                     bg_color->r, bg_color->g, bg_color->b);
@@ -94,7 +95,7 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_
     else
     {
         SDL_FillRect(dest_surface, &rect, SDL_MapRGB(dest_surface->format, button->pressed_color.r, button->pressed_color.g, button->pressed_color.b));
-        draw_text(font, dest_surface, button->text,
+        draw_text(button->font, dest_surface, button->text,
                 text_x, text_y,
                 255, 255, 255,
                 button->pressed_color.r, button->pressed_color.g, button->pressed_color.b);
@@ -104,7 +105,7 @@ void Button_draw(Button* button, TTF_Font* font, SDL_Surface* dest_surface, SDL_
 
 void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y)
 {
-    if (button->state == BUTTON_STATE_DISABLED)
+    if (button->state != BUTTON_STATE_ENABLED)
     {
         return;
     }

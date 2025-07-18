@@ -35,6 +35,27 @@ typedef struct
 } InputBuffer;
 
 
+enum
+{
+    DRAW_AREA_BOTTOM_BORDER,
+    DRAW_AREA_TOP_BORDER,
+    DRAW_AREA_LEFT_BORDER,
+    DRAW_AREA_RIGHT_BORDER
+};
+
+
+typedef struct
+{
+    int x;
+    int y;
+    int w;
+    int h;
+    int border_thickness;
+
+    int flags;
+} DrawArea;
+
+
 typedef struct _ProgramState
 {
     SDL_Window* window;
@@ -57,11 +78,8 @@ typedef struct _ProgramState
     int camera_x;
     int camera_y;
 
-    int editor_area_x;
-    int editor_area_y;
-    int editor_area_w;
-    int editor_area_h;
-    int editor_area_border_thickness;
+    DrawArea editor_area;
+    DrawArea file_explorer_area;
 
     int state;
 
@@ -101,6 +119,11 @@ typedef struct _ProgramState
     //every token type (TOKEN_NONE, TOKEN_KEYWORD) will work as an index into this colors array
     //to get the color of keywords in the current theme, state->token_colors[TOKEN_KEYWORD];
     SDL_Color* token_colors;
+
+    //File explorer
+    TTF_Font* file_explorer_font;
+    Button* file_buttons;
+    int file_count;
 } ProgramState;
 
 
@@ -111,6 +134,11 @@ void editor_loop(ProgramState* state);
 
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
+
+void editor_add_file_to_explorer(ProgramState* state, const char* filename);
+
+bool editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count);
+
 
 //TODO(omar): find a better name than this shit
 void editor_do_timed_events(ProgramState* state, bool* should_update);
