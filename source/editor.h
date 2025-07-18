@@ -37,10 +37,10 @@ typedef struct
 
 enum
 {
-    DRAW_AREA_BOTTOM_BORDER,
-    DRAW_AREA_TOP_BORDER,
-    DRAW_AREA_LEFT_BORDER,
-    DRAW_AREA_RIGHT_BORDER
+    DRAW_AREA_BOTTOM_BORDER = 1 << 0,
+    DRAW_AREA_TOP_BORDER = 1 << 1,
+    DRAW_AREA_LEFT_BORDER = 1 << 2,
+    DRAW_AREA_RIGHT_BORDER = 1 << 3 
 };
 
 
@@ -134,6 +134,8 @@ void editor_loop(ProgramState* state);
 
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
+
+void editor_render_draw_area(ProgramState* state, const DrawArea* area);
 
 void editor_add_file_to_explorer(ProgramState* state, const char* filename);
 

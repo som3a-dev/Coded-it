@@ -75,15 +75,6 @@ void editor_init(ProgramState* state)
 
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
-    state->editor_area.x = state->window_w / 6.5;
-    state->editor_area.y = 0;
-    state->editor_area.w = state->window_w;
-    state->editor_area.border_thickness = 4;
-
-    state->file_explorer_area.x = 0;
-    state->file_explorer_area.y = 0;
-    state->file_explorer_area.w = state->editor_area.x;
-    state->file_explorer_area.h = state->window_h;
 
     ButtonConfig config = {0};
     config.pressed_r = 110;
@@ -141,7 +132,6 @@ void editor_init(ProgramState* state)
     editor_open_file(state);
     state->current_file = NULL;
 
-    editor_resize_and_position_buttons(state);
 
     //Cursor color
     state->cursor_color.r = 255;
@@ -321,15 +311,33 @@ void editor_init(ProgramState* state)
     }
 
 
-    //Init input buffers
-    state->text.x = state->editor_area.x;
-    state->text.y = state->editor_area.y;
+
+
+    //draw areas
+    state->editor_area.x = state->window_w / 6.5;
+    state->editor_area.y = 0;
+    state->editor_area.w = state->window_w;
+    state->editor_area.border_thickness = 4;
+    state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
+
+    editor_resize_and_position_buttons(state); //to set editor_area.h
+
+    state->file_explorer_area.x = 0;
+    state->file_explorer_area.y = state->char_h;
+    state->file_explorer_area.w = state->editor_area.x;
+    state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
+    state->file_explorer_area.border_thickness = 4;
+    state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
 
     //File explorer
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
     editor_add_file_to_explorer(state, "code.c");
     editor_add_file_to_explorer(state, "code.h");
     editor_add_file_to_explorer(state, "cfg.json");
+
+    //Init input buffers
+    state->text.x = state->editor_area.x;
+    state->text.y = state->editor_area.y;
 }
 
 
@@ -496,7 +504,7 @@ void editor_draw(ProgramState* state)
             state->window_w, state->editor_area.border_thickness 
         };
 
-        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
+//        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
     }
 
     { //draw font size
@@ -567,6 +575,11 @@ void editor_draw(ProgramState* state)
                       state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
             free(text);
+
+            //draw DrawArea borders
+            editor_render_draw_area(state, &(state->editor_area));
+            editor_render_draw_area(state, &(state->file_explorer_area));
+
         } break;
     }
 
@@ -597,6 +610,52 @@ void editor_draw(ProgramState* state)
 }
 
 
+void editor_render_draw_area(ProgramState* state, const DrawArea* area)
+{
+    Uint32 color = SDL_MapRGB(state->window_surface->format, 50, 50, 50);
+
+    if (area->flags & DRAW_AREA_TOP_BORDER)
+    {
+        SDL_Rect rect = {
+            area->x, area->y,
+            area->w, area->border_thickness
+        };
+
+        SDL_FillRect(state->window_surface, &rect, color);
+    }
+
+    if (area->flags & DRAW_AREA_BOTTOM_BORDER)
+    {
+        SDL_Rect rect = {
+            area->x, area->y + area->h,
+            area->w, area->border_thickness
+        };
+
+        SDL_FillRect(state->window_surface, &rect, color);
+    }
+
+    if (area->flags & DRAW_AREA_LEFT_BORDER)
+    {
+        SDL_Rect rect = {
+            area->x, area->y,
+            area->border_thickness, area->h
+        };
+
+        SDL_FillRect(state->window_surface, &rect, color);
+    }
+
+    if (area->flags & DRAW_AREA_RIGHT_BORDER)
+    {
+        SDL_Rect rect = {
+            area->x + area->w, area->y,
+            area->border_thickness, area->h
+        };
+
+        SDL_FillRect(state->window_surface, &rect, color);
+    }
+}
+
+
 void editor_add_file_to_explorer(ProgramState* state, const char* filename)
 {
     state->file_count++;
@@ -620,7 +679,9 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
 
     int margin_between_file_names = cfg.h * 0.3;
 
-    cfg.y = (cfg.h + margin_between_file_names) * ((state->file_count)-1);
+    cfg.x = state->file_explorer_area.x;
+    cfg.y = (state->file_explorer_area.y + state->file_explorer_area.border_thickness)
+    + (cfg.h + margin_between_file_names) * ((state->file_count)-1);
 
     Button_init(button, &cfg);
 }
