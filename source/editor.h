@@ -160,7 +160,7 @@ void editor_set_state(ProgramState* state, int new_state);
 
 void editor_set_filename(ProgramState* state, const char* new_filename);
 
-void editor_resize_and_position_buttons(ProgramState* state); //called after
+void editor_resize_and_reposition(ProgramState* state); //called after
                                                               //changing font size
 
 //gets position in X and Y of the current input buffer's cursor

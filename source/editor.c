@@ -315,19 +315,13 @@ void editor_init(ProgramState* state)
 
     //draw areas
     state->editor_area.border_thickness = 4;
-    state->editor_area.x = (state->window_w / 6.5);
-    state->editor_area.y = 0;
-    state->editor_area.w = state->window_w;
     state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
 
-    editor_resize_and_position_buttons(state); //to set editor_area.h
-
     state->file_explorer_area.border_thickness = 4;
-    state->file_explorer_area.x = 0;
-    state->file_explorer_area.y = state->char_h;
-    state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
-    state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
+
+    //Must be called to init draw areas and stuff
+    editor_resize_and_reposition(state); //to set editor_area.h
 
     //File explorer
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
@@ -799,8 +793,9 @@ void editor_set_filename(ProgramState* state, const char* new_filename)
 }
 
 
-void editor_resize_and_position_buttons(ProgramState* state)
+void editor_resize_and_reposition(ProgramState* state)
 {
+    //Command state buttons
     for (int i = 0; i < 10; i++)
     {
         Button* button = state->buttons + i;
@@ -813,16 +808,23 @@ void editor_resize_and_position_buttons(ProgramState* state)
         button->y = state->char_h * i;
     }
 
-    state->editor_area.w = state->window_w;
-    //state->editor_area.h = state->window_h - state->char_h * 2.5f;
 
+    //Ui elements and DrawAreas
     {
         int char_h;
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
 
         state->command_input.y = state->window_h - char_h * 1.1f;
+        state->editor_area.x = 165; //TODO(omar): decide this better somehow
         state->editor_area.h = state->window_h - char_h * 4;
+        state->editor_area.w = state->window_w;
+
+        state->file_explorer_area.y = char_h;
+        state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
+        state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
     }
+
+    printf("%d\n", state->editor_area.x);
 
 }
 

@@ -135,7 +135,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 SDL_GetWindowSize(state->window, &(state->window_w), &(state->window_h));
             }
 
-            editor_resize_and_position_buttons(state);
+            editor_resize_and_reposition(state);
         } break;
 
         case SDLK_EQUALS:
@@ -155,7 +155,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
                 
-                editor_resize_and_position_buttons(state);
+                editor_resize_and_reposition(state);
             }
         } break;
 
@@ -176,7 +176,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
-                editor_resize_and_position_buttons(state);
+                editor_resize_and_reposition(state);
             }
         } break;
     }
