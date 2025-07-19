@@ -618,7 +618,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
     {
         SDL_Rect rect = {
             area->x, area->y,
-            area->w, area->border_thickness
+            area->w + area->border_thickness, area->border_thickness
         };
 
         SDL_FillRect(state->window_surface, &rect, color);
@@ -628,7 +628,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
     {
         SDL_Rect rect = {
             area->x, area->y + area->h,
-            area->w, area->border_thickness
+            area->w + area->border_thickness, area->border_thickness
         };
 
         SDL_FillRect(state->window_surface, &rect, color);
@@ -638,7 +638,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
     {
         SDL_Rect rect = {
             area->x, area->y,
-            area->border_thickness, area->h
+            area->border_thickness, area->h + area->border_thickness
         };
 
         SDL_FillRect(state->window_surface, &rect, color);
@@ -648,7 +648,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
     {
         SDL_Rect rect = {
             area->x + area->w, area->y,
-            area->border_thickness, area->h
+            area->border_thickness, area->h + area->border_thickness
         };
 
         SDL_FillRect(state->window_surface, &rect, color);
