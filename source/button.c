@@ -39,6 +39,11 @@ void Button_init(Button* button, ButtonConfig* config)
 void Button_add_child(Button* button, ProgramState* state, int child_index)
 {
     if (!button) return;
+    if (button->state == BUTTON_STATE_NONE)
+    {
+        return;
+    }
+
 
     Button* child = state->buttons + child_index;
     if (child->state != BUTTON_STATE_NONE)
@@ -51,6 +56,10 @@ void Button_add_child(Button* button, ProgramState* state, int child_index)
 void Button_remove_child(Button* button, int child_index)
 {
     if (!button) return;
+    if (button->state == BUTTON_STATE_NONE)
+    {
+        return;
+    }
 
     ArrayInt_remove(&(button->child_buttons), child_index);
 }
@@ -58,10 +67,11 @@ void Button_remove_child(Button* button, int child_index)
 
 void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color)
 {
-    if (button->state == BUTTON_STATE_DISABLED)
+    if (button->state != BUTTON_STATE_ENABLED)
     {
         return;
     }
+
     SDL_Rect rect = {button->x, button->y, button->w, button->h};
 
     int text_x = button->x;
@@ -129,7 +139,7 @@ void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y)
 
 bool Button_is_mouse_hovering(Button* button)
 {
-    if (button->state == BUTTON_STATE_DISABLED)
+    if (button->state != BUTTON_STATE_ENABLED)
     {
         return false;
     }
@@ -140,6 +150,11 @@ bool Button_is_mouse_hovering(Button* button)
 
 void Button_resize_text(Button* button, TTF_Font* font)
 {
+    if (button->state != BUTTON_STATE_ENABLED)
+    {
+        return false;
+    }
+
     TTF_SizeText(font, button->text, &(button->text_w), &(button->text_h));
     if (button->w == 0)
     {
@@ -154,6 +169,11 @@ void Button_resize_text(Button* button, TTF_Font* font)
 
 void Button_disable_children(Button* button, ProgramState* state)
 {
+    if (button->state != BUTTON_STATE_ENABLED)
+    {
+        return false;
+    }
+
     for (int i = 0; i < button->child_buttons.count; i++)
     {
         int index;
