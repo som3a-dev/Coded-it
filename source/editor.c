@@ -82,37 +82,46 @@ void editor_init(ProgramState* state)
     config.pressed_b = 100;
     config.font = state->font;
     config.h = state->char_h;
+    config.x = 0;
+    config.y = 0;
 
-    {
-        config.text = "Save";
-        config.x = 0;
-        config.y = config.h * 2;
-        config.on_click = Button_save_on_click;
-        config.on_input = Button_save_on_input;
-        config.disabled = true;
-        Button_init(state->buttons + 2, &config);
-    }
-    {
-        config.text = "Open";
-        config.x = 0;
-        config.y = config.h;
-        config.on_click = Button_save_on_click; //this is not an oversight.
-        config.on_input = Button_open_on_input;
-        config.disabled = true;
-        Button_init(state->buttons + 1, &config);
-    }
+    int index = 0;
     {
         config.text = "File";
-        config.y = 0;
-        config.x = 0;
         config.on_click = Button_file_on_click;
         config.on_input = NULL;
         config.disabled = false;
-        Button_init(state->buttons + 0, &config);
-
-        Button_add_child(state->buttons + 0, state, 1);
-        Button_add_child(state->buttons + 0, state, 2);
+        Button_init(state->buttons + index, &config);
+        index++;
     }
+    {
+        config.text = "Open";
+        config.y += config.h;
+
+        config.on_click = Button_save_on_click; //this is not an oversight.
+        config.on_input = Button_open_on_input;
+        config.disabled = true;
+        Button_init(state->buttons + index, &config);
+
+        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
+ 
+        index++;
+
+    }
+    {
+        config.text = "Save";
+        config.y += config.h;
+
+        config.on_click = Button_save_on_click;
+        config.on_input = Button_save_on_input;
+        config.disabled = true;
+        Button_init(state->buttons + index, &config);
+
+        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
+
+        index++;
+    }
+
 
     Stack_init(&(state->undo_tree), sizeof(TextAction));
     Stack_init(&(state->redo_tree), sizeof(TextAction));

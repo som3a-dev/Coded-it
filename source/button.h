@@ -90,4 +90,8 @@ void Button_open_on_input(Button* button, ProgramState* state, String* input);
 
 void Button_file_on_click(Button* button, ProgramState* state);
 
+//helpers
 
+//TODO(omar): if 2 buttons have the same text. this will return the first one it finds
+//Maybe add a "name" member of Button and use that instead for searching
+Button* get_button_by_text(const Button* buttons, int button_count, const char* text);

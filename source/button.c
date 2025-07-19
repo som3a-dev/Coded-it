@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
+#include <string.h>
 #include <memory.h>
 
 void Button_init(Button* button, ButtonConfig* config)
@@ -254,4 +255,21 @@ void Button_file_on_click(Button* button, ProgramState* state)
             }
         }
     }
+}
+
+
+Button* get_button_by_text(const Button* buttons, int button_count, const char* text)
+{
+    for (int i = 0; i < button_count; i++)
+    {
+        if (buttons[i].state != BUTTON_STATE_NONE)
+        {
+            if (strcmp(text, buttons[i].text) == 0)
+            {
+                return buttons + i;
+            }
+        }
+    }
+    
+    return NULL;
 }
