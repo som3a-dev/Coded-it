@@ -424,32 +424,53 @@ void editor_update(ProgramState* state)
         {
             if (mouse_state & SDL_BUTTON(1))
             {
-                if (state->text.text.len != 0)
-                {
-                    int mouse_char_x = mouse_x / state->char_w;
-                    int mouse_char_y = mouse_y / state->char_h;
-
-                    int char_x = 0;
-                    int char_y = 0;
-                    for (int i = 0; i <= state->text.text.len; i++)
+               mouse_x -= state->text.x;
+               mouse_y -= state->text.y;
+               if ((mouse_x >= 0) && (mouse_y >= 0)) 
+               {
+                    if (state->text.text.len != 0)
                     {
-                        if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
-                        {
-                            editor_set_cursor(state, i);
-                            break;
-                        }
+                        int mouse_char_x = mouse_x / state->char_w;
+                        int mouse_char_y = mouse_y / state->char_h;
 
-                        char_x++;
+                        printf("%d, %d\n", mouse_char_x, mouse_char_y);
 
-                        if (state->text.text.text[i] == '\n')
+                        int char_x = 0;
+                        int char_y = 0;
+                        for (int i = 0; i <= state->text.text.len; i++)
                         {
-                            char_x = 0;
-                            char_y++;
+                            if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
+                            {
+                                editor_set_cursor(state, i);
+                                printf("set\n");
+                                break;
+                            }
+
+                            char_x++;
+
+                            if (state->text.text.text[i] == '\n')
+                            {
+                                char_x = 0;
+                                char_y++;
+                            }
                         }
                     }
                 }
-            }
 
+/*                int mouse_text_buffer_x = mouse_x - state->text.x; 
+                int mouse_text_buffer_y = mouse_y - state->text.y;
+
+                char c;
+                for (int i = 0; i < state->text.text.len; i++)
+                {
+                    c = state->text.text.text[i];
+                    int char_w;
+
+                    TTF_GlyphMetrics(state->font, c, NULL, NULL, NULL, NULL, &char_w);
+
+                    printf("%c: %d, %d\n", c, char_w, state->char_w);
+                }*/
+            }
 
             int cursor_x = 0;
             int cursor_y = 0;
@@ -607,7 +628,58 @@ void editor_draw(ProgramState* state)
         }
     }
 
-    //draw file explorer
+/*    int char_w = state->window_w / state->char_w;
+    int char_h = state->window_h / state->char_h;
+
+    for (int i = 0; i < char_h; i++)
+    {
+        for (int j = 0; j < char_w; j++)
+        {
+            int x = (state->text.x) + j * state->char_w;
+            int y = (state->text.y) + i * state->char_h;
+
+            {
+                SDL_Rect rect = {
+                    x, y,
+                    1, state->char_h
+                };
+
+                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
+                    state->window_surface->format, 255, 255, 0
+                ));
+            }
+            {
+                SDL_Rect rect = {
+                    x, y,
+                    state->char_w, 1 
+                };
+
+                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
+                    state->window_surface->format, 255, 255, 0
+                ));
+            }
+            {
+                SDL_Rect rect = {
+                    x, y + state->char_h,
+                    state->char_w, 1 
+                };
+
+                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
+                    state->window_surface->format, 255, 255, 0
+                ));
+            }
+            {
+                SDL_Rect rect = {
+                    x + state->char_w, y,
+                    1, state->char_h 
+                };
+
+                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
+                    state->window_surface->format, 255, 255, 0
+                ));
+            }
+        }
+    }*/
 
     SDL_UpdateWindowSurface(state->window);
 }
@@ -824,7 +896,7 @@ void editor_resize_and_reposition(ProgramState* state)
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
 
         state->command_input.y = state->window_h - char_h * 1.1f;
-        state->editor_area.x = 165; //TODO(omar): decide this better somehow
+        state->editor_area.x = state->char_w * 9; //TODO(omar): decide this better somehow
         state->editor_area.h = state->window_h - char_h * 4;
         state->editor_area.w = state->window_w;
 
@@ -850,18 +922,7 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char
     for (int i = 0; i < buffer->text.len; i++)
     {
         char c = buffer->text.text[i];
-        int char_w;
-        {
-            char text[2] = {c, '\0'};
-            if (state->state == EDITOR_STATE_EDIT)
-            {
-                TTF_SizeText(state->font, text, &char_w, NULL);
-            }
-            else
-            {
-                TTF_SizeText(state->static_font, text, &char_w, NULL);
-            }
-        }
+        int char_w = state->char_w;
 
         if (c == '\n')
         {

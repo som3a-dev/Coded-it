@@ -32,7 +32,6 @@ void editor_draw_cursor(ProgramState* state, const TTF_Font* font)
     {
         int char_w = state->char_w;
         int char_h = state->char_h;
-        TTF_SizeText(font, "A", &char_w, &char_h);
 
         int cursor_x = 0;
         int cursor_y = 0;
@@ -175,7 +174,7 @@ void editor_draw_input_buffer(ProgramState* state)
                             if ((selection_start <= char_index_in_text) &&
                                 (selection_end >= char_index_in_text))
                             {
-                                SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
+                                SDL_Rect rect = { draw_x, draw_y, state->char_w, state->char_h};
                                 SDL_FillRect(state->window_surface, &rect,
                                 SDL_MapRGB(state->window_surface->format,
                                 200, 200, 200));
@@ -200,7 +199,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                 state->bg_color.r, state->bg_color.g, state->bg_color.b);
                             }
 
-                            x += char_w;
+                            x += state->char_w;
                         }
 
                         String_clear(&current_token);
@@ -230,7 +229,7 @@ void editor_draw_input_buffer(ProgramState* state)
                     if ((selection_start <= i) &&
                         (selection_end >= i))
                     {
-                        SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
+                        SDL_Rect rect = { draw_x, draw_y, state->char_w, state->char_h};
                         SDL_FillRect(state->window_surface, &rect,
                         SDL_MapRGB(state->window_surface->format,
                         200, 200, 200));
@@ -240,7 +239,7 @@ void editor_draw_input_buffer(ProgramState* state)
                     {
                         case ' ':
                         {
-                            x += char_w;
+                            x += state->char_w;
                         } break;
 
                         case '\n':
@@ -284,7 +283,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                 if ((selection_start <= i) &&
                                     (selection_end >= i))
                                 {
-                                    SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
+                                    SDL_Rect rect = { draw_x, draw_y, state->char_w, state->char_h};
                                     SDL_FillRect(state->window_surface, &rect,
                                     SDL_MapRGB(state->window_surface->format,
                                     200, 200, 200));
@@ -309,7 +308,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
                                 }
                             }
-                            x += char_w;
+                            x += state->char_w;
                         } break;
                     }
                 } break;
