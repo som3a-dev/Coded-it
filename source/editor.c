@@ -14,18 +14,11 @@
 #include <string.h>
 #include <SDL_syswm.h>
 
-//everybody does these this is C shut up
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 const int CURSOR_BLINK_TIME = 1000;
 const int MESSAGE_DURATION = 1000;
-
-
-//NEXT OBJECTIVE:: DO ALL THE TEXT EDITING COOL SHIT WITH LCTRL AND COPY PASTING AND STUFF
-//                 ALSO DISPLAYING MESSAGES TO THE USER IN THE BOTTOM RIGHT CORNER OR SOMETHING
-//                 "FILE OPENED SUCCESSFULLY", "OPENING FILE FAILED", "PASTED XXX LINES"
-//                 AND A STATUS BAR WITH THE FILENAME. CURRENT LINE AND CURRENT CHARACTER NUMBER
 
 
 void editor_init(ProgramState* state)
