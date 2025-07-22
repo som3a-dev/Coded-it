@@ -322,12 +322,12 @@ void editor_init(ProgramState* state)
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
 
+    state->editor_area.x = state->char_w * 9; //TODO(omar): decide this better somehow
+    state->file_explorer_area.y = state->char_h;
+
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
 
-    state->editor_area.x = state->char_w * 9; //TODO(omar): decide this better somehow
-
-    state->file_explorer_area.y = state->char_h;
 
     //File explorer
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
