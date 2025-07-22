@@ -126,6 +126,28 @@ void editor_draw_input_buffer(ProgramState* state)
         String current_token = {0};
         for (int i = 0; i <= buffer->text.len; i++)
         {
+            { //CULLING
+                int draw_x = x;
+                int draw_y = y;
+                if (state->state == EDITOR_STATE_EDIT)
+                {
+                    draw_x -= state->camera_x;
+                    draw_y -= state->camera_y;
+                }
+
+                int char_w = state->char_w;
+                int char_h = state->char_h;
+
+                if (state->state == EDITOR_STATE_EDIT)
+                {
+                    if ((draw_y) > (state->editor_area.h + state->editor_area.y))
+                    {
+                        printf("Done at %d\n", i);
+                        goto end_text_rendering;
+                    }
+                }
+            }
+
             switch (buffer->text.text[i])
             {
                 case ' ':
@@ -157,9 +179,8 @@ void editor_draw_input_buffer(ProgramState* state)
                                 draw_y -= state->camera_y;
                             }
 
-                            int char_w;
-                            int char_h;
-                            TTF_SizeText(font, text, &char_w, &char_h);
+                            int char_w = state->char_w;
+                            int char_h = state->char_h;
 
                             if (state->state == EDITOR_STATE_EDIT)
                             {
@@ -225,17 +246,17 @@ void editor_draw_input_buffer(ProgramState* state)
                     }
                     int draw_x = x;
                     int draw_y = y;
-                    if (state->state == EDITOR_STATE_EDIT)
-                    {
-                        draw_x -= state->camera_x;
-                        draw_y -= state->camera_y;
-                    }
-
                     int char_w;
                     int char_h;
                     {
                         char text[2] = {buffer->text.text[i], '\0'};
                         TTF_SizeText(font, text, &char_w, &char_h);
+                    }
+
+                    if (state->state == EDITOR_STATE_EDIT)
+                    {
+                        draw_x -= state->camera_x;
+                        draw_y -= state->camera_y;
                     }
 
                     //draw selection highlight
@@ -334,8 +355,9 @@ void editor_draw_input_buffer(ProgramState* state)
                     }
                 } break;
             }
-            end_text_rendering:;
         }
+        end_text_rendering:;
+
 //        printf("\n\n");
 
         String_clear(&current_token);

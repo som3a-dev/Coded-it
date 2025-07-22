@@ -57,7 +57,7 @@ void editor_init(ProgramState* state)
         return 3;
     }
 
-    state->font_size = 24;
+    state->font_size = 18;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
     if (!(state->font) || !(state->static_font))
@@ -130,7 +130,7 @@ void editor_init(ProgramState* state)
 
     state->selection_start_index = -2;
 
-    state->current_file = "CODE.c";
+    state->current_file = "json_parser.c";
     editor_open_file(state);
     state->current_file = NULL;
 
