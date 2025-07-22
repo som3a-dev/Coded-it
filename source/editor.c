@@ -573,6 +573,8 @@ void editor_draw(ProgramState* state)
             int line;
             int col;
             editor_get_cursor_pos(state, &col, &line, state->char_h);
+            line -= state->text.y;
+            col -= state->text.x;
             line /= state->char_h;
             col /= state->char_w;
 
