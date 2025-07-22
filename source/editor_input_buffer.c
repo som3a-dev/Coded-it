@@ -163,9 +163,21 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             if (state->state == EDITOR_STATE_EDIT)
                             {
-                                if ((draw_y + char_h) > state->editor_area.h)
+                                if ((draw_y + char_h) > (state->editor_area.h + state->editor_area.y))
                                 {
-                                    goto end_text_rendering;
+                                    goto next_char;
+                                }
+                                if ((draw_y) < state->editor_area.y)
+                                {
+                                    goto next_char;
+                                }
+                                if ((draw_x + char_w) > (state->editor_area.w + state->editor_area.x))
+                                {
+                                    goto next_char;
+                                }
+                                if ((draw_x) < state->editor_area.x)
+                                {
+                                    goto next_char;
                                 }
                             }
 
@@ -199,6 +211,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                 state->bg_color.r, state->bg_color.g, state->bg_color.b);
                             }
 
+                            next_char:
                             x += state->char_w;
                         }
 

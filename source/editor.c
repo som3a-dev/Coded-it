@@ -471,6 +471,8 @@ void editor_update(ProgramState* state)
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
 
+
+
             if ((cursor_x + state->char_w) > state->editor_area.w)
             {
                 state->camera_x += state->char_w;
@@ -486,7 +488,15 @@ void editor_update(ProgramState* state)
             }
             if (cursor_x < state->editor_area.x)
             {
-                state->camera_x -= state->char_w;
+                int line;
+                int col;
+                editor_get_cursor_pos(state, &col, &line, state->char_h);
+                line -= state->text.y;
+                col -= state->text.x;
+                line /= state->char_h;
+                col /= state->char_w;
+
+                state->camera_x = col * state->char_w;
             }
 
             if (mouse_state)
