@@ -130,8 +130,8 @@ void editor_init(ProgramState* state)
 
     state->selection_start_index = -2;
 
-    state->current_file = "json_parser.c";
-    editor_open_file(state);
+//    state->current_file = "json_parser.c";
+//    editor_open_file(state);
     state->current_file = NULL;
 
 
@@ -311,6 +311,64 @@ void editor_init(ProgramState* state)
         const char* dark_default = "FFD700";
         rgb_hex_str_to_int(dark_default, &(color->r), &(color->g), &(color->b));
     }
+    {
+        SDL_Color* color = state->token_colors + TOKEN_COMMENT;
+        json_value* token_color = NULL;
+        
+        for (int i = 0; i < token_colors->values_count; i++) 
+        {
+            json_value* val = token_colors->values + i;
+            if (val->type != JSON_VALUE_OBJECT)
+            {
+                //TODO(omar): this probably should never happen. maybe print an error
+                assert(false);
+                continue;
+            }
+
+            json_object* obj = (json_object*)(val->val);
+            assert(obj);
+
+            json_value* scope = hash_table_get(&(obj->table), "scope");
+            if (scope == NULL)
+            {
+                //TODO(omar): this probably should never happen. maybe print an error
+                assert(false);
+                continue;
+            }
+
+            if (scope->type == JSON_VALUE_STRING)
+            {
+                if (strcmp(scope->val, "\"comment\"") == 0)
+                {
+                    json_value* settings = hash_table_get(&(obj->table), "settings");
+                    assert(settings);
+                    json_object* settings_obj = (json_object*)(settings->val);
+
+                    token_color = hash_table_get(&(settings_obj->table), "foreground");
+                    break;
+                }
+            }
+        }
+        
+        if (token_color)
+        {
+            assert(token_color->type == JSON_VALUE_STRING);
+            char* str = token_color->val;
+            str++;
+            str++;
+            str[strlen(str)-1] = '\0';
+
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+        }
+        else
+        {
+            color->r = 180;
+            color->g = 180;
+            color->b = 180;
+            color->a = 255;
+        }
+    }
+ 
 
 
 

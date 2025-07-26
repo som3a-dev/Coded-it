@@ -8,10 +8,12 @@
 const char* keywords = "auto:break:case:char:const:continue:default:do:double:else:enum:extern:float:for:goto:if:inline:int:long:register:restrict:return:short:signed:sizeof:static:struct:switch:typedef:union:unsigned:void:volatile:while:_Bool:_Complex:_Imaginary";
 
 
-
-
 int sp_get_token_type(const char* token)
 {
+    if (sp_is_comment(token))
+    {
+        return TOKEN_COMMENT;
+    }
     if (sp_is_keyword(token))
     {
         return TOKEN_KEYWORD;
@@ -42,6 +44,22 @@ int sp_get_token_type(const char* token)
     }
 
     return TOKEN_NONE;
+}
+
+
+bool sp_is_comment(const char* text)
+{
+    if (strlen(text) < 2)
+    {
+        return false;
+    }
+
+    if ((text[0] == text[1]) && (text[1] == '/'))
+    {
+        return true;
+    }
+
+    return false;
 }
 
 

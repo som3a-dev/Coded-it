@@ -119,8 +119,8 @@ void editor_draw_input_buffer(ProgramState* state)
 
     int x = buffer->x;
     int y = buffer->y;
-   
-
+    
+    bool line_is_comment = false;
     if (buffer->text.text)
     {
         String current_token = {0};
@@ -164,6 +164,17 @@ void editor_draw_input_buffer(ProgramState* state)
                     if (current_token.text != NULL)
                     {
                         int token_type = sp_get_token_type(current_token.text);
+
+                        if (token_type == TOKEN_COMMENT)
+                        {
+                            line_is_comment = true;
+                        }
+
+                        if (line_is_comment)
+                        {
+                            token_type = TOKEN_COMMENT;
+                        }
+
                         SDL_Color* token_color = state->token_colors + token_type;
 
                         //Draw token text
@@ -237,6 +248,7 @@ void editor_draw_input_buffer(ProgramState* state)
                         }
 
                         String_clear(&current_token);
+
                     }
 
                     //draw the delimiter
@@ -312,6 +324,10 @@ void editor_draw_input_buffer(ProgramState* state)
                                 char text[2] = {buffer->text.text[i], '\0'};
 
                                 int token_type = sp_get_token_type(text);
+                                if (line_is_comment)
+                                {
+                                    token_type = TOKEN_COMMENT;
+                                }
                                 SDL_Color* token_color = state->token_colors + token_type;
 
                                 if ((selection_start <= i) &&
@@ -345,6 +361,12 @@ void editor_draw_input_buffer(ProgramState* state)
                             x += state->char_w;
                         } break;
                     }
+
+                    if (buffer->text.text[i] == '\n')
+                    {
+                        line_is_comment = false;
+                    }
+
                 } break;
 
                 default:
