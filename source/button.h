@@ -33,7 +33,7 @@ typedef struct _Button
     bool mouse_hovering; //true if the mouse is on the button 
 
     TTF_Font* font;
-    const char* text;
+    char text[256];
     int text_w;
     int text_h;
     bool text_centered; //if false then text will be drawn from 0 on the x coord but cenetered
@@ -61,7 +61,7 @@ typedef struct
     int pressed_g;
     int pressed_b;
 
-    const char* text;
+    char* text;
     bool text_centered;
     TTF_Font* font;
 

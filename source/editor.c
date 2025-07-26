@@ -11,6 +11,9 @@
 
 #include <assert.h>
 #include <memory.h>
+#include <windows.h>
+#include <fileapi.h>
+#include <stdio.h>
 #include <string.h>
 #include <SDL_syswm.h>
 
@@ -370,8 +373,30 @@ void editor_init(ProgramState* state)
     }
  
 
+    //File explorer
+    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
 
+    WIN32_FIND_DATAA data = {0};
+    HANDLE dir_handle = FindFirstFileA(".\\source\\*", &data);
 
+    if (dir_handle == INVALID_HANDLE_VALUE)
+    {
+        assert(false && "INVALID HANDLE VALUE");
+    }
+
+    int max_len = 9;
+    while (FindNextFileA(dir_handle, &data) != 0)
+    {
+        if (strcmp(data.cFileName, "..") == 0) continue;
+        if (strcmp(data.cFileName, ".") == 0) continue;
+
+        editor_add_file_to_explorer(state, data.cFileName);
+        if (strlen(data.cFileName) > max_len)
+        {
+            max_len = strlen(data.cFileName);
+        }
+    }
+    max_len++;
 
     //draw areas
     state->editor_area.border_thickness = 4;
@@ -380,18 +405,11 @@ void editor_init(ProgramState* state)
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
 
-    state->editor_area.x = state->char_w * 9; //TODO(omar): decide this better somehow
+    state->editor_area.x = state->char_w * max_len;
     state->file_explorer_area.y = state->char_h;
 
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
-
-
-    //File explorer
-    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
-    editor_add_file_to_explorer(state, "code.c");
-    editor_add_file_to_explorer(state, "code.h");
-    editor_add_file_to_explorer(state, "cfg.json");
 
     //Init input buffers
     state->text.x = state->editor_area.x;
@@ -635,6 +653,18 @@ void editor_draw(ProgramState* state)
 
             for (int i = 0; i < state->file_count; i++)
             {
+                //TODO(omar): Decide if culling buttons should be here or in button_draw
+
+                int x = state->file_buttons[i].x;
+                int y = state->file_buttons[i].y;
+                int w = state->file_buttons[i].w;
+                int h = state->file_buttons[i].h;
+
+                if ((y+h) > (state->file_explorer_area.y + state->file_explorer_area.h))
+                {
+                    continue;
+                }
+
                 Button_draw(state->file_buttons + i,
                 state->window_surface, &(state->bg_color));
             }
@@ -817,11 +847,11 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
     cfg.text = filename;
     cfg.font = state->file_explorer_font;
 
-    int margin_between_file_names = cfg.h * 0.3;
+    int margin_between_file_names = cfg.h * 0.4;
 
     cfg.x = state->file_explorer_area.x;
     cfg.y = (state->file_explorer_area.y + state->file_explorer_area.border_thickness)
-    + (cfg.h + margin_between_file_names) * ((state->file_count)-1);
+    + (cfg.h + margin_between_file_names) * ((state->file_count));
 
     Button_init(button, &cfg);
 }
@@ -965,8 +995,6 @@ void editor_resize_and_reposition(ProgramState* state)
         state->editor_area.w = state->window_w;
         state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
         state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
-
-
     }
 
     printf("%d\n", state->editor_area.x);

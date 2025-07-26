@@ -24,7 +24,7 @@ void Button_init(Button* button, ButtonConfig* config)
     button->pressed_color.r = config->pressed_r;
     button->pressed_color.g = config->pressed_g;
     button->pressed_color.b = config->pressed_b;
-    button->text = config->text;
+    memcpy(button->text, config->text, sizeof(char) * (strlen(config->text) + 1));
     button->text_centered = config->text_centered;
     button->on_click = config->on_click;
     button->on_input = config->on_input;
