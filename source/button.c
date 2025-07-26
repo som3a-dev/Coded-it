@@ -66,7 +66,7 @@ void Button_remove_child(Button* button, int child_index)
 }
 
 
-void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color)
+void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color, int offset_x, int offset_y)
 {
     if (button->state != BUTTON_STATE_ENABLED)
     {
@@ -74,9 +74,11 @@ void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color)
     }
 
     SDL_Rect rect = {button->x, button->y, button->w, button->h};
+    rect.x -= offset_x;
+    rect.y -= offset_y;
 
-    int text_x = button->x;
-    int text_y = button->y;
+    int text_x = rect.x;
+    int text_y = rect.y;
 
     if (button->text_centered)
     {
@@ -114,18 +116,20 @@ void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color)
 }
 
 
-void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y)
+void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x, int offset_y)
 {
     if (button->state != BUTTON_STATE_ENABLED)
     {
         return;
     }
-    
-    int right = button->x + button->w;
-    int bottom = button->y + button->h;
+    int x = button->x - offset_x;
+    int y = button->y - offset_y; 
 
-    bool in_button_x = ((button->x < mouse_x) && (mouse_x < right));
-    bool in_button_y = ((button->y < mouse_y) && (mouse_y < bottom));
+    int right = x + button->w;
+    int bottom = y + button->h;
+
+    bool in_button_x = ((x < mouse_x) && (mouse_x < right));
+    bool in_button_y = ((y < mouse_y) && (mouse_y < bottom));
 
     if (in_button_x && in_button_y)
     {

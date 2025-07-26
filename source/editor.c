@@ -411,6 +411,8 @@ void editor_init(ProgramState* state)
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
 
+    state->file_explorer_camera_y = state->file_buttons->h;
+
     //Init input buffers
     state->text.x = state->editor_area.x;
     state->text.y = state->editor_area.y;
@@ -506,8 +508,6 @@ void editor_update(ProgramState* state)
                         int mouse_char_x = mouse_x / state->char_w;
                         int mouse_char_y = mouse_y / state->char_h;
 
-                        printf("%d, %d\n", mouse_char_x, mouse_char_y);
-
                         int char_x = 0;
                         int char_y = 0;
                         for (int i = 0; i <= state->text.text.len; i++)
@@ -515,7 +515,6 @@ void editor_update(ProgramState* state)
                             if ((mouse_char_x == char_x) && (mouse_char_y == char_y))
                             {
                                 editor_set_cursor(state, i);
-                                printf("set\n");
                                 break;
                             }
 
@@ -638,7 +637,8 @@ void editor_draw(ProgramState* state)
         {
             for (int i = 0; i < 10; i++)
             {
-                Button_draw(state->buttons + i, state->window_surface, &(state->bg_color));
+                Button_draw(state->buttons + i, state->window_surface, &(state->bg_color),
+                0, 0);
             }
         } break;
 
@@ -655,8 +655,8 @@ void editor_draw(ProgramState* state)
             {
                 //TODO(omar): Decide if culling buttons should be here or in button_draw
 
-                int x = state->file_buttons[i].x;
-                int y = state->file_buttons[i].y;
+                int x = state->file_buttons[i].x - state->file_explorer_camera_x;
+                int y = state->file_buttons[i].y - state->file_explorer_camera_y;
                 int w = state->file_buttons[i].w;
                 int h = state->file_buttons[i].h;
 
@@ -664,9 +664,14 @@ void editor_draw(ProgramState* state)
                 {
                     continue;
                 }
+                if (y < state->file_explorer_area.y)
+                {
+                    continue;
+                }
 
                 Button_draw(state->file_buttons + i,
-                state->window_surface, &(state->bg_color));
+                state->window_surface, &(state->bg_color), state->file_explorer_camera_x,
+                state->file_explorer_camera_y);
             }
 
             //draw status bar

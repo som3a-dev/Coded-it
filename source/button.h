@@ -74,9 +74,10 @@ void Button_init(Button* button, ButtonConfig* config);
 void Button_add_child(Button* button, ProgramState* state, int child_index);
 void Button_remove_child(Button* button, int child_index /*the index of the child button in the ProgramState array.*/);
 
-void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color);
+void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color,
+                 int offset_x, int offset_y);
 
-void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y);
+void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x, int offset_y);
 bool Button_is_mouse_hovering(Button* button);
 
 void Button_resize_text(Button* button, TTF_Font* font);

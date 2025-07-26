@@ -15,6 +15,10 @@ void editor_handle_events(ProgramState* state, bool* should_update)
         return;
     }
     
+    int mousex;
+    int mousey;
+    SDL_GetMouseState(&mousex, &mousey);
+
     switch (e.type)
     {
         case SDL_QUIT:
@@ -45,12 +49,38 @@ void editor_handle_events(ProgramState* state, bool* should_update)
         {
             for (int i = 0; i < 10; i++)
             {
-                Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y);
+                Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y,
+                0, 0);
             }
 
             for (int i = 0; i < state->file_count; i++)
             {
-                Button_on_mouse_move(state->file_buttons + i, e.motion.x, e.motion.y);
+                Button_on_mouse_move(state->file_buttons + i, e.motion.x, e.motion.y,
+                state->file_explorer_camera_x, state->file_explorer_camera_y);
+            }
+        } break;
+
+        case SDL_MOUSEWHEEL:
+        {
+            if ((mousex >= state->file_explorer_area.x) &&
+                (mousey >= state->file_explorer_area.y))
+            {
+                if ((mousex < (state->file_explorer_area.x + state->file_explorer_area.w)) &&
+                    (mousey < (state->file_explorer_area.y + state->file_explorer_area.h)))
+                {
+                    state->file_explorer_camera_y += -(state->file_buttons->h) * e.wheel.y;
+
+                    int max_bottom = state->file_explorer_area.h / 2 + state->file_buttons->h;
+                    if (state->file_explorer_camera_y > max_bottom)
+                    {
+                        state->file_explorer_camera_y = max_bottom;
+                    }
+                    if (state->file_explorer_camera_y < 0)
+                    {
+                        state->file_explorer_camera_y = 0;
+                    }
+                    printf("%d, %d\n", state->file_explorer_camera_y, state->file_explorer_area.h);
+                }
             }
         } break;
 
