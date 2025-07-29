@@ -30,12 +30,14 @@ void editor_draw_cursor(ProgramState* state, const TTF_Font* font)
 {
     if (state->draw_cursor)
     {
-        int char_w = state->char_w;
-        int char_h = state->char_h;
+        int char_w;
+        int char_h;
+        TTF_SizeText(font, "A", &char_w, &char_h);
+        printf("%d, %d\n", char_w, char_h);
 
         int cursor_x = 0;
         int cursor_y = 0;
-        editor_get_cursor_pos(state, &cursor_x, &cursor_y, char_h);
+        editor_get_cursor_pos(state, &cursor_x, &cursor_y, char_w, char_h);
 
         bool draw_cursor = true;
 
@@ -84,16 +86,7 @@ void editor_draw_input_buffer(ProgramState* state)
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return;
 
-    TTF_Font* font;
-
-    if (state->state == EDITOR_STATE_COMMAND_INPUT)
-    {
-        font = state->static_font;
-    }
-    else
-    {
-        font = state->font;
-    }
+    TTF_Font* font = buffer->font;
 
     if (state->draw_cursor)
     {
@@ -119,6 +112,10 @@ void editor_draw_input_buffer(ProgramState* state)
 
     int x = buffer->x;
     int y = buffer->y;
+
+    int char_w;
+    int char_h;
+    TTF_SizeText(font, "A", &char_w, &char_h);
     
     bool line_is_comment = false;
     if (buffer->text.text)
@@ -133,16 +130,8 @@ void editor_draw_input_buffer(ProgramState* state)
                 {
                     draw_x -= state->camera_x;
                     draw_y -= state->camera_y;
-                }
-
-                int char_w = state->char_w;
-                int char_h = state->char_h;
-
-                if (state->state == EDITOR_STATE_EDIT)
-                {
                     if ((draw_y) > (state->editor_area.h + state->editor_area.y))
                     {
-                        printf("Done at %d\n", i);
                         goto end_text_rendering;
                     }
                 }
@@ -190,9 +179,6 @@ void editor_draw_input_buffer(ProgramState* state)
                                 draw_y -= state->camera_y;
                             }
 
-                            int char_w = state->char_w;
-                            int char_h = state->char_h;
-
                             if (state->state == EDITOR_STATE_EDIT)
                             {
                                 if ((draw_y + char_h) > (state->editor_area.h + state->editor_area.y))
@@ -218,7 +204,7 @@ void editor_draw_input_buffer(ProgramState* state)
                             if ((selection_start <= char_index_in_text) &&
                                 (selection_end >= char_index_in_text))
                             {
-                                SDL_Rect rect = { draw_x, draw_y, state->char_w, state->char_h};
+                                SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
                                 SDL_FillRect(state->window_surface, &rect,
                                 SDL_MapRGB(state->window_surface->format,
                                 200, 200, 200));
@@ -244,7 +230,7 @@ void editor_draw_input_buffer(ProgramState* state)
                             }
 
                             next_char:
-                            x += state->char_w;
+                            x += char_w;
                         }
 
                         String_clear(&current_token);
@@ -258,12 +244,6 @@ void editor_draw_input_buffer(ProgramState* state)
                     }
                     int draw_x = x;
                     int draw_y = y;
-                    int char_w;
-                    int char_h;
-                    {
-                        char text[2] = {buffer->text.text[i], '\0'};
-                        TTF_SizeText(font, text, &char_w, &char_h);
-                    }
 
                     if (state->state == EDITOR_STATE_EDIT)
                     {
@@ -275,7 +255,7 @@ void editor_draw_input_buffer(ProgramState* state)
                     if ((selection_start <= i) &&
                         (selection_end >= i))
                     {
-                        SDL_Rect rect = { draw_x, draw_y, state->char_w, state->char_h};
+                        SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
                         SDL_FillRect(state->window_surface, &rect,
                         SDL_MapRGB(state->window_surface->format,
                         200, 200, 200));
@@ -285,12 +265,12 @@ void editor_draw_input_buffer(ProgramState* state)
                     {
                         case ' ':
                         {
-                            x += state->char_w;
+                            x += char_w;
                         } break;
 
                         case '\n':
                         {
-                            y += state->char_h; 
+                            y += char_h; 
                             x = buffer->x;
                         } break;
 
@@ -333,7 +313,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                 if ((selection_start <= i) &&
                                     (selection_end >= i))
                                 {
-                                    SDL_Rect rect = { draw_x, draw_y, state->char_w, state->char_h};
+                                    SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
                                     SDL_FillRect(state->window_surface, &rect,
                                     SDL_MapRGB(state->window_surface->format,
                                     200, 200, 200));
@@ -358,7 +338,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
                                 }
                             }
-                            x += state->char_w;
+                            x += char_w;
                         } break;
                     }
 

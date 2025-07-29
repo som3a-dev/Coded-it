@@ -76,7 +76,7 @@ void editor_init(ProgramState* state)
     config.pressed_r = 110;
     config.pressed_g = 100;
     config.pressed_b = 100;
-    config.font = state->font;
+    config.font = state->static_font;
     config.h = state->char_h;
     config.x = 0;
     config.y = 0;
@@ -377,7 +377,7 @@ void editor_init(ProgramState* state)
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
 
     WIN32_FIND_DATAA data = {0};
-    HANDLE dir_handle = FindFirstFileA("*", &data);
+    HANDLE dir_handle = FindFirstFileA(".\\source\\*", &data);
 
     if (dir_handle == INVALID_HANDLE_VALUE)
     {
@@ -405,17 +405,16 @@ void editor_init(ProgramState* state)
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
 
+    //TODO(omar): move this to editor_resize_and_reposition
     state->editor_area.x = state->char_w * max_len;
     state->file_explorer_area.y = state->char_h;
 
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
 
-    state->file_explorer_camera_y = state->file_buttons->h;
-
-    //Init input buffers
-    state->text.x = state->editor_area.x;
-    state->text.y = state->editor_area.y;
+    //Input buffer properties
+    state->text.font = state->font;
+    state->command_input.font = state->static_font;
 }
 
 
@@ -546,7 +545,7 @@ void editor_update(ProgramState* state)
 
             int cursor_x = 0;
             int cursor_y = 0;
-            editor_get_cursor_pos(state, &cursor_x, &cursor_y, state->char_h);
+            editor_get_cursor_pos(state, &cursor_x, &cursor_y, state->char_w, state->char_h);
             cursor_x -= state->camera_x;
             cursor_y -= state->camera_y;
 
@@ -567,7 +566,7 @@ void editor_update(ProgramState* state)
             {
                 int line;
                 int col;
-                editor_get_cursor_pos(state, &col, &line, state->char_h);
+                editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
                 line -= state->text.y;
                 col -= state->text.x;
                 line /= state->char_h;
@@ -677,7 +676,7 @@ void editor_draw(ProgramState* state)
             //draw status bar
             int line;
             int col;
-            editor_get_cursor_pos(state, &col, &line, state->char_h);
+            editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
             line -= state->text.y;
             col -= state->text.x;
             line /= state->char_h;
@@ -916,7 +915,7 @@ void editor_set_cursor(ProgramState* state, int index)
         buffer->cursor_index = buffer->text.len;
     }
 
-    editor_get_cursor_pos(state, &(buffer->cursor_col), &(buffer->cursor_line),
+    editor_get_cursor_pos(state, &(buffer->cursor_col), &(buffer->cursor_line), state->char_w,
                           state->char_h);
     
     //don't blink while typing
@@ -977,6 +976,9 @@ void editor_set_filename(ProgramState* state, const char* new_filename)
 
 void editor_resize_and_reposition(ProgramState* state)
 {
+    int static_char_h;
+    TTF_SizeText(state->static_font, "A", NULL, &static_char_h);
+
     //Command state buttons
     for (int i = 0; i < 10; i++)
     {
@@ -985,19 +987,19 @@ void editor_resize_and_reposition(ProgramState* state)
         button->w = 0;
         button->h = 0; //so that it is set to the size of the text
         
-        Button_resize_text(button, state->font);
+        Button_resize_text(button, state->static_font);
 
-        button->y = state->char_h * i;
+        button->y = static_char_h * i;
     }
 
+    //Input buffers
+    state->command_input.y = state->window_h - static_char_h * 1.1f;
+    state->text.x = state->editor_area.x;
+    state->text.y = state->editor_area.y;
 
     //Ui elements and DrawAreas
     {
-        int char_h;
-        TTF_SizeText(state->static_font, "A", NULL, &char_h);
-
-        state->command_input.y = state->window_h - char_h * 1.1f;
-        state->editor_area.h = state->window_h - char_h * 4;
+        state->editor_area.h = state->window_h - static_char_h * 4;
         state->editor_area.w = state->window_w;
         state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
         state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
@@ -1007,7 +1009,7 @@ void editor_resize_and_reposition(ProgramState* state)
 
 }
 
-bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_h)
+bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_w, int char_h)
 {
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return false;
@@ -1020,7 +1022,6 @@ bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char
     for (int i = 0; i < buffer->text.len; i++)
     {
         char c = buffer->text.text[i];
-        int char_w = state->char_w;
 
         if (c == '\n')
         {

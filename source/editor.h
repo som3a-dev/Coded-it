@@ -25,6 +25,7 @@ enum
 
 typedef struct
 {
+    TTF_Font* font;
     String text;
     int cursor_index;
     int cursor_line;
@@ -168,6 +169,7 @@ void editor_resize_and_reposition(ProgramState* state); //called after
 //gets position in X and Y of the current input buffer's cursor
 //returns false if there is no current input buffer.
 bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y,
+                           int char_w,
                            int char_h);
 
 void editor_push_message(ProgramState* state, const String* msg);
