@@ -121,6 +121,8 @@ typedef struct _ProgramState
     SDL_Color* token_colors;
 
     //File explorer
+    int file_explorer_camera_x;
+    int file_explorer_camera_y;
     TTF_Font* file_explorer_font;
     Button* file_buttons;
     int file_count;

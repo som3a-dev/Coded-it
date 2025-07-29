@@ -377,7 +377,7 @@ void editor_init(ProgramState* state)
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
 
     WIN32_FIND_DATAA data = {0};
-    HANDLE dir_handle = FindFirstFileA(".\\source\\*", &data);
+    HANDLE dir_handle = FindFirstFileA("*", &data);
 
     if (dir_handle == INVALID_HANDLE_VALUE)
     {
@@ -852,11 +852,12 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
     cfg.text = filename;
     cfg.font = state->file_explorer_font;
 
-    int margin_between_file_names = cfg.h * 0.4;
+//    const int margin_between_file_names = cfg.h * 0.4;
+    cfg.h += (cfg.h * 0.4);
 
     cfg.x = state->file_explorer_area.x;
-    cfg.y = (state->file_explorer_area.y + state->file_explorer_area.border_thickness)
-    + (cfg.h + margin_between_file_names) * ((state->file_count));
+    cfg.y = (state->file_explorer_area.y)
+    + (cfg.h) * ((state->file_count));
 
     Button_init(button, &cfg);
 }

@@ -70,7 +70,9 @@ void editor_handle_events(ProgramState* state, bool* should_update)
                 {
                     state->file_explorer_camera_y += -(state->file_buttons->h) * e.wheel.y;
 
-                    int max_bottom = state->file_explorer_area.h / 2 + state->file_buttons->h;
+                    int explorer_height_in_files = (state->file_explorer_area.h / state->file_buttons->h);
+                    int max_bottom = (state->file_count - explorer_height_in_files) * state->file_buttons->h;
+
                     if (state->file_explorer_camera_y > max_bottom)
                     {
                         state->file_explorer_camera_y = max_bottom;
@@ -79,7 +81,7 @@ void editor_handle_events(ProgramState* state, bool* should_update)
                     {
                         state->file_explorer_camera_y = 0;
                     }
-                    printf("%d, %d\n", state->file_explorer_camera_y, state->file_explorer_area.h);
+                    printf("%d, %d\n", state->file_explorer_camera_y, max_bottom);
                 }
             }
         } break;
