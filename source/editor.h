@@ -84,7 +84,7 @@ typedef struct _ProgramState
 
     int state;
 
-    const char* current_file;
+    String current_file;
 
     Stack undo_tree;
     Stack redo_tree;

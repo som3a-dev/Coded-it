@@ -135,7 +135,6 @@ void editor_init(ProgramState* state)
 
 //    state->current_file = "json_parser.c";
 //    editor_open_file(state);
-    state->current_file = NULL;
 
 
     //Cursor color
@@ -970,7 +969,7 @@ void editor_set_state(ProgramState* state, int new_state)
 
 void editor_set_filename(ProgramState* state, const char* new_filename)
 {
-    state->current_file = new_filename;
+    String_set(&(state->current_file), new_filename);
 }
 
 

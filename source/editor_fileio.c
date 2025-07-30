@@ -4,12 +4,12 @@
 void editor_save_file(const ProgramState* state)
 {
     FILE* fp;
-    if (!state->current_file)
+    if (state->current_file.text == NULL)
     {
         printf("No current open file.\n");
         return;
     }
-    fopen_s(&fp, state->current_file, "w");
+    fopen_s(&fp, state->current_file.text, "w");
 
     const char* msg_format;
     if (!fp)
@@ -27,10 +27,10 @@ void editor_save_file(const ProgramState* state)
     }
 
     //send message
-    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
+    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file.text) + 1);
     char* msg = malloc(msg_size); 
 
-    snprintf(msg, msg_size, msg_format, state->current_file);
+    snprintf(msg, msg_size, msg_format, state->current_file.text);
     
     String str = {0};
     String_set(&str, msg);
@@ -43,11 +43,11 @@ void editor_save_file(const ProgramState* state)
 void editor_open_file(ProgramState* state)
 {
     FILE* fp;
-    if (!state->current_file)
+    if (state->current_file.text == NULL)
     {
         printf("No file selected to open.\n");
     }
-    fopen_s(&fp, state->current_file, "r");
+    fopen_s(&fp, state->current_file.text, "r");
 
     char* msg_format = NULL;
     if (!fp)
@@ -78,10 +78,10 @@ void editor_open_file(ProgramState* state)
         msg_format = "Opened file '%s'.";
     }
 
-    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file) + 1);
+    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file.text) + 1);
     char* msg = malloc(msg_size); 
 
-    snprintf(msg, msg_size, msg_format, state->current_file);
+    snprintf(msg, msg_size, msg_format, state->current_file.text);
     
     String str = {0};
     String_set(&str, msg);
