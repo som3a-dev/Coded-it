@@ -425,6 +425,12 @@ void editor_destroy(ProgramState* state)
 
     free(state->file_buttons);
     free(state->token_colors);
+    String_clear(&(state->text.text));
+    String_clear(&(state->command_input.text));
+    String_clear(&(state->clipboard));
+    String_clear(&(state->current_directory));
+    String_clear(&(state->current_file));
+
 
     TTF_Quit();
     SDL_DestroyWindow(state->window);
