@@ -22,6 +22,7 @@ enum
 typedef struct
 {
     int quote_count; //how many quotes in the file up to this point
+    bool line_is_comment;
 } sp_metadata;
 
 
@@ -39,6 +40,9 @@ bool sp_is_numeric(const char* text);
 bool sp_is_string_literal(const char* text, sp_metadata* md);
 
 bool sp_is_braces(const char* text);
-bool sp_is_comment(const char* text);
+
+//NOTE(omar): EXACT SAME NOTE AS THE STRING LITERALS
+//THE EXACT SAME LOGIC
+bool sp_is_comment(const char* text, sp_metadata* md);
 
 int sp_get_token_type(const char* token, sp_metadata* md);

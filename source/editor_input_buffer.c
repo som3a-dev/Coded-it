@@ -185,8 +185,6 @@ void editor_draw_input_buffer(ProgramState* state)
     int char_h;
     TTF_SizeText(font, "A", &char_w, &char_h);
     
-    bool line_is_comment = false;
-
     sp_metadata meta_data = {0};
 
     if (buffer->text.text)
@@ -238,10 +236,10 @@ void editor_draw_input_buffer(ProgramState* state)
 
                                 if (token_type == TOKEN_COMMENT)
                                 {
-                                    line_is_comment = true;
+                                    meta_data.line_is_comment = true;
                                 }
 
-                                if (line_is_comment)
+                                if (meta_data.line_is_comment)
                                 {
                                     token_type = TOKEN_COMMENT;
                                 }
@@ -323,15 +321,15 @@ void editor_draw_input_buffer(ProgramState* state)
                                     y += char_h; 
                                     x = buffer->x;
 
-                                    line_is_comment = false;
+                                    meta_data.line_is_comment = false;
                                 } break;
 
                                 default:
                                 {
                                     char text[2] = {buffer->text.text[i], '\0'};
                                     int token_type;
-
-                                    if (line_is_comment)
+                            
+                                    if (meta_data.line_is_comment)
                                     {
                                         token_type = TOKEN_COMMENT;
                                     }

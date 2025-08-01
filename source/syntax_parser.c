@@ -10,7 +10,7 @@ const char* keywords = "auto:break:case:char:const:continue:default:do:double:el
 
 int sp_get_token_type(const char* token, sp_metadata* md)
 {
-    if (sp_is_comment(token))
+    if (sp_is_comment(token, md))
     {
         return TOKEN_COMMENT;
     }
@@ -47,8 +47,16 @@ int sp_get_token_type(const char* token, sp_metadata* md)
 }
 
 
-bool sp_is_comment(const char* text)
+bool sp_is_comment(const char* text, sp_metadata* md)
 {
+    if (md)
+    {
+        if (md->line_is_comment)
+        {
+            return true;
+        }
+    }
+
     if (strlen(text) < 2)
     {
         return false;
