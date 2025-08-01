@@ -84,7 +84,8 @@ bool editor_draw_input_buffer_character(ProgramState* state,
                                         char c, int x, int y,
                                         int char_w, int char_h,
                                         int index_in_text,
-                                        SDL_Color* color)
+                                        SDL_Color* color,
+                                        bool draw_char)
 {
     InputBuffer* buffer = editor_get_current_input_buffer(state);
     if (!buffer) return;
@@ -112,6 +113,10 @@ bool editor_draw_input_buffer_character(ProgramState* state,
     int draw_x = x;
     int draw_y = y;
 
+    bool part_of_selection = (selection_start <= index_in_text) &&
+                             (selection_end >= index_in_text);
+
+
     if (state->state == EDITOR_STATE_EDIT)
     {
         draw_x -= state->camera_x;
@@ -135,15 +140,21 @@ bool editor_draw_input_buffer_character(ProgramState* state,
         }
     }
 
-    //check if part of selection start or end
-    if ((selection_start <= index_in_text) &&
-        (selection_end >= index_in_text))
+    if (part_of_selection)
     {
+        //Draw the selection fill regardless of whether we draw the character or not
         SDL_Rect rect = { draw_x, draw_y, char_w, char_h};
         SDL_FillRect(state->window_surface, &rect,
         SDL_MapRGB(state->window_surface->format,
         200, 200, 200));
+    }
 
+    //TODO(omar): Would probably be cleaner to move the logic that decides if a character is drawable or not here. rather than having this weird
+    //"draw_char" boolean in a function called draw_character ffs
+    if (draw_char == false) return false;
+
+    if (part_of_selection)
+    {
         draw_text(font, state->window_surface,
         text, draw_x, draw_y,
         color->r, color->g, color->b,
@@ -282,7 +293,7 @@ void editor_draw_input_buffer(ProgramState* state)
 
                                 draw_token_char:
                                 editor_draw_input_buffer_character(state, current_token.text[j],
-                                x, y, char_w, char_h, char_index_in_text, color);
+                                x, y, char_w, char_h, char_index_in_text, color, true);
 
                                 x += char_w;
                             }
@@ -301,15 +312,20 @@ void editor_draw_input_buffer(ProgramState* state)
                         {
                             case ' ':
                             {
+                                editor_draw_input_buffer_character(state, buffer->text.text[i],
+                                x, y, char_w, char_h, i, NULL, false);
+
                                 x += char_w;
                             } break;
 
                             case '\n':
                             {
+                                meta_data.line_is_comment = false;
+                                editor_draw_input_buffer_character(state, buffer->text.text[i],
+                                x, y, char_w, char_h, i, NULL, false);
+
                                 y += char_h; 
                                 x = buffer->x;
-
-                                meta_data.line_is_comment = false;
                             } break;
 
                             default:
@@ -329,12 +345,11 @@ void editor_draw_input_buffer(ProgramState* state)
                                 SDL_Color* token_color = state->token_colors + token_type;
 
                                 editor_draw_input_buffer_character(state, buffer->text.text[i],
-                                x, y, char_w, char_h, i, token_color);
+                                x, y, char_w, char_h, i, token_color, true);
 
                                 x += char_w;
                             } break;
                         }
-
                     } break;
 
                     default:
