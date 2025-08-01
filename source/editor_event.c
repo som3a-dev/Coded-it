@@ -485,9 +485,8 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
             }
             
             int cursor_index_in_line = buffer->cursor_index - prev_newline - 1;
-            printf("Cursor index in line: %d\n", cursor_index_in_line);
             
-            int newline_before_prev_newline = String_get_previous_newline(buffer,
+            int newline_before_prev_newline = String_get_previous_newline(&(buffer->text),
             prev_newline);
             
             //cap cursor_index_in_line at the length of the previous line - 1
