@@ -81,7 +81,6 @@ void editor_handle_events(ProgramState* state, bool* should_update)
                     {
                         state->file_explorer_camera_y = 0;
                     }
-                    printf("%d, %d\n", state->file_explorer_camera_y, max_bottom);
                 }
             }
         } break;

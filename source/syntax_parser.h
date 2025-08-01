@@ -15,19 +15,30 @@ enum
     _TOKEN_COUNT
 };
 
+//This struct is passed to the syntax parser from the editor text rendering
+//code. It contains metadata about the file both constant and variable
+//and the current token
+//used in parsing the token and finding its type
 typedef struct
 {
-    int start_index;
-    int end_index;
-    int type;
-    String text;
-} Token;
+    int quote_count; //how many quotes in the file up to this point
+} sp_metadata;
 
 
 bool sp_is_keyword(const char* text);
 bool sp_is_numeric(const char* text);
-bool sp_is_string_literal(const char* text);
+
+//NOTE(omar): IMPORTANT NOTES ABOUT HOW THIS FUNCTION AND STRING LITERALS WORK
+//This function only returns true IF the token is JUST A string. as in the first and last character in it are 
+//similar quotations. it does NOT return true if the token fails that condition but has a string INSIDE it.
+//THAT case is handled in the text rendering code itself.
+//So the only thing useful about this function is that it saves us some time if the token is clearly simply a string
+//we just render it without checking for strings each character. thats it.
+//This is not very clean. But given that we aren't willing to sacrifice our 'token' model to call sp_get_token_type
+//for every single character. this is what we currently do. Tough Luck!
+bool sp_is_string_literal(const char* text, sp_metadata* md);
+
 bool sp_is_braces(const char* text);
 bool sp_is_comment(const char* text);
 
-int sp_get_token_type(const char* token);
+int sp_get_token_type(const char* token, sp_metadata* md);
