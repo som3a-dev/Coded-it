@@ -248,8 +248,14 @@ void editor_draw_input_buffer(ProgramState* state)
 
                                 SDL_Color* token_color = state->token_colors + token_type;
 
-                                //Draw token text
+                                bool lock_token_color = true;
 
+                                if ((token_type != TOKEN_COMMENT) && (token_type != TOKEN_STRING_LITERAL))
+                                {
+                                    lock_token_color = false;
+                                }
+
+                                //Draw token text
                                 for (int j = 0; j < current_token.len; j++)
                                 {
                                     int char_index_in_text = j + (i - current_token.len);
@@ -261,14 +267,34 @@ void editor_draw_input_buffer(ProgramState* state)
                                         meta_data.quote_count++;
                                     }
 
-                                    if ((token_type != TOKEN_COMMENT) && (token_type != TOKEN_STRING_LITERAL))
+                                    if (lock_token_color)
                                     {
+                                        goto draw_token_char;
+                                    }
+                                    else
+                                    {
+                                        //Check for a string literal inside the token
                                         if (((meta_data.quote_count % 2) != 0) || (c == '"'))
                                         {
                                             color = state->token_colors + TOKEN_STRING_LITERAL;
                                         }
+
+                                        //Check for a comment inside the token
+                                        else if (c == '/')
+                                        {
+                                            if (j < (current_token.len-1))
+                                            {
+                                                if ((current_token.text[j+1] == c))
+                                                {
+                                                    lock_token_color = true;
+                                                    token_color = state->token_colors + TOKEN_COMMENT;
+                                                    color = token_color;
+                                                }
+                                            }
+                                        }
                                     }
 
+                                    draw_token_char:
                                     editor_draw_input_buffer_character(state, current_token.text[j],
                                     x, y, char_w, char_h, char_index_in_text, color);
 
