@@ -6,6 +6,7 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 
+static int characters_rendered = 0;
 
 InputBuffer* editor_get_current_input_buffer(const ProgramState* state)
 {
@@ -163,6 +164,8 @@ bool editor_draw_input_buffer_character(ProgramState* state,
         state->bg_color.r, state->bg_color.g, state->bg_color.b);
     }
 
+    characters_rendered++;
+
     return true;
 }
 
@@ -202,160 +205,145 @@ void editor_draw_input_buffer(ProgramState* state)
             String current_token = {0};
             for (int i = 0; i <= buffer->text.len; i++)
             {
-                { //CULLING
-                    int draw_x = x;
-                    int draw_y = y;
-                    if (state->state == EDITOR_STATE_EDIT)
-                    {
-                        draw_x -= state->camera_x;
-                        draw_y -= state->camera_y;
-                        if ((draw_y) > (state->editor_area.h + state->editor_area.y))
-                        {
-                            goto end_text_rendering;
-                        }
-                    }
-                }
-
+                switch (buffer->text.text[i])
                 {
-                    switch (buffer->text.text[i])
+                    case ' ':
+                    case '\n':
+                    case '(':
+                    case ')':
+                    case '{':
+                    case '}':
+                    case '[':
+                    case ']':
+                    case ';':
+                    case '\0':
                     {
-                        case ' ':
-                        case '\n':
-                        case '(':
-                        case ')':
-                        case '{':
-                        case '}':
-                        case '[':
-                        case ']':
-                        case ';':
-                        case '\0':
+                        if (current_token.text != NULL)
                         {
-                            if (current_token.text != NULL)
-                            {
-                                int token_type = sp_get_token_type(current_token.text, &meta_data);
+                            int token_type = sp_get_token_type(current_token.text, &meta_data);
 
-                                if (token_type == TOKEN_COMMENT)
+                            if (token_type == TOKEN_COMMENT)
+                            {
+                                meta_data.line_is_comment = true;
+                            }
+
+                            if (meta_data.line_is_comment)
+                            {
+                                token_type = TOKEN_COMMENT;
+                            }
+
+                            SDL_Color* token_color = state->token_colors + token_type;
+
+                            bool lock_token_color = true;
+
+                            if ((token_type != TOKEN_COMMENT) && (token_type != TOKEN_STRING_LITERAL))
+                            {
+                                lock_token_color = false;
+                            }
+
+                            //Draw token text
+                            for (int j = 0; j < current_token.len; j++)
+                            {
+                                int char_index_in_text = j + (i - current_token.len);
+                                char c = current_token.text[j];
+                                SDL_Color* color = token_color;
+
+                                if (c == '"')
                                 {
-                                    meta_data.line_is_comment = true;
+                                    meta_data.quote_count++;
                                 }
 
+                                if (lock_token_color)
+                                {
+                                    goto draw_token_char;
+                                }
+                                else
+                                {
+                                    //Check for a string literal inside the token
+                                    if (((meta_data.quote_count % 2) != 0) || (c == '"'))
+                                    {
+                                        color = state->token_colors + TOKEN_STRING_LITERAL;
+                                    }
+
+                                    //Check for a comment inside the token
+                                    else if (c == '/')
+                                    {
+                                        if (j < (current_token.len-1))
+                                        {
+                                            if ((current_token.text[j+1] == c))
+                                            {
+                                                lock_token_color = true;
+                                                token_color = state->token_colors + TOKEN_COMMENT;
+                                                color = token_color;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                draw_token_char:
+                                editor_draw_input_buffer_character(state, current_token.text[j],
+                                x, y, char_w, char_h, char_index_in_text, color);
+
+                                x += char_w;
+                            }
+
+                            String_clear(&current_token);
+
+                        }
+
+                        //draw the delimiter
+                        if (buffer->text.text[i] == '\0')
+                        {
+                            continue;
+                        }
+
+                        switch (buffer->text.text[i])
+                        {
+                            case ' ':
+                            {
+                                x += char_w;
+                            } break;
+
+                            case '\n':
+                            {
+                                y += char_h; 
+                                x = buffer->x;
+
+                                meta_data.line_is_comment = false;
+                            } break;
+
+                            default:
+                            {
+                                char text[2] = {buffer->text.text[i], '\0'};
+                                int token_type;
+                        
                                 if (meta_data.line_is_comment)
                                 {
                                     token_type = TOKEN_COMMENT;
                                 }
+                                else
+                                {
+                                    token_type = sp_get_token_type(text, &meta_data);
+                                }
 
                                 SDL_Color* token_color = state->token_colors + token_type;
 
-                                bool lock_token_color = true;
+                                editor_draw_input_buffer_character(state, buffer->text.text[i],
+                                x, y, char_w, char_h, i, token_color);
 
-                                if ((token_type != TOKEN_COMMENT) && (token_type != TOKEN_STRING_LITERAL))
-                                {
-                                    lock_token_color = false;
-                                }
+                                x += char_w;
+                            } break;
+                        }
 
-                                //Draw token text
-                                for (int j = 0; j < current_token.len; j++)
-                                {
-                                    int char_index_in_text = j + (i - current_token.len);
-                                    char c = current_token.text[j];
-                                    SDL_Color* color = token_color;
+                    } break;
 
-                                    if (c == '"')
-                                    {
-                                        meta_data.quote_count++;
-                                    }
-
-                                    if (lock_token_color)
-                                    {
-                                        goto draw_token_char;
-                                    }
-                                    else
-                                    {
-                                        //Check for a string literal inside the token
-                                        if (((meta_data.quote_count % 2) != 0) || (c == '"'))
-                                        {
-                                            color = state->token_colors + TOKEN_STRING_LITERAL;
-                                        }
-
-                                        //Check for a comment inside the token
-                                        else if (c == '/')
-                                        {
-                                            if (j < (current_token.len-1))
-                                            {
-                                                if ((current_token.text[j+1] == c))
-                                                {
-                                                    lock_token_color = true;
-                                                    token_color = state->token_colors + TOKEN_COMMENT;
-                                                    color = token_color;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    draw_token_char:
-                                    editor_draw_input_buffer_character(state, current_token.text[j],
-                                    x, y, char_w, char_h, char_index_in_text, color);
-
-                                    x += char_w;
-                                }
-
-                                String_clear(&current_token);
-
-                            }
-
-                            //draw the delimiter
-                            if (buffer->text.text[i] == '\0')
-                            {
-                                continue;
-                            }
-
-                            switch (buffer->text.text[i])
-                            {
-                                case ' ':
-                                {
-                                    x += char_w;
-                                } break;
-
-                                case '\n':
-                                {
-                                    y += char_h; 
-                                    x = buffer->x;
-
-                                    meta_data.line_is_comment = false;
-                                } break;
-
-                                default:
-                                {
-                                    char text[2] = {buffer->text.text[i], '\0'};
-                                    int token_type;
-                            
-                                    if (meta_data.line_is_comment)
-                                    {
-                                        token_type = TOKEN_COMMENT;
-                                    }
-                                    else
-                                    {
-                                        token_type = sp_get_token_type(text, &meta_data);
-                                    }
-
-                                    SDL_Color* token_color = state->token_colors + token_type;
-
-                                    editor_draw_input_buffer_character(state, buffer->text.text[i],
-                                    x, y, char_w, char_h, i, token_color);
-
-                                    x += char_w;
-                                } break;
-                            }
-                        } break;
-
-                        default:
+                    default:
+                    {
+                        if (buffer->text.text[i] != '\0')
                         {
-                            if (buffer->text.text[i] != '\0')
-                            {
-                                String_push(&current_token, buffer->text.text[i]);
-                            }
-                        } break;
-                    }
+                            String_push(&current_token, buffer->text.text[i]);
+                        }
+                    } break;
                 }
             }
             end_text_rendering:;
@@ -364,4 +352,6 @@ void editor_draw_input_buffer(ProgramState* state)
         }
     }
 
+    printf("Rendered %d characters out of %d\n", characters_rendered, buffer->text.len);
+    characters_rendered = 0;
 }
