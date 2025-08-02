@@ -259,9 +259,12 @@ void editor_draw_input_buffer(ProgramState* state)
                                 char c = current_token.text[j];
                                 SDL_Color* color = token_color;
 
-                                if (c == '"')
+                                if (token_type != TOKEN_COMMENT)
                                 {
-                                    meta_data.quote_count++;
+                                    if (c == '"')
+                                    {
+                                        meta_data.quote_count++;
+                                    }
                                 }
 
                                 if (lock_token_color)
