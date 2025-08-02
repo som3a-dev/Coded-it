@@ -37,6 +37,8 @@ bool sp_is_numeric(const char* text);
 //we just render it without checking for strings each character. thats it.
 //This is not very clean. But given that we aren't willing to sacrifice our 'token' model to call sp_get_token_type
 //for every single character. this is what we currently do. Tough Luck!
+//NOTE(omar): this function always returns false when an sp_metadata md is passed. meaning it does nothing as of now and is just for consistency
+//TODO(omar): Rewrite all this shit and decouple the text rendering code from highlighting string literals or comments or anything
 bool sp_is_string_literal(const char* text, sp_metadata* md);
 
 bool sp_is_braces(const char* text);

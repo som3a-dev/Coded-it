@@ -97,11 +97,9 @@ bool sp_is_string_literal(const char* text, sp_metadata* md)
 {
     if (md)
     {
-        if ((md->quote_count % 2) == 0)
-        {
-            return false;
-        }
+        return false;
     }
+
     int len = strlen(text);
 
     if ((text[0] == '\'') && (text[len-1] == '\''))
