@@ -289,6 +289,7 @@ void editor_draw_input_buffer(ProgramState* state)
                                                 lock_token_color = true;
                                                 token_color = state->token_colors + TOKEN_COMMENT;
                                                 color = token_color;
+                                                meta_data.line_is_comment = true;
                                             }
                                         }
                                     }
