@@ -340,6 +340,10 @@ void editor_draw_input_buffer(ProgramState* state)
                                 {
                                     token_type = TOKEN_COMMENT;
                                 }
+                                else if (((meta_data.quote_count % 2) != 0))
+                                {
+                                    token_type = TOKEN_STRING_LITERAL;
+                                }
                                 else
                                 {
                                     token_type = sp_get_token_type(text, &meta_data);
