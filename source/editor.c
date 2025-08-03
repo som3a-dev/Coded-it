@@ -629,7 +629,8 @@ void editor_draw(ProgramState* state)
 //        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
     }
 
-/*    { //draw font size
+    if (state->state == EDITOR_STATE_EDIT)
+    { //draw font size
         const char* format = "Font size: %d";
 
         int text_len = (strlen(format) - 2) + ulen_helper(state->font_size) + 1;
@@ -646,8 +647,7 @@ void editor_draw(ProgramState* state)
                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
         free(text);
-
-    }*/
+    }
 
     switch (state->state)
     {
@@ -878,7 +878,8 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
     cfg.on_click = Button_file_name_on_click;
 
     TTF_SizeText(state->file_explorer_font, filename, &(cfg.w), &(cfg.h));
-    cfg.w = state->file_explorer_area.w;
+//    cfg.w = state->file_explorer_area.w;
+    cfg.w = state->window_w;
     cfg.text = filename;
     cfg.font = state->file_explorer_font;
 
@@ -1052,6 +1053,13 @@ void editor_resize_and_reposition(ProgramState* state)
         Button_resize_text(button, state->static_font);
 
         button->y = static_char_h * i;
+    }
+
+    //FIle explorer buttons
+    for (int i = 0; i < state->file_count; i++)
+    {
+        Button* button = state->file_buttons + i;
+        button->w = state->window_w;
     }
 
     //Input buffers
