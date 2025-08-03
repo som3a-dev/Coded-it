@@ -612,6 +612,11 @@ void editor_draw(ProgramState* state)
     SDL_MapRGB(state->window_surface->format,
     state->bg_color.r, state->bg_color.g, state->bg_color.b)); //Clear
 
+    if (state->clicked_button)
+    {
+        printf("%d\n", state->clicked_button->mouse_hovering);
+    }
+
     { //draw border line
         int char_h;
         TTF_SizeText(state->static_font, "A", NULL, &char_h);
@@ -783,7 +788,6 @@ void editor_draw(ProgramState* state)
 
 void editor_draw_file_explorer(ProgramState* state)
 {
-    printf("%d\n", state->file_explorer_camera_y);
     for (int i = 0; i < state->file_count; i++)
     {
         //TODO(omar): Decide if culling buttons should be here or in button_draw
@@ -1059,13 +1063,11 @@ void editor_resize_and_reposition(ProgramState* state)
     {
         state->editor_area.h = state->window_h - static_char_h * 4;
         state->editor_area.w = state->window_w;
-        state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
-        state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
+        state->file_explorer_area.h = state->window_h - static_char_h * 4;
+        state->file_explorer_area.w = state->window_w;
 
-        state->file_explorer_area.y = state->char_h;
+        state->file_explorer_area.y = static_char_h;
     }
-
-    printf("%d\n", state->editor_area.x);
 
 }
 

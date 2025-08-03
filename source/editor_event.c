@@ -33,7 +33,7 @@ void editor_handle_events(ProgramState* state, bool* should_update)
             {
                 String_insert(&(buffer->text), e.text.text[0], buffer->cursor_index);
                 //system("@cls||clear");
-                //printf("%s\n", state->text);
+                printf("%s\n", state->text);
                 
                 editor_set_cursor(state, buffer->cursor_index + 1);
 
@@ -57,6 +57,14 @@ void editor_handle_events(ProgramState* state, bool* should_update)
             {
                 Button_on_mouse_move(state->file_buttons + i, e.motion.x, e.motion.y,
                 state->file_explorer_camera_x, state->file_explorer_camera_y);
+            }
+            
+            if (state->clicked_button)
+            {
+                //Hacky fix because SDL sends a mouse motion event after setting window to fullscreen
+                //that would lead to the clicked button's mouse hovering to be set to false
+                //so the button would internally be selected but not highlighted
+                state->clicked_button->mouse_hovering = true;
             }
         } break;
 

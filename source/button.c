@@ -123,6 +123,7 @@ void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x
     {
         return;
     }
+    printf("Mouse move\n");
     int x = button->x - offset_x;
     int y = button->y - offset_y; 
 
