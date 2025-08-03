@@ -1,5 +1,6 @@
 #include "button.h"
 #include "editor.h"
+#include "editor_fileio.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
@@ -190,11 +191,44 @@ void Button_disable_children(Button* button, ProgramState* state)
 }
 
 
+void Button_file_name_on_click(Button* button, ProgramState* state)
+{
+    if (!state) return;
+    
+    String_set(&(state->current_file), button->text);
+
+    switch (state->file_explorer_action)
+    {
+        case EXPLORER_ACTION_SAVE:
+        {
+            editor_save_file(state);
+        } break;
+
+        case EXPLORER_ACTION_OPEN:
+        {
+            editor_open_file(state);
+        } break;
+    }
+}
+
+
 void Button_save_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;
 
-    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
+//    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
+    editor_set_state(state, EDITOR_STATE_FILE_EXPLORER);
+    state->file_explorer_action = EXPLORER_ACTION_SAVE;
+}
+
+
+void Button_open_on_click(Button* button, ProgramState* state)
+{
+    if (!state) return;
+
+//    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
+    editor_set_state(state, EDITOR_STATE_FILE_EXPLORER);
+    state->file_explorer_action = EXPLORER_ACTION_OPEN;
 }
 
 
@@ -220,13 +254,14 @@ void Button_save_on_input(Button* button, ProgramState* state, String* input)
 void Button_open_on_input(Button* button, ProgramState* state, String* input)
 {
     if (!state) return;
+    return;
 
     if (input)
     {
         if (input->text)
         {
-            editor_set_filename(state, input->text); 
-            editor_open_file(state);
+//            editor_set_filename(state, input->text); 
+//            editor_open_file(state);
         }
         else
         {

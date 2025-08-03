@@ -94,7 +94,7 @@ void editor_init(ProgramState* state)
         config.text = "Open";
         config.y += config.h;
 
-        config.on_click = Button_save_on_click; //this is not an oversight.
+        config.on_click = Button_open_on_click;
         config.on_input = Button_open_on_input;
         config.disabled = true;
         Button_init(state->buttons + index, &config);
@@ -376,7 +376,7 @@ void editor_init(ProgramState* state)
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
 
     WIN32_FIND_DATAA data = {0};
-    HANDLE dir_handle = FindFirstFileA(".\\source\\*", &data);
+    HANDLE dir_handle = FindFirstFileA("*", &data);
 
     if (dir_handle == INVALID_HANDLE_VALUE)
     {
@@ -404,16 +404,17 @@ void editor_init(ProgramState* state)
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
 
-    //TODO(omar): move this to editor_resize_and_reposition
-    state->editor_area.x = state->char_w * max_len;
-    state->file_explorer_area.y = state->char_h;
-
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
 
     //Input buffer properties
     state->text.font = state->font;
     state->command_input.font = state->static_font;
+
+    String_set(&(state->current_file), "CODE.c");
+    editor_open_file(state);
+
+    editor_set_state(state, EDITOR_STATE_EDIT);
 }
 
 
@@ -475,9 +476,13 @@ void editor_do_timed_events(ProgramState* state, bool* should_update)
 
 void editor_update(ProgramState* state)
 {
-    if (state->selection_start_index != -2)
+    if (editor_get_current_input_buffer(state))
     {
-        state->draw_cursor = true;
+        //Do stuff that is specific to states with an input buffer
+        if (state->selection_start_index != -2)
+        {
+            state->draw_cursor = true;
+        }
     }
 
     if (state->message)
@@ -580,6 +585,10 @@ void editor_update(ProgramState* state)
                 state->camera_x = col * state->char_w;
             }
 
+        } break;
+
+        case EDITOR_STATE_FILE_EXPLORER:
+        {
             if (mouse_state)
             {
                 editor_check_button_mouse_click(state, state->file_buttons, state->file_count);
@@ -615,7 +624,7 @@ void editor_draw(ProgramState* state)
 //        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
     }
 
-    { //draw font size
+/*    { //draw font size
         const char* format = "Font size: %d";
 
         int text_len = (strlen(format) - 2) + ulen_helper(state->font_size) + 1;
@@ -633,7 +642,7 @@ void editor_draw(ProgramState* state)
 
         free(text);
 
-    }
+    }*/
 
     switch (state->state)
     {
@@ -651,32 +660,15 @@ void editor_draw(ProgramState* state)
             editor_draw_input_buffer(state);
         } break;
 
+        case EDITOR_STATE_FILE_EXPLORER:
+        {
+            editor_draw_file_explorer(state);
+            editor_render_draw_area(state, &(state->file_explorer_area));
+        } break;
+
         case EDITOR_STATE_EDIT:
         {
             editor_draw_input_buffer(state);
-
-            for (int i = 0; i < state->file_count; i++)
-            {
-                //TODO(omar): Decide if culling buttons should be here or in button_draw
-
-                int x = state->file_buttons[i].x - state->file_explorer_camera_x;
-                int y = state->file_buttons[i].y - state->file_explorer_camera_y;
-                int w = state->file_buttons[i].w;
-                int h = state->file_buttons[i].h;
-
-                if ((y+h) > (state->file_explorer_area.y + state->file_explorer_area.h))
-                {
-                    continue;
-                }
-                if (y < state->file_explorer_area.y)
-                {
-                    continue;
-                }
-
-                Button_draw(state->file_buttons + i,
-                state->window_surface, &(state->bg_color), state->file_explorer_camera_x,
-                state->file_explorer_camera_y);
-            }
 
             //draw status bar
             int line;
@@ -706,7 +698,7 @@ void editor_draw(ProgramState* state)
 
             //draw DrawArea borders
             editor_render_draw_area(state, &(state->editor_area));
-            editor_render_draw_area(state, &(state->file_explorer_area));
+//            editor_render_draw_area(state, &(state->file_explorer_area));
 
         } break;
     }
@@ -789,6 +781,34 @@ void editor_draw(ProgramState* state)
 }
 
 
+void editor_draw_file_explorer(ProgramState* state)
+{
+    printf("%d\n", state->file_explorer_camera_y);
+    for (int i = 0; i < state->file_count; i++)
+    {
+        //TODO(omar): Decide if culling buttons should be here or in button_draw
+
+        int x = state->file_buttons[i].x - state->file_explorer_camera_x;
+        int y = state->file_buttons[i].y - state->file_explorer_camera_y;
+        int w = state->file_buttons[i].w;
+        int h = state->file_buttons[i].h;
+
+        if ((y+h) > (state->file_explorer_area.y + state->file_explorer_area.h))
+        {
+            continue;
+        }
+        if (y < state->file_explorer_area.y)
+        {
+            continue;
+        }
+
+        Button_draw(state->file_buttons + i,
+        state->window_surface, &(state->bg_color), state->file_explorer_camera_x,
+        state->file_explorer_camera_y);
+    }
+}
+
+
 void editor_render_draw_area(ProgramState* state, const DrawArea* area)
 {
     Uint32 color = SDL_MapRGB(state->window_surface->format, 50, 50, 50);
@@ -851,10 +871,16 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
     Button* button = state->file_buttons + ((state->file_count)-1);
     ButtonConfig cfg = {0};
 
+    cfg.on_click = Button_file_name_on_click;
+
     TTF_SizeText(state->file_explorer_font, filename, &(cfg.w), &(cfg.h));
     cfg.w = state->file_explorer_area.w;
     cfg.text = filename;
     cfg.font = state->file_explorer_font;
+
+    cfg.pressed_r = 110;
+    cfg.pressed_g = 100;
+    cfg.pressed_b = 100;
 
 //    const int margin_between_file_names = cfg.h * 0.4;
     cfg.h += (cfg.h * 0.4);
@@ -933,6 +959,10 @@ void editor_set_state(ProgramState* state, int new_state)
 {
     switch (state->state)
     {
+        case EDITOR_STATE_EDIT:
+        {
+        } break;
+
         case EDITOR_STATE_COMMAND_INPUT:
         {
             InputBuffer* buffer = editor_get_current_input_buffer(state);
@@ -955,6 +985,7 @@ void editor_set_state(ProgramState* state, int new_state)
             for (int i = 0; i < 10; i++)
             {
                 Button* button = state->buttons + i;
+                button->mouse_hovering = false;
                 Button_disable_children(button, state);
             } 
 
@@ -967,6 +998,28 @@ void editor_set_state(ProgramState* state, int new_state)
                 }
             }
         } break;
+    }
+
+    if ((new_state == EDITOR_STATE_COMMAND) || (new_state == EDITOR_STATE_FILE_EXPLORER))
+    {
+        state->clicked_button = NULL;
+    }
+
+    if (new_state == EDITOR_STATE_FILE_EXPLORER)
+    {
+        state->file_explorer_area.w = state->window_w;
+
+        for (int i = 0; i < state->file_count; i++)
+        {
+            state->file_buttons[i].mouse_hovering = false;
+        }
+
+        editor_select_first_enabled_button(state, state->file_buttons, state->file_count);
+    }
+    else if (new_state == EDITOR_STATE_COMMAND)
+    {
+        editor_select_first_enabled_button(state, state->buttons, 10);
+
     }
 
     state->state = new_state;
@@ -1008,6 +1061,8 @@ void editor_resize_and_reposition(ProgramState* state)
         state->editor_area.w = state->window_w;
         state->file_explorer_area.w = state->editor_area.x - (state->file_explorer_area.border_thickness);
         state->file_explorer_area.h = state->editor_area.h - state->file_explorer_area.y;
+
+        state->file_explorer_area.y = state->char_h;
     }
 
     printf("%d\n", state->editor_area.x);
@@ -1068,15 +1123,16 @@ void editor_push_text_action(ProgramState* state, const TextAction* new_action)
 }
 
 
-void editor_select_first_enabled_button(ProgramState* state)
+void editor_select_first_enabled_button(ProgramState* state, Button* buttons, int button_count)
 {
-    int button_count = sizeof(state->buttons) / sizeof(Button);
     for (int i = 0; i < button_count; i++)
     {
-        Button* button = state->buttons + i;
+        Button* button = buttons + i;
         if (button->state == BUTTON_STATE_ENABLED)
         {
             state->clicked_button = button;
+            state->clicked_button->mouse_hovering = true;
+            break;
         }
     }
 }

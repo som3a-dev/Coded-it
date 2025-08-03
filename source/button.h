@@ -84,9 +84,14 @@ void Button_resize_text(Button* button, TTF_Font* font);
 
 void Button_disable_children(Button* button, ProgramState* state);
 
+
+//The file name in the file explorer listing
+void Button_file_name_on_click(Button* button, ProgramState* state);
+
 void Button_save_on_click(Button* button, ProgramState* state);
 void Button_save_on_input(Button* button, ProgramState* state, String* input);
 
+void Button_open_on_click(Button* button, ProgramState* state);
 void Button_open_on_input(Button* button, ProgramState* state, String* input);
 
 void Button_file_on_click(Button* button, ProgramState* state);

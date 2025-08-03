@@ -122,13 +122,23 @@ void editor_handle_events(ProgramState* state, bool* should_update)
 
 void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 {
-    if (state->state == EDITOR_STATE_COMMAND)
+    switch (state->state)
     {
-        editor_handle_events_keydown_command(state, e);
-    }
-    else
-    {
-        editor_handle_events_keydown_textual(state, e);
+        case EDITOR_STATE_COMMAND:
+        {
+            editor_handle_events_keydown_command(state, e);
+        } break;
+
+        case EDITOR_STATE_EDIT:
+        case EDITOR_STATE_COMMAND_INPUT:
+        {
+            editor_handle_events_keydown_textual(state, e);
+        } break;
+
+        case EDITOR_STATE_FILE_EXPLORER:
+        {
+            editor_handle_events_keydown_file_explorer(state, e);
+        } break;
     }
 
     switch (e.key.keysym.sym)
@@ -216,75 +226,34 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 
 void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e)
 {
-    switch (e.key.keysym.sym)
+    editor_navigate_buttons_with_keys(state, state->buttons, 10, e);
+}
+
+
+void editor_handle_events_keydown_file_explorer(ProgramState* state, SDL_Event e)
+{
+    if (editor_navigate_buttons_with_keys(state, state->file_buttons, state->file_count, e))
     {
-        case SDLK_UP:
+        editor_set_state(state, EDITOR_STATE_EDIT);
+    }
+
+    //Scrolling
+    if (state->clicked_button)
+    {
+        int x = state->clicked_button->x - state->file_explorer_camera_x;
+        int y = state->clicked_button->y - state->file_explorer_camera_y;
+        int w = state->clicked_button->w;
+        int h = state->clicked_button->h;
+
+        if ((y + h) > (state->file_explorer_area.y + state->file_explorer_area.h))
         {
-            if (state->clicked_button == NULL)
-            {
-                editor_select_first_enabled_button(state);
-            }
-            else
-            {
-                for (int i = 1; i < 10; i++)
-                {
-                    Button* button = state->buttons + i;
-                    if (button == state->clicked_button &&
-                        (button->state == BUTTON_STATE_ENABLED))
-                    {
-                        if ((state->buttons + i - 1)->state != BUTTON_STATE_ENABLED)
-                        {
-                            continue;
-                        }
+            state->file_explorer_camera_y += state->clicked_button->h;
+        }
 
-                        state->clicked_button->mouse_hovering = false;
-                        state->clicked_button = state->buttons + i - 1;
-                        break;
-                    }
-                }
-            }
-            state->clicked_button->mouse_hovering = true;
-        } break;
-
-        case SDLK_DOWN:
+        if (y < state->file_explorer_area.y)
         {
-            if (state->clicked_button == NULL)
-            {
-                editor_select_first_enabled_button(state);
-            }
-            else
-            {
-                for (int i = 0; i < 9; i++)
-                {
-                    Button* button = state->buttons + i;
-                    if (button == state->clicked_button &&
-                        (button->state == BUTTON_STATE_ENABLED))
-                    {
-                        if ((state->buttons + i + 1)->state != BUTTON_STATE_ENABLED)
-                        {
-                            continue;
-                        }
-
-                        state->clicked_button->mouse_hovering = false;
-                        state->clicked_button = state->buttons + i + 1;
-                        break;
-                    }
-                }
-            }
-
-            state->clicked_button->mouse_hovering = true;
-        } break;
-
-        case SDLK_RETURN:
-        {
-            if (state->clicked_button)
-            {
-                if (state->clicked_button->on_click)
-                {
-                    state->clicked_button->on_click(state->clicked_button, state);
-                }
-            }
-        } break;
+            state->file_explorer_camera_y -= state->clicked_button->h;
+        }
     }
 }
 
@@ -597,3 +566,81 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
     }
 }
 
+
+
+bool editor_navigate_buttons_with_keys(ProgramState* state, Button* buttons, int button_count, SDL_Event e)
+{
+    switch (e.key.keysym.sym)
+    {
+        case SDLK_UP:
+        {
+            if (state->clicked_button == NULL)
+            {
+                editor_select_first_enabled_button(state, buttons, button_count);
+            }
+            else
+            {
+                for (int i = 1; i < button_count; i++)
+                {
+                    Button* button = buttons + i;
+                    if (button == state->clicked_button &&
+                        (button->state == BUTTON_STATE_ENABLED))
+                    {
+                        if ((buttons + i - 1)->state != BUTTON_STATE_ENABLED)
+                        {
+                            continue;
+                        }
+
+                        state->clicked_button->mouse_hovering = false;
+                        state->clicked_button = buttons + i - 1;
+                        break;
+                    }
+                }
+            }
+            state->clicked_button->mouse_hovering = true;
+        } break;
+
+        case SDLK_DOWN:
+        {
+            if (state->clicked_button == NULL)
+            {
+                editor_select_first_enabled_button(state, buttons, button_count);
+            }
+            else
+            {
+                for (int i = 0; i < button_count-1; i++)
+                {
+                    Button* button = buttons + i;
+                    if (button == state->clicked_button &&
+                        (button->state == BUTTON_STATE_ENABLED))
+                    {
+                        if ((buttons + i + 1)->state != BUTTON_STATE_ENABLED)
+                        {
+                            continue;
+                        }
+
+                        state->clicked_button->mouse_hovering = false;
+                        state->clicked_button = buttons + i + 1;
+                        break;
+                    }
+                }
+            }
+
+            state->clicked_button->mouse_hovering = true;
+        } break;
+
+        case SDLK_RETURN:
+        {
+            if (state->clicked_button)
+            {
+                if (state->clicked_button->on_click)
+                {
+                    state->clicked_button->on_click(state->clicked_button, state);
+                }
+            }
+            return true;
+        } break;
+    }
+
+    return false;
+}

@@ -19,7 +19,14 @@ enum
     EDITOR_STATE_EDIT,
     EDITOR_STATE_COMMAND,
     EDITOR_STATE_COMMAND_INPUT,
+    EDITOR_STATE_FILE_EXPLORER,
     EDITOR_STATE_COUNT //not an actual state. used for counting
+};
+
+enum
+{
+    EXPLORER_ACTION_SAVE,
+    EXPLORER_ACTION_OPEN
 };
 
 
@@ -122,6 +129,7 @@ typedef struct _ProgramState
     SDL_Color* token_colors;
 
     //File explorer
+    int file_explorer_action; //Save or open etc
     int file_explorer_camera_x;
     int file_explorer_camera_y;
     TTF_Font* file_explorer_font;
@@ -137,6 +145,7 @@ void editor_loop(ProgramState* state);
 
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
+void editor_draw_file_explorer(ProgramState* state);
 
 void editor_render_draw_area(ProgramState* state, const DrawArea* area);
 
@@ -176,7 +185,7 @@ void editor_push_message(ProgramState* state, const String* msg);
 
 void editor_push_text_action(ProgramState* state, TextAction* new_action);
 
-void editor_select_first_enabled_button(ProgramState* state);
+void editor_select_first_enabled_button(ProgramState* state, Button* buttons, int button_count);
 
 //also frees the action and any malloced variables it has
 void editor_undo_text_action(ProgramState* state, const TextAction* action);
