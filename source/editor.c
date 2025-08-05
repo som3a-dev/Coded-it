@@ -62,8 +62,9 @@ void editor_init(ProgramState* state)
 
     state->font_size = 18;
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
-    state->static_font = TTF_OpenFont("CONSOLA.ttf", 20);
-    if (!(state->font) || !(state->static_font))
+    state->ui_font_size = 16;
+    state->ui_font = TTF_OpenFont("CONSOLA.ttf", state->ui_font_size);
+    if (!(state->font) || !(state->ui_font))
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
         return 4;
@@ -76,7 +77,7 @@ void editor_init(ProgramState* state)
     config.pressed_r = 110;
     config.pressed_g = 100;
     config.pressed_b = 100;
-    config.font = state->static_font;
+    config.font = state->ui_font;
     config.h = state->char_h;
     config.x = 0;
     config.y = 0;
@@ -373,7 +374,8 @@ void editor_init(ProgramState* state)
  
 
     //File explorer
-    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", 16);
+    state->file_explorer_font_size = 16;
+    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
 
     WIN32_FIND_DATAA data = {0};
     HANDLE dir_handle = FindFirstFileA("*", &data);
@@ -409,7 +411,7 @@ void editor_init(ProgramState* state)
 
     //Input buffer properties
     state->text.font = state->font;
-    state->command_input.font = state->static_font;
+    state->command_input.font = state->ui_font;
 
     String_set(&(state->current_file), "CODE.c");
     editor_open_file(state);
@@ -421,7 +423,7 @@ void editor_init(ProgramState* state)
 void editor_destroy(ProgramState* state)
 {
     TTF_CloseFont(state->font);
-    TTF_CloseFont(state->static_font);
+    TTF_CloseFont(state->ui_font);
     TTF_CloseFont(state->file_explorer_font);
 
     free(state->file_buttons);
@@ -566,6 +568,7 @@ void editor_update(ProgramState* state)
             if ((cursor_y + state->char_h) > state->editor_area.h)
             {
                 state->camera_y += state->char_h;
+                printf("scroll\n");
             }
 
             if (cursor_y < state->editor_area.y)
@@ -619,7 +622,7 @@ void editor_draw(ProgramState* state)
 
     { //draw border line
         int char_h;
-        TTF_SizeText(state->static_font, "A", NULL, &char_h);
+        TTF_SizeText(state->ui_font, "A", NULL, &char_h);
         SDL_Rect border_line = 
         {
             0, state->editor_area.h,
@@ -631,17 +634,17 @@ void editor_draw(ProgramState* state)
 
     if (state->state == EDITOR_STATE_EDIT)
     { //draw font size
-        const char* format = "Font size: %d";
+        const char* format = "Font size: %d, UI Font size: %d";
 
-        int text_len = (strlen(format) - 2) + ulen_helper(state->font_size) + 1;
+        int text_len = (strlen(format) - 4) + ulen_helper(state->font_size) + ulen_helper(state->ui_font_size) + 1;
         char* text = malloc(sizeof(char) * text_len);
 
-        snprintf(text, text_len, format, state->font_size);
+        snprintf(text, text_len, format, state->font_size, state->ui_font_size);
 
         int text_w;
         TTF_SizeText(state->font, text, &text_w, NULL);
 
-        draw_text(state->static_font, state->window_surface, text, 0,
+        draw_text(state->ui_font, state->window_surface, text, 0,
                     state->editor_area.h + state->editor_area.border_thickness,
                     255, 255, 255,
                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
@@ -692,9 +695,9 @@ void editor_draw(ProgramState* state)
             snprintf(text, text_len, format, line, col);
 
             int text_w;
-            TTF_SizeText(state->static_font, text, &text_w, NULL);
+            TTF_SizeText(state->ui_font, text, &text_w, NULL);
 
-            draw_text(state->static_font, state->window_surface, text, state->window_w - text_w, 
+            draw_text(state->ui_font, state->window_surface, text, state->window_w - text_w, 
                       state->editor_area.h + state->editor_area.border_thickness,
                       255, 255, 255,
                       state->bg_color.r, state->bg_color.g, state->bg_color.b);
@@ -718,9 +721,9 @@ void editor_draw(ProgramState* state)
         if (state->message)
         {
             int char_h;
-            TTF_SizeText(state->static_font, "A", NULL, &char_h);
+            TTF_SizeText(state->ui_font, "A", NULL, &char_h);
 
-            draw_text(state->static_font, state->window_surface, state->message->text,
+            draw_text(state->ui_font, state->window_surface, state->message->text,
                     0,
                     state->command_input.y,
                     255, 230, 230 ,
@@ -1039,8 +1042,8 @@ void editor_set_filename(ProgramState* state, const char* new_filename)
 
 void editor_resize_and_reposition(ProgramState* state)
 {
-    int static_char_h;
-    TTF_SizeText(state->static_font, "A", NULL, &static_char_h);
+    int ui_font_char_h;
+    TTF_SizeText(state->ui_font, "A", NULL, &ui_font_char_h);
 
     //Command state buttons
     for (int i = 0; i < 10; i++)
@@ -1050,31 +1053,35 @@ void editor_resize_and_reposition(ProgramState* state)
         button->w = 0;
         button->h = 0; //so that it is set to the size of the text
         
-        Button_resize_text(button, state->static_font);
+        Button_resize_text(button, state->ui_font);
 
-        button->y = static_char_h * i;
+        button->y = ui_font_char_h * i;
     }
+
+    int explorer_font_char_h;
+    TTF_SizeText(state->ui_font, "A", NULL, &explorer_font_char_h);
 
     //FIle explorer buttons
     for (int i = 0; i < state->file_count; i++)
     {
         Button* button = state->file_buttons + i;
         button->w = state->window_w;
+        button->y = explorer_font_char_h * i;
     }
 
     //Input buffers
-    state->command_input.y = state->window_h - static_char_h * 1.1f;
+    state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
     state->text.x = state->editor_area.x;
     state->text.y = state->editor_area.y;
 
     //Ui elements and DrawAreas
     {
-        state->editor_area.h = state->window_h - static_char_h * 4;
+        state->editor_area.h = state->window_h - ui_font_char_h * 4;
         state->editor_area.w = state->window_w;
-        state->file_explorer_area.h = state->window_h - static_char_h * 4;
+        state->file_explorer_area.h = state->window_h - ui_font_char_h * 4;
         state->file_explorer_area.w = state->window_w;
 
-        state->file_explorer_area.y = static_char_h;
+        state->file_explorer_area.y = ui_font_char_h;
     }
 
 }

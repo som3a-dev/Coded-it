@@ -4,6 +4,20 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
+//helper
+void set_font_size(const char* file, TTF_Font** font, int* size, int new_size, int min_size, int max_size)
+{
+    if (new_size > max_size) new_size = max_size;
+    if (new_size < min_size) new_size = min_size;
+    if (*font)
+    {
+        TTF_CloseFont(*font);
+    }
+
+    *size = new_size;
+    *font = TTF_OpenFont(file, *size);
+}
+
 
 void editor_handle_events(ProgramState* state, bool* should_update)
 {
@@ -193,16 +207,17 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 
             if (SDL_is_ctrl_pressed(keystate))
             {
-                TTF_CloseFont(state->font);
-
-                state->font_size += 2;
-                if (state->font_size > 36)
-                {
-                    state->font_size = 36;
-                }
+                set_font_size("CONSOLA.ttf", &(state->font),
+                &(state->font_size), state->font_size + 2, 12, 36);
 
                 state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+                set_font_size("CONSOLA.ttf", &(state->ui_font),
+                &(state->ui_font_size), state->ui_font_size + 2, 10, 30);
+
+                set_font_size("CONSOLA.ttf", &(state->file_explorer_font),
+                &(state->file_explorer_font_size), state->file_explorer_font_size + 2, 10, 30);
                 
                 editor_resize_and_reposition(state);
             }
@@ -214,16 +229,17 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 
             if (SDL_is_ctrl_pressed(keystate))
             {
-                TTF_CloseFont(state->font);
-
-                state->font_size -= 2;
-                if (state->font_size < 12)
-                {
-                    state->font_size = 12;
-                }
+                set_font_size("CONSOLA.ttf", &(state->font),
+                &(state->font_size), state->font_size - 2, 12, 36);
 
                 state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+                set_font_size("CONSOLA.ttf", &(state->ui_font),
+                &(state->ui_font_size), state->ui_font_size - 2, 10, 30);
+
+                set_font_size("CONSOLA.ttf", &(state->file_explorer_font),
+                &(state->file_explorer_font_size), state->file_explorer_font_size - 2, 10, 30);
 
                 editor_resize_and_reposition(state);
             }

@@ -69,8 +69,9 @@ typedef struct _ProgramState
     SDL_Window* window;
     SDL_Surface* window_surface;
     TTF_Font* font;
-    unsigned int font_size;
-    TTF_Font* static_font; //the font for text not affected by zooming. like the status bar
+    int font_size;
+    TTF_Font* ui_font; //for UI elements generally
+    int ui_font_size;
 
     SDL_Color bg_color; //background color
     SDL_Color cursor_color;
@@ -109,7 +110,7 @@ typedef struct _ProgramState
                                  //EDITOR_STATE_COMMAND_INPUT to be used by the
                                  //clicked button from EDITOR_STATE_COMMAND
 
-    //TODO(omar): make char_w and char_h variables for the static_font too
+    //TODO(omar): make char_w and char_h variables for the ui_font too
     //instead of having to call TTF_SizeText
     int char_w;
     int char_h;
@@ -133,6 +134,7 @@ typedef struct _ProgramState
     int file_explorer_camera_x;
     int file_explorer_camera_y;
     TTF_Font* file_explorer_font;
+    int file_explorer_font_size;
     Button* file_buttons;
     int file_count;
 } ProgramState;
