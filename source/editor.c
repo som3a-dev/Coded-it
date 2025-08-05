@@ -623,7 +623,7 @@ void editor_draw(ProgramState* state)
         printf("%d\n", state->clicked_button->mouse_hovering);
     }
 
-    { //draw border line
+/*    { //draw border line
         int char_h;
         TTF_SizeText(state->ui_font, "A", NULL, &char_h);
         SDL_Rect border_line = 
@@ -633,9 +633,9 @@ void editor_draw(ProgramState* state)
         };
 
 //        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
-    }
+    }*/
 
-    if (state->state == EDITOR_STATE_EDIT)
+/*    if (state->state == EDITOR_STATE_EDIT)
     { //draw font size
         const char* format = "Font size: %d, UI Font size: %d";
 
@@ -653,7 +653,7 @@ void editor_draw(ProgramState* state)
                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
         free(text);
-    }
+    }*/
 
     switch (state->state)
     {
@@ -682,6 +682,7 @@ void editor_draw(ProgramState* state)
             editor_draw_input_buffer(state);
 
             //draw status bar
+            /*
             int line;
             int col;
             editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
@@ -705,7 +706,7 @@ void editor_draw(ProgramState* state)
                       255, 255, 255,
                       state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
-            free(text);
+            free(text);*/
 
             //draw DrawArea borders
             editor_render_draw_area(state, &(state->editor_area));
@@ -1077,12 +1078,21 @@ void editor_resize_and_reposition(ProgramState* state)
 
     //Ui elements and DrawAreas
     {
-        state->editor_area.h = state->window_h - ui_font_char_h * 4;
-        state->editor_area.w = state->window_w;
-        state->file_explorer_area.h = state->window_h - ui_font_char_h * 4;
-        state->file_explorer_area.w = state->window_w;
+        //message area
+        state->message_area.x = 0;
+        state->message_area.w = state->window_w;
+        state->message_area.h = ui_font_char_h * 1.5 + state->editor_area.border_thickness;
+        state->message_area.y = state->window_h - state->message_area.h;
 
+        //editor area
+        state->editor_area.h = state->message_area.y;
+        state->editor_area.w = state->window_w;
+
+        //explorer area
+        state->file_explorer_area.h = state->message_area.y;
+        state->file_explorer_area.w = state->window_w;
         state->file_explorer_area.y = ui_font_char_h;
+
     }
 
 }

@@ -89,6 +89,7 @@ typedef struct _ProgramState
 
     DrawArea editor_area;
     DrawArea file_explorer_area;
+    DrawArea message_area;
 
     int state;
 
