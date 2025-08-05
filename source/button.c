@@ -157,10 +157,10 @@ bool Button_is_mouse_hovering(Button* button)
 
 void Button_resize_text(Button* button, TTF_Font* font)
 {
-    if (button->state != BUTTON_STATE_ENABLED)
+/*    if (button->state != BUTTON_STATE_ENABLED)
     {
         return false;
-    }
+    }*/
 
     TTF_SizeText(font, button->text, &(button->text_w), &(button->text_h));
     if (button->w == 0)

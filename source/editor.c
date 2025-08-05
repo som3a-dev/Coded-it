@@ -77,8 +77,9 @@ void editor_init(ProgramState* state)
     config.pressed_r = 110;
     config.pressed_g = 100;
     config.pressed_b = 100;
-    config.font = state->ui_font;
+    config.font = state->font;
     config.h = state->char_h;
+    config.w = state->window_w;
     config.x = 0;
     config.y = 0;
 
@@ -708,8 +709,6 @@ void editor_draw(ProgramState* state)
 
             //draw DrawArea borders
             editor_render_draw_area(state, &(state->editor_area));
-//            editor_render_draw_area(state, &(state->file_explorer_area));
-
         } break;
     }
 
@@ -1052,11 +1051,11 @@ void editor_resize_and_reposition(ProgramState* state)
     {
         Button* button = state->buttons + i;
 
-        button->w = 0;
         button->h = 0; //so that it is set to the size of the text
         
         Button_resize_text(button, state->ui_font);
 
+        button->w = state->window_w;
         button->y = ui_font_char_h * i;
     }
 
