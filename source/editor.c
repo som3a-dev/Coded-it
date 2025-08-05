@@ -418,6 +418,11 @@ void editor_init(ProgramState* state)
     editor_open_file(state);
 
     editor_set_state(state, EDITOR_STATE_EDIT);
+
+    state->status_bar_color.r = 170;
+    state->status_bar_color.g = 170;
+    state->status_bar_color.b = 170;
+    state->status_bar_color.a = 255;
 }
 
 
@@ -680,6 +685,7 @@ void editor_draw(ProgramState* state)
         case EDITOR_STATE_EDIT:
         {
             editor_draw_input_buffer(state);
+            editor_draw_status_bar(state);
 
             //draw status bar
             /*
@@ -734,60 +740,65 @@ void editor_draw(ProgramState* state)
         }
     }
 
-/*    int char_w = state->window_w / state->char_w;
-    int char_h = state->window_h / state->char_h;
-
-    for (int i = 0; i < char_h; i++)
-    {
-        for (int j = 0; j < char_w; j++)
-        {
-            int x = (state->text.x) + j * state->char_w;
-            int y = (state->text.y) + i * state->char_h;
-
-            {
-                SDL_Rect rect = {
-                    x, y,
-                    1, state->char_h
-                };
-
-                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
-                    state->window_surface->format, 255, 255, 0
-                ));
-            }
-            {
-                SDL_Rect rect = {
-                    x, y,
-                    state->char_w, 1 
-                };
-
-                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
-                    state->window_surface->format, 255, 255, 0
-                ));
-            }
-            {
-                SDL_Rect rect = {
-                    x, y + state->char_h,
-                    state->char_w, 1 
-                };
-
-                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
-                    state->window_surface->format, 255, 255, 0
-                ));
-            }
-            {
-                SDL_Rect rect = {
-                    x + state->char_w, y,
-                    1, state->char_h 
-                };
-
-                SDL_FillRect(state->window_surface, &rect, SDL_MapRGB(
-                    state->window_surface->format, 255, 255, 0
-                ));
-            }
-        }
-    }*/
-
     SDL_UpdateWindowSurface(state->window);
+}
+
+
+void editor_draw_status_bar(ProgramState* state)
+{
+    SDL_FillRect(state->window_surface, &(state->status_bar_area), SDL_MapRGB(state->window_surface->format, 170, 170, 170));
+
+
+
+    { //Line and col
+        int line;
+        int col;
+        editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
+        line -= state->text.y;
+        col -= state->text.x;
+        line /= state->char_h;
+        col /= state->char_w;
+
+        const char* format = "Ln %d, Col %d";
+
+        int text_len = (strlen(format) - 4) + ulen_helper(line) + ulen_helper(col) + 1;
+        char* text = malloc(sizeof(char) * text_len);
+
+        snprintf(text, text_len, format, line, col);
+
+        int text_w;
+        TTF_SizeText(state->font, text, &text_w, NULL);
+
+//        int x = state->status_bar_area.x + (state->status_bar_area.w * 0.3f);
+        int x = state->window_w - text_w;
+        int y = state->status_bar_area.y + ((state->status_bar_area.h / 2) - (state->char_h / 2));
+
+
+        draw_text(state->font, state->window_surface, text,
+                    x, y, 
+                    0, 0, 0,
+                    state->status_bar_color.r, state->status_bar_color.g, state->status_bar_color.b);
+
+        free(text);
+    }
+
+    { //Current filename
+        int x = state->status_bar_area.x + (state->status_bar_area.w * 0.3f);
+        int y = state->status_bar_area.y + ((state->status_bar_area.h / 2) - (state->char_h / 2));
+        x = state->status_bar_area.x;
+
+        char* text = state->current_file.text;
+        if (text == NULL)
+        {
+            text = "(No file)";
+        }
+
+        draw_text(state->font, state->window_surface, state->current_file.text,
+                  x, y, 
+                  0, 0, 0,
+                  state->status_bar_color.r, state->status_bar_color.g, state->status_bar_color.b);
+
+    }
 }
 
 
@@ -1078,6 +1089,12 @@ void editor_resize_and_reposition(ProgramState* state)
 
     //Ui elements and DrawAreas
     {
+        //status bar area
+        state->status_bar_area.x = state->char_w * 0.1f;
+        state->status_bar_area.y = state->char_h * 0.1f;
+        state->status_bar_area.w = state->window_w;
+        state->status_bar_area.h = state->char_h * 1;
+
         //message area
         state->message_area.x = 0;
         state->message_area.w = state->window_w;
@@ -1085,6 +1102,7 @@ void editor_resize_and_reposition(ProgramState* state)
         state->message_area.y = state->window_h - state->message_area.h;
 
         //editor area
+        state->editor_area.y = state->status_bar_area.y + state->status_bar_area.h + state->status_bar_area.x;
         state->editor_area.h = state->message_area.y;
         state->editor_area.w = state->window_w;
 

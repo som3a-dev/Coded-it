@@ -75,6 +75,7 @@ typedef struct _ProgramState
 
     SDL_Color bg_color; //background color
     SDL_Color cursor_color;
+    SDL_Color status_bar_color;
 
     bool running;
 
@@ -89,6 +90,7 @@ typedef struct _ProgramState
 
     DrawArea editor_area;
     DrawArea file_explorer_area;
+    DrawArea status_bar_area;
     DrawArea message_area;
 
     int state;
@@ -149,6 +151,8 @@ void editor_loop(ProgramState* state);
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
 void editor_draw_file_explorer(ProgramState* state);
+
+void editor_draw_status_bar(ProgramState* state);
 
 void editor_render_draw_area(ProgramState* state, const DrawArea* area);
 
