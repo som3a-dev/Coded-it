@@ -210,7 +210,6 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 set_font_size("CONSOLA.ttf", &(state->font),
                 &(state->font_size), state->font_size + 2, 12, 36);
 
-                state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
                 set_font_size("CONSOLA.ttf", &(state->ui_font),
@@ -232,7 +231,6 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 set_font_size("CONSOLA.ttf", &(state->font),
                 &(state->font_size), state->font_size - 2, 12, 36);
 
-                state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
                 set_font_size("CONSOLA.ttf", &(state->ui_font),
