@@ -375,6 +375,6 @@ void editor_draw_input_buffer(ProgramState* state)
         }
     }
 
-    printf("Rendered %d characters out of %d\n", characters_rendered, buffer->text.len);
+//    printf("Rendered %d characters out of %d\n", characters_rendered, buffer->text.len);
     characters_rendered = 0;
 }

@@ -563,21 +563,22 @@ void editor_update(ProgramState* state)
 
             if ((cursor_x + state->char_w) > state->editor_area.w)
             {
-                state->camera_x += state->char_w;
+                state->camera_x += (((cursor_x + state->char_w) - state->editor_area.w) / state->char_w) * state->char_w;
+//                state->camera_x += state->char_w; //the cursor's height offset
             }
             if ((cursor_y + state->char_h) > state->editor_area.h)
             {
-                state->camera_y += state->char_h;
-                printf("scroll\n");
+                state->camera_y += (((cursor_y + state->char_h) - state->editor_area.h) / state->char_h) * state->char_h;
+                state->camera_y += state->char_h; //the cursor's height offset
             }
 
             if (cursor_y < state->editor_area.y)
             {
-                state->camera_y -= state->char_h;
+                state->camera_y += (((cursor_y) - state->editor_area.y) / state->char_h) * state->char_h;
             }
             if (cursor_x < state->editor_area.x)
             {
-                int line;
+/*                int line;
                 int col;
                 editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
                 line -= state->text.y;
@@ -585,7 +586,8 @@ void editor_update(ProgramState* state)
                 line /= state->char_h;
                 col /= state->char_w;
 
-                state->camera_x = col * state->char_w;
+                state->camera_x = col * state->char_w;*/
+                state->camera_x += (((cursor_x) - state->editor_area.x) / state->char_w) * state->char_w;
             }
 
         } break;

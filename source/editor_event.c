@@ -47,7 +47,7 @@ void editor_handle_events(ProgramState* state, bool* should_update)
             {
                 String_insert(&(buffer->text), e.text.text[0], buffer->cursor_index);
                 //system("@cls||clear");
-                printf("%s\n", state->text);
+//                printf("%s\n", state->text);
                 
                 editor_set_cursor(state, buffer->cursor_index + 1);
 
