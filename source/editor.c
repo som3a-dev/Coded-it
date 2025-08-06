@@ -374,6 +374,31 @@ void editor_init(ProgramState* state)
     }
  
 
+
+    //draw areas
+    state->editor_area.border_thickness = 4;
+    state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
+
+    state->file_explorer_area.border_thickness = 4;
+    state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
+
+    //Must be called to init draw areas and stuff
+    editor_resize_and_reposition(state); //to set editor_area.h
+
+    //Input buffer properties
+    state->text.font = state->font;
+    state->command_input.font = state->ui_font;
+
+    String_set(&(state->current_file), "CODE.c");
+    editor_open_file(state);
+
+    editor_set_state(state, EDITOR_STATE_EDIT);
+
+    state->status_bar_color.r = 170;
+    state->status_bar_color.g = 170;
+    state->status_bar_color.b = 170;
+    state->status_bar_color.a = 255;
+
     //File explorer
     state->file_explorer_font_size = 16;
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
@@ -400,29 +425,6 @@ void editor_init(ProgramState* state)
     }
     max_len++;
 
-    //draw areas
-    state->editor_area.border_thickness = 4;
-    state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
-
-    state->file_explorer_area.border_thickness = 4;
-    state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
-
-    //Must be called to init draw areas and stuff
-    editor_resize_and_reposition(state); //to set editor_area.h
-
-    //Input buffer properties
-    state->text.font = state->font;
-    state->command_input.font = state->ui_font;
-
-    String_set(&(state->current_file), "CODE.c");
-    editor_open_file(state);
-
-    editor_set_state(state, EDITOR_STATE_EDIT);
-
-    state->status_bar_color.r = 170;
-    state->status_bar_color.g = 170;
-    state->status_bar_color.b = 170;
-    state->status_bar_color.a = 255;
 }
 
 
@@ -903,12 +905,14 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
     cfg.pressed_g = 100;
     cfg.pressed_b = 100;
 
-//    const int margin_between_file_names = cfg.h * 0.4;
-    cfg.h += (cfg.h * 0.4);
+    const int margin_between_file_names = cfg.h * 0.35F;
+//    cfg.h += (cfg.h * 0.1);
 
     cfg.x = state->file_explorer_area.x;
-    cfg.y = (state->file_explorer_area.y)
-    + (cfg.h) * ((state->file_count));
+    cfg.y = state->file_explorer_area.y;
+    cfg.y += (cfg.h * (state->file_count)) + (margin_between_file_names) * (state->file_count - 1);
+//    printf("%d, %d\n", cfg.x, cfg.y);
+
 
     Button_init(button, &cfg);
 }
@@ -1112,7 +1116,6 @@ void editor_resize_and_reposition(ProgramState* state)
     state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
     state->text.x = state->editor_area.x;
     state->text.y = state->editor_area.y;
-
 }
 
 bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_w, int char_h)

@@ -78,8 +78,11 @@ void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color,
     rect.x -= offset_x;
     rect.y -= offset_y;
 
+//    printf("%d, %d\n", rect.x, rect.y);
+
     int text_x = rect.x;
     int text_y = rect.y;
+
 
     if (button->text_centered)
     {
@@ -123,7 +126,6 @@ void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x
     {
         return;
     }
-    printf("Mouse move\n");
     int x = button->x - offset_x;
     int y = button->y - offset_y; 
 
