@@ -1082,11 +1082,6 @@ void editor_resize_and_reposition(ProgramState* state)
         button->y = explorer_font_char_h * i;
     }
 
-    //Input buffers
-    state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
-    state->text.x = state->editor_area.x;
-    state->text.y = state->editor_area.y;
-
     //Ui elements and DrawAreas
     {
         //status bar area
@@ -1112,6 +1107,11 @@ void editor_resize_and_reposition(ProgramState* state)
         state->file_explorer_area.y = ui_font_char_h;
 
     }
+
+    //Input buffers
+    state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
+    state->text.x = state->editor_area.x;
+    state->text.y = state->editor_area.y;
 
 }
 
