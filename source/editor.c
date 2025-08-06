@@ -895,9 +895,6 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
 
     cfg.on_click = Button_file_name_on_click;
 
-    TTF_SizeText(state->file_explorer_font, filename, &(cfg.w), &(cfg.h));
-//    cfg.w = state->file_explorer_area.w;
-    cfg.w = state->window_w;
     cfg.text = filename;
     cfg.font = state->file_explorer_font;
 
@@ -905,17 +902,25 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename)
     cfg.pressed_g = 100;
     cfg.pressed_b = 100;
 
-    const int margin_between_file_names = cfg.h * 0.35F;
-//    cfg.h += (cfg.h * 0.1);
-
-    cfg.x = state->file_explorer_area.x;
-    cfg.y = state->file_explorer_area.y;
-    cfg.y += (cfg.h * (state->file_count)) + (margin_between_file_names) * (state->file_count - 1);
-//    printf("%d, %d\n", cfg.x, cfg.y);
-
-
     Button_init(button, &cfg);
+
+    editor_position_file_button(state, button, state->file_count);
 }
+
+
+void editor_position_file_button(const ProgramState* state, Button* button, int i)
+{
+    TTF_SizeText(state->file_explorer_font, button->text, NULL, &(button->h));
+
+    const int margin_between_file_names = button->h * 0.35F;
+
+    button->w = state->window_w;
+
+    button->x = state->file_explorer_area.x;
+    button->y = state->file_explorer_area.y;
+    button->y += (button->h * i) + (margin_between_file_names) * (i - 1);
+}
+
 
 
 bool editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count)
@@ -1082,8 +1087,7 @@ void editor_resize_and_reposition(ProgramState* state)
     for (int i = 0; i < state->file_count; i++)
     {
         Button* button = state->file_buttons + i;
-        button->w = state->window_w;
-        button->y = explorer_font_char_h * i;
+        editor_position_file_button(state, button, i+1);
     }
 
     //Ui elements and DrawAreas

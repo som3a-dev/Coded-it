@@ -158,6 +158,10 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area);
 
 void editor_add_file_to_explorer(ProgramState* state, const char* filename);
 
+//i is one index of the button. 1st button, i = 1. etc
+//Basically the state->file_count if its the last file button
+void editor_position_file_button(const ProgramState* state, Button* button, int i);
+
 bool editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count);
 
 
