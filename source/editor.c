@@ -377,7 +377,10 @@ void editor_init(ProgramState* state)
 
     //draw areas
     state->editor_area.border_thickness = 4;
-    state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
+//    state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
+
+    state->message_area.flags |= DRAW_AREA_TOP_BORDER;
+    state->message_area.border_thickness = 4;
 
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
@@ -621,6 +624,8 @@ void editor_update(ProgramState* state)
 
 void editor_draw(ProgramState* state)
 {
+    printf("%d\n", state->message_area.h);
+
     SDL_FillRect(state->window_surface, NULL,
     SDL_MapRGB(state->window_surface->format,
     state->bg_color.r, state->bg_color.g, state->bg_color.b)); //Clear
@@ -717,7 +722,7 @@ void editor_draw(ProgramState* state)
             free(text);*/
 
             //draw DrawArea borders
-            editor_render_draw_area(state, &(state->editor_area));
+            editor_render_draw_area(state, &(state->message_area));
         } break;
     }
 
@@ -1101,7 +1106,7 @@ void editor_resize_and_reposition(ProgramState* state)
         //message area
         state->message_area.x = 0;
         state->message_area.w = state->window_w;
-        state->message_area.h = ui_font_char_h * 1.5 + state->editor_area.border_thickness;
+        state->message_area.h = ui_font_char_h * 1.5;
         state->message_area.y = state->window_h - state->message_area.h;
 
         //editor area
@@ -1113,7 +1118,6 @@ void editor_resize_and_reposition(ProgramState* state)
         state->file_explorer_area.h = state->message_area.y;
         state->file_explorer_area.w = state->window_w;
         state->file_explorer_area.y = ui_font_char_h;
-
     }
 
     //Input buffers
