@@ -377,13 +377,30 @@ void editor_init(ProgramState* state)
 
     //draw areas
     state->editor_area.border_thickness = 4;
-//    state->editor_area.flags |= DRAW_AREA_BOTTOM_BORDER;
+    state->editor_area.outline_color.r = 50;
+    state->editor_area.outline_color.g = 50;
+    state->editor_area.outline_color.b = 50;
 
-    state->message_area.flags |= DRAW_AREA_TOP_BORDER;
+    state->message_area.flags |= DRAW_AREA_TOP_BORDER | DRAW_AREA_FILL;
     state->message_area.border_thickness = 4;
+    state->message_area.color.r = state->bg_color.r;
+    state->message_area.color.g = state->bg_color.g;
+    state->message_area.color.b = state->bg_color.b;
+    state->message_area.outline_color.r = 50;
+    state->message_area.outline_color.g = 50;
+    state->message_area.outline_color.b = 50;
+
 
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
+    state->file_explorer_area.outline_color.r = 50;
+    state->file_explorer_area.outline_color.g = 50;
+    state->file_explorer_area.outline_color.b = 50;
+
+    state->status_bar_area.color.r = 170;
+    state->status_bar_area.color.g = 170;
+    state->status_bar_area.color.b = 170;
+    state->status_bar_area.flags |= DRAW_AREA_FILL;
 
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
@@ -396,11 +413,6 @@ void editor_init(ProgramState* state)
     editor_open_file(state);
 
     editor_set_state(state, EDITOR_STATE_EDIT);
-
-    state->status_bar_color.r = 170;
-    state->status_bar_color.g = 170;
-    state->status_bar_color.b = 170;
-    state->status_bar_color.a = 255;
 
     //File explorer
     state->file_explorer_font_size = 16;
@@ -753,9 +765,8 @@ void editor_draw(ProgramState* state)
 
 void editor_draw_status_bar(ProgramState* state)
 {
-    SDL_FillRect(state->window_surface, &(state->status_bar_area), SDL_MapRGB(state->window_surface->format, 170, 170, 170));
-
-
+//    SDL_FillRect(state->window_surface, &(state->status_bar_area), SDL_MapRGB(state->window_surface->format, 170, 170, 170));
+    editor_render_draw_area(state, &(state->status_bar_area));
 
     { //Line and col
         int line;
@@ -784,8 +795,10 @@ void editor_draw_status_bar(ProgramState* state)
         draw_text(state->font, state->window_surface, text,
                     x, y, 
                     0, 0, 0,
-                    state->status_bar_color.r, state->status_bar_color.g, state->status_bar_color.b);
-
+                    state->status_bar_area.color.r,
+                    state->status_bar_area.color.g,
+                    state->status_bar_area.color.b
+        );
         free(text);
     }
 
@@ -803,8 +816,9 @@ void editor_draw_status_bar(ProgramState* state)
         draw_text(state->font, state->window_surface, state->current_file.text,
                   x, y, 
                   0, 0, 0,
-                  state->status_bar_color.r, state->status_bar_color.g, state->status_bar_color.b);
-
+                  state->status_bar_area.color.r,
+                  state->status_bar_area.color.g,
+                  state->status_bar_area.color.b);
     }
 }
 
@@ -838,7 +852,15 @@ void editor_draw_file_explorer(ProgramState* state)
 
 void editor_render_draw_area(ProgramState* state, const DrawArea* area)
 {
-    Uint32 color = SDL_MapRGB(state->window_surface->format, 50, 50, 50);
+    Uint32 color = SDL_MapRGB(state->window_surface->format, area->color.r,
+    area->color.g, area->color.b);
+    if (area->flags & DRAW_AREA_FILL)
+    {
+        SDL_FillRect(state->window_surface, area, color);
+    }
+
+    color = SDL_MapRGB(state->window_surface->format, area->outline_color.r,
+    area->outline_color.g, area->outline_color.b);
 
     if (area->flags & DRAW_AREA_TOP_BORDER)
     {
@@ -847,7 +869,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
             area->w + area->border_thickness, area->border_thickness
         };
 
-        SDL_FillRect(state->window_surface, &rect, color);
+        SDL_FillRect(state->window_surface, &rect,color);
     }
 
     if (area->flags & DRAW_AREA_BOTTOM_BORDER)
@@ -857,7 +879,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
             area->w + area->border_thickness, area->border_thickness
         };
 
-        SDL_FillRect(state->window_surface, &rect, color);
+        SDL_FillRect(state->window_surface, &rect,color);
     }
 
     if (area->flags & DRAW_AREA_LEFT_BORDER)
@@ -867,7 +889,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
             area->border_thickness, area->h + area->border_thickness
         };
 
-        SDL_FillRect(state->window_surface, &rect, color);
+        SDL_FillRect(state->window_surface, &rect,color);
     }
 
     if (area->flags & DRAW_AREA_RIGHT_BORDER)
@@ -877,7 +899,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
             area->border_thickness, area->h + area->border_thickness
         };
 
-        SDL_FillRect(state->window_surface, &rect, color);
+        SDL_FillRect(state->window_surface, &rect,color);
     }
 }
 

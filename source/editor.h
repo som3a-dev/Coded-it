@@ -48,7 +48,8 @@ enum
     DRAW_AREA_BOTTOM_BORDER = 1 << 0,
     DRAW_AREA_TOP_BORDER = 1 << 1,
     DRAW_AREA_LEFT_BORDER = 1 << 2,
-    DRAW_AREA_RIGHT_BORDER = 1 << 3 
+    DRAW_AREA_RIGHT_BORDER = 1 << 3,
+    DRAW_AREA_FILL = 1 << 4
 };
 
 
@@ -61,6 +62,8 @@ typedef struct
     int border_thickness;
 
     int flags;
+    SDL_Color color;
+    SDL_Color outline_color;
 } DrawArea;
 
 
