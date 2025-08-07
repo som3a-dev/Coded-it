@@ -373,8 +373,6 @@ void editor_init(ProgramState* state)
         }
     }
  
-
-
     //draw areas
     state->editor_area.border_thickness = 4;
     state->editor_area.outline_color.r = 50;
@@ -1018,6 +1016,11 @@ void editor_set_state(ProgramState* state, int new_state)
         {
         } break;
 
+        case EDITOR_STATE_FILE_EXPLORER:
+        {
+
+        } break;
+
         case EDITOR_STATE_COMMAND_INPUT:
         {
             InputBuffer* buffer = editor_get_current_input_buffer(state);
@@ -1118,16 +1121,20 @@ void editor_resize_and_reposition(ProgramState* state)
     //Ui elements and DrawAreas
     {
         //status bar area
-        state->status_bar_area.x = state->char_w * 0.1f;
-        state->status_bar_area.y = state->char_h * 0.1f;
+
+        //TODO(omar): find a different way to indicate the first time initializing
+        if (state->status_bar_area.x == 0)
+        {
+            state->status_bar_area.x = state->char_w * 0.1f;
+            state->status_bar_area.y = state->char_h * 0.1f;
+        }
         state->status_bar_area.w = state->window_w;
         state->status_bar_area.h = state->char_h * 1;
 
         //message area
-        state->message_area.x = 0;
-        state->message_area.w = state->window_w;
-        state->message_area.h = ui_font_char_h * 1.5;
+        state->message_area.h = ui_font_char_h * 1.5f;
         state->message_area.y = state->window_h - state->message_area.h;
+        state->message_area.w = state->window_w;
 
         //editor area
         state->editor_area.y = state->status_bar_area.y + state->status_bar_area.h + state->status_bar_area.x;
@@ -1135,9 +1142,12 @@ void editor_resize_and_reposition(ProgramState* state)
         state->editor_area.w = state->window_w;
 
         //explorer area
-        state->file_explorer_area.h = state->message_area.y;
-        state->file_explorer_area.w = state->window_w;
-        state->file_explorer_area.y = ui_font_char_h;
+        if (state->file_explorer_area.y == 0)
+        {
+            state->file_explorer_area.y = ui_font_char_h;
+            state->file_explorer_area.w = state->window_w;
+        }
+        state->file_explorer_area.h = state->message_area.y - state->file_explorer_area.y;
     }
 
     //Input buffers

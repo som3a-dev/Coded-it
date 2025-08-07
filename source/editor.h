@@ -14,6 +14,18 @@
 #include "stack.h"
 #include "text_action.h"
 
+#ifndef __EDITOR_CONSTS
+#define __EDITOR_CONSTS
+
+
+static const float MARGIN_BETWEEN_FILE_NAMES_FACTOR = 0.1f; //Multiply this by the button height to get
+                                                    //the margin.
+                                                    //Maybe consts like this should be handled differently but this way is fine for now
+
+
+#endif
+
+
 enum
 {
     EDITOR_STATE_EDIT,
