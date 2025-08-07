@@ -1148,6 +1148,7 @@ void editor_resize_and_reposition(ProgramState* state)
             state->file_explorer_area.y = ui_font_char_h;
             state->file_explorer_area.w = state->window_w;
         }
+        state->file_explorer_area.w = state->window_w;
         state->file_explorer_area.h = state->message_area.y - state->file_explorer_area.y;
     }
 
