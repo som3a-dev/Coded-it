@@ -1018,7 +1018,8 @@ void editor_set_state(ProgramState* state, int new_state)
 
         case EDITOR_STATE_FILE_EXPLORER:
         {
-
+            state->file_explorer_camera_x = 0;
+            state->file_explorer_camera_y = 0;
         } break;
 
         case EDITOR_STATE_COMMAND_INPUT:
