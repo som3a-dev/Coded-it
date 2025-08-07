@@ -636,16 +636,9 @@ void editor_update(ProgramState* state)
 
 void editor_draw(ProgramState* state)
 {
-    printf("%d\n", state->message_area.h);
-
     SDL_FillRect(state->window_surface, NULL,
     SDL_MapRGB(state->window_surface->format,
     state->bg_color.r, state->bg_color.g, state->bg_color.b)); //Clear
-
-    if (state->clicked_button)
-    {
-        printf("%d\n", state->clicked_button->mouse_hovering);
-    }
 
 /*    { //draw border line
         int char_h;
@@ -939,13 +932,16 @@ void editor_position_file_button(const ProgramState* state, Button* button, int 
 {
     TTF_SizeText(state->file_explorer_font, button->text, NULL, &(button->h));
 
-    const int margin_between_file_names = button->h * 0.35F;
+    int margin_between_file_names = button->h * MARGIN_BETWEEN_FILE_NAMES_FACTOR;
 
     button->w = state->window_w;
 
     button->x = state->file_explorer_area.x;
-    button->y = state->file_explorer_area.y;
-    button->y += (button->h * i) + (margin_between_file_names) * (i - 1);
+    button->y = state->file_explorer_area.y + state->file_explorer_area.border_thickness * 2;
+    if (i > 1)
+    {
+        button->y += (button->h + margin_between_file_names) * (i-1);
+    }
 
     Button_resize_text(button, state->file_explorer_font);
 }

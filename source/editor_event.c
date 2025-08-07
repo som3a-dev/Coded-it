@@ -266,15 +266,22 @@ void editor_handle_events_keydown_file_explorer(ProgramState* state, SDL_Event e
         int y = state->clicked_button->y - state->file_explorer_camera_y;
         int w = state->clicked_button->w;
         int h = state->clicked_button->h;
+        int file_explorer_area_bottom = state->file_explorer_area.y + state->file_explorer_area.h;
+        int margin_between_file_names = h * MARGIN_BETWEEN_FILE_NAMES_FACTOR;
+        h += margin_between_file_names;
 
-        if ((y + h) > (state->file_explorer_area.y + state->file_explorer_area.h))
+
+        if ((y + h) > file_explorer_area_bottom)
         {
-            state->file_explorer_camera_y += state->clicked_button->h;
+//            state->file_explorer_camera_y += h;
+            int diff = ((y + h) - file_explorer_area_bottom) / h;
+            state->file_explorer_camera_y += (diff+1) * h;
         }
 
-        if (y < state->file_explorer_area.y)
+        if ((y < (state->file_explorer_area.y)))
         {
-            state->file_explorer_camera_y -= state->clicked_button->h;
+            int diff = (y - state->file_explorer_area.y) / h;
+            state->file_explorer_camera_y += (diff-1) * h;
         }
     }
 }
