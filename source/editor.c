@@ -946,6 +946,8 @@ void editor_position_file_button(const ProgramState* state, Button* button, int 
     button->x = state->file_explorer_area.x;
     button->y = state->file_explorer_area.y;
     button->y += (button->h * i) + (margin_between_file_names) * (i - 1);
+
+    Button_resize_text(button, state->file_explorer_font);
 }
 
 
