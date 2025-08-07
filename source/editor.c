@@ -77,7 +77,7 @@ void editor_init(ProgramState* state)
     config.pressed_r = 110;
     config.pressed_g = 100;
     config.pressed_b = 100;
-    config.font = state->font;
+    config.font = state->ui_font;
     config.h = state->char_h;
     config.w = state->window_w;
     config.x = 0;
