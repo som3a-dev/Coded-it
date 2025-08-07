@@ -560,20 +560,6 @@ void editor_update(ProgramState* state)
                         }
                     }
                 }
-
-/*                int mouse_text_buffer_x = mouse_x - state->text.x; 
-                int mouse_text_buffer_y = mouse_y - state->text.y;
-
-                char c;
-                for (int i = 0; i < state->text.text.len; i++)
-                {
-                    c = state->text.text.text[i];
-                    int char_w;
-
-                    TTF_GlyphMetrics(state->font, c, NULL, NULL, NULL, NULL, &char_w);
-
-                    printf("%c: %d, %d\n", c, char_w, state->char_w);
-                }*/
             }
 
             int cursor_x = 0;
@@ -585,7 +571,6 @@ void editor_update(ProgramState* state)
             if ((cursor_x + state->char_w) > state->editor_area.w)
             {
                 state->camera_x += (((cursor_x + state->char_w) - state->editor_area.w) / state->char_w) * state->char_w;
-//                state->camera_x += state->char_w; //the cursor's height offset
             }
             if ((cursor_y + state->char_h) > state->editor_area.h)
             {
@@ -599,15 +584,6 @@ void editor_update(ProgramState* state)
             }
             if (cursor_x < state->editor_area.x)
             {
-/*                int line;
-                int col;
-                editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
-                line -= state->text.y;
-                col -= state->text.x;
-                line /= state->char_h;
-                col /= state->char_w;
-
-                state->camera_x = col * state->char_w;*/
                 state->camera_x += (((cursor_x) - state->editor_area.x) / state->char_w) * state->char_w;
             }
 
@@ -837,6 +813,7 @@ void editor_draw_file_explorer(ProgramState* state)
         Button_draw(state->file_buttons + i,
         state->window_surface, &(state->bg_color), state->file_explorer_camera_x,
         state->file_explorer_camera_y);
+        printf("%d, %d\n", state->file_explorer_camera_y, y);
     }
 }
 
@@ -1010,6 +987,8 @@ void editor_set_cursor(ProgramState* state, int index)
 
 void editor_set_state(ProgramState* state, int new_state)
 {
+    state->clicked_button = NULL;
+
     switch (state->state)
     {
         case EDITOR_STATE_EDIT:
@@ -1020,6 +999,12 @@ void editor_set_state(ProgramState* state, int new_state)
         {
             state->file_explorer_camera_x = 0;
             state->file_explorer_camera_y = 0;
+
+            for (int i = 0; i < state->file_count; i++)
+            {
+                Button* button = state->file_buttons + i;
+                button->state = BUTTON_STATE_DISABLED;
+            }
         } break;
 
         case EDITOR_STATE_COMMAND_INPUT:
@@ -1045,6 +1030,7 @@ void editor_set_state(ProgramState* state, int new_state)
             {
                 Button* button = state->buttons + i;
                 button->mouse_hovering = false;
+                button->state = BUTTON_STATE_DISABLED;
                 Button_disable_children(button, state);
             } 
 
@@ -1059,11 +1045,6 @@ void editor_set_state(ProgramState* state, int new_state)
         } break;
     }
 
-    if ((new_state == EDITOR_STATE_COMMAND) || (new_state == EDITOR_STATE_FILE_EXPLORER))
-    {
-        state->clicked_button = NULL;
-    }
-
     if (new_state == EDITOR_STATE_FILE_EXPLORER)
     {
         state->file_explorer_area.w = state->window_w;
@@ -1071,14 +1052,37 @@ void editor_set_state(ProgramState* state, int new_state)
         for (int i = 0; i < state->file_count; i++)
         {
             state->file_buttons[i].mouse_hovering = false;
+            state->file_buttons[i].state = BUTTON_STATE_ENABLED;
         }
 
         editor_select_first_enabled_button(state, state->file_buttons, state->file_count);
     }
     else if (new_state == EDITOR_STATE_COMMAND)
     {
-        editor_select_first_enabled_button(state, state->buttons, 10);
+        for (int i = 0; i < 10; i++)
+        {
+            state->buttons[i].mouse_hovering = false;
+            state->buttons[i].state = BUTTON_STATE_ENABLED;
+        }
 
+        editor_select_first_enabled_button(state, state->buttons, 10);
+    }
+    else
+    {
+        //State has no buttons. disable this shit
+        for (int i = 0; i < state->file_count; i++)
+        {
+            Button* button = state->file_buttons + i;
+            button->state = BUTTON_STATE_DISABLED;
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Button* button = state->buttons + i;
+            button->mouse_hovering = false;
+            button->state = BUTTON_STATE_DISABLED;
+            Button_disable_children(button, state);
+        } 
     }
 
     state->state = new_state;
@@ -1146,7 +1150,6 @@ void editor_resize_and_reposition(ProgramState* state)
         if (state->file_explorer_area.y == 0)
         {
             state->file_explorer_area.y = ui_font_char_h;
-            state->file_explorer_area.w = state->window_w;
         }
         state->file_explorer_area.w = state->window_w;
         state->file_explorer_area.h = state->message_area.y - state->file_explorer_area.y;

@@ -120,12 +120,13 @@ void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color,
 }
 
 
-void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x, int offset_y)
+bool Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x, int offset_y)
 {
     if (button->state != BUTTON_STATE_ENABLED)
     {
-        return;
+        return false;
     }
+
     int x = button->x - offset_x;
     int y = button->y - offset_y; 
 
@@ -143,6 +144,8 @@ void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x
     {
         button->mouse_hovering = false;
     }
+
+    return button->mouse_hovering;
 }
 
 
@@ -212,6 +215,8 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
             editor_open_file(state);
         } break;
     }
+
+    editor_set_state(state, EDITOR_STATE_EDIT);
 }
 
 

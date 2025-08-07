@@ -61,25 +61,47 @@ void editor_handle_events(ProgramState* state, bool* should_update)
 
         case SDL_MOUSEMOTION:
         {
+            Button* selected_button = NULL;
             for (int i = 0; i < 10; i++)
             {
-                Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y,
-                0, 0);
+                if (Button_on_mouse_move(state->buttons + i, e.motion.x, e.motion.y,
+                0, 0))
+                {
+                    if (selected_button == NULL)
+                    {
+                        selected_button = state->buttons + i;
+                    }
+                }
             }
 
             for (int i = 0; i < state->file_count; i++)
             {
-                Button_on_mouse_move(state->file_buttons + i, e.motion.x, e.motion.y,
-                state->file_explorer_camera_x, state->file_explorer_camera_y);
+                if (Button_on_mouse_move(state->file_buttons + i, e.motion.x, e.motion.y,
+                state->file_explorer_camera_x, state->file_explorer_camera_y))
+                {
+                    if (selected_button == NULL)
+                    {
+                        selected_button = state->file_buttons + i;
+                    }
+                }
             }
-            
-            if (state->clicked_button)
+
+            if (selected_button)
+            {
+                if (state->clicked_button && (state->clicked_button != selected_button))
+                {
+                    state->clicked_button->mouse_hovering = false;
+                }
+                state->clicked_button = selected_button;
+            }
+            else if (state->clicked_button)
             {
                 //Hacky fix because SDL sends a mouse motion event after setting window to fullscreen
                 //that would lead to the clicked button's mouse hovering to be set to false
                 //so the button would internally be selected but not highlighted
                 state->clicked_button->mouse_hovering = true;
             }
+
         } break;
 
         case SDL_MOUSEWHEEL:

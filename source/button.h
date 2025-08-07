@@ -77,7 +77,9 @@ void Button_remove_child(Button* button, int child_index /*the index of the chil
 void Button_draw(Button* button, SDL_Surface* dest_surface, SDL_Color* bg_color,
                  int offset_x, int offset_y);
 
-void Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x, int offset_y);
+//returns true if mouse hovered over button
+bool Button_on_mouse_move(Button* button, int mouse_x, int mouse_y, int offset_x, int offset_y);
+
 bool Button_is_mouse_hovering(Button* button);
 
 void Button_resize_text(Button* button, TTF_Font* font);
