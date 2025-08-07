@@ -1,15 +1,15 @@
 #include "editor_fileio.h"
 
 
-void editor_save_file(const ProgramState* state)
+void editor_save_file(const ProgramState* state, const char* filename)
 {
     FILE* fp;
-    if (state->current_file.text == NULL)
+    if (filename == NULL)
     {
         printf("No current open file.\n");
         return;
     }
-    fopen_s(&fp, state->current_file.text, "w");
+    fopen_s(&fp, filename, "w");
 
     const char* msg_format;
     if (!fp)
@@ -27,10 +27,10 @@ void editor_save_file(const ProgramState* state)
     }
 
     //send message
-    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file.text) + 1);
+    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
     char* msg = malloc(msg_size); 
 
-    snprintf(msg, msg_size, msg_format, state->current_file.text);
+    snprintf(msg, msg_size, msg_format, filename);
     
     String str = {0};
     String_set(&str, msg);
@@ -40,14 +40,14 @@ void editor_save_file(const ProgramState* state)
 }
 
 
-void editor_open_file(ProgramState* state)
+void editor_open_file(ProgramState* state, const char* filename)
 {
     FILE* fp;
-    if (state->current_file.text == NULL)
+    if (filename == NULL)
     {
         printf("No file selected to open.\n");
     }
-    fopen_s(&fp, state->current_file.text, "r");
+    fopen_s(&fp, filename, "r");
 
     char* msg_format = NULL;
     if (!fp)
@@ -78,14 +78,16 @@ void editor_open_file(ProgramState* state)
         msg_format = "Opened file '%s'.";
     }
 
-    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(state->current_file.text) + 1);
+    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
     char* msg = malloc(msg_size); 
 
-    snprintf(msg, msg_size, msg_format, state->current_file.text);
+    snprintf(msg, msg_size, msg_format, filename);
     
     String str = {0};
     String_set(&str, msg);
     free(msg);
 
     editor_push_message(state, &str);
+
+    String_set(&(state->current_file), filename);
 }

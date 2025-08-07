@@ -601,7 +601,7 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
 
         case SDLK_INSERT:
         {
-            editor_save_file(state);
+            editor_save_file(state, state->current_file);
         } break;
 
         case SDLK_LCTRL:

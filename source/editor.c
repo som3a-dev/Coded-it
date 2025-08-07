@@ -407,8 +407,7 @@ void editor_init(ProgramState* state)
     state->text.font = state->font;
     state->command_input.font = state->ui_font;
 
-    String_set(&(state->current_file), "CODE.c");
-    editor_open_file(state);
+    editor_open_file(state, "CODE.c");
 
     editor_set_state(state, EDITOR_STATE_EDIT);
 

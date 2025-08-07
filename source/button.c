@@ -201,18 +201,16 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;
     
-    String_set(&(state->current_file), button->text);
-
     switch (state->file_explorer_action)
     {
         case EXPLORER_ACTION_SAVE:
         {
-            editor_save_file(state);
+            editor_save_file(state, button->text);
         } break;
 
         case EXPLORER_ACTION_OPEN:
         {
-            editor_open_file(state);
+            editor_open_file(state, button->text);
         } break;
     }
 
@@ -249,7 +247,7 @@ void Button_save_on_input(Button* button, ProgramState* state, String* input)
         if (input->text)
         {
             editor_set_filename(state, input->text); 
-            editor_save_file(state);
+            editor_save_file(state, input->text);
         }
         else
         {
