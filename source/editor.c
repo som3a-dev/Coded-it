@@ -1158,6 +1158,8 @@ void editor_resize_and_reposition(ProgramState* state)
     state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
     state->text.x = state->editor_area.x;
     state->text.y = state->editor_area.y;
+
+    editor_update_file_explorer_camera(state);
 }
 
 bool editor_get_cursor_pos(ProgramState* state, int* out_x, int* out_y, int char_w, int char_h)
@@ -1316,8 +1318,34 @@ void editor_redo_text_action(ProgramState* state, const TextAction* action)
     free(action);
 }
 
+void editor_update_file_explorer_camera(ProgramState* state)
+{
+    if (state->clicked_button == NULL) return;
+    if (state->state != EDITOR_STATE_FILE_EXPLORER) return;
+
+    int x = state->clicked_button->x - state->file_explorer_camera_x;
+    int y = state->clicked_button->y - state->file_explorer_camera_y;
+    int w = state->clicked_button->w;
+    int h = state->clicked_button->h;
+    int file_explorer_area_bottom = state->file_explorer_area.y + state->file_explorer_area.h;
+    int margin_between_file_names = h * MARGIN_BETWEEN_FILE_NAMES_FACTOR;
+    h += margin_between_file_names;
 
 
+    if ((y + h) > file_explorer_area_bottom)
+    {
+        int diff = ((y + h) - file_explorer_area_bottom) / h;
+        state->file_explorer_camera_y += (diff+1) * h;
+    }
+
+    if ((y < (state->file_explorer_area.y)))
+    {
+        int diff = (y - state->file_explorer_area.y) / h;
+        state->file_explorer_camera_y += (diff-1) * h;
+    }
+
+    state->file_explorer_camera_y = (state->file_explorer_camera_y / h) * h;
+} 
 
 
 

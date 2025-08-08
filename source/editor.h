@@ -216,3 +216,5 @@ void editor_select_first_enabled_button(ProgramState* state, Button* buttons, in
 //also frees the action and any malloced variables it has
 void editor_undo_text_action(ProgramState* state, const TextAction* action);
 void editor_redo_text_action(ProgramState* state, const TextAction* action);
+
+void editor_update_file_explorer_camera(ProgramState* state);
