@@ -76,6 +76,7 @@ void editor_open_file(ProgramState* state, const char* filename)
         fclose(fp);
 
         msg_format = "Opened file '%s'.";
+        String_set(&(state->current_file), filename);
     }
 
     size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
@@ -88,6 +89,4 @@ void editor_open_file(ProgramState* state, const char* filename)
     free(msg);
 
     editor_push_message(state, &str);
-
-    String_set(&(state->current_file), filename);
 }
