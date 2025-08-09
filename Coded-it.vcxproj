@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="source\array.c" />
     <ClCompile Include="source\button.c" />
+    <ClCompile Include="source\button_callback.c" />
     <ClCompile Include="source\draw.c" />
     <ClCompile Include="source\editor.c" />
     <ClCompile Include="source\editor_event.c" />
@@ -39,6 +40,7 @@
   <ItemGroup>
     <ClInclude Include="source\array.h" />
     <ClInclude Include="source\button.h" />
+    <ClInclude Include="source\button_callback.h" />
     <ClInclude Include="source\draw.h" />
     <ClInclude Include="source\editor.h" />
     <ClInclude Include="source\editor_event.h" />
