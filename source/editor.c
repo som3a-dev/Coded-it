@@ -911,7 +911,7 @@ void editor_position_file_button(const ProgramState* state, Button* button, int 
     button->w = state->window_w;
 
     button->x = state->file_explorer_area.x;
-    button->y = state->file_explorer_area.y + state->file_explorer_area.border_thickness * 2;
+    button->y = state->file_explorer_area.y + state->file_explorer_area.border_thickness;
     if (i > 1)
     {
         button->y += (button->h + margin_between_file_names) * (i-1);
@@ -1098,29 +1098,8 @@ void editor_resize_and_reposition(ProgramState* state)
 {
     int ui_font_char_h;
     TTF_SizeText(state->ui_font, "A", NULL, &ui_font_char_h);
-
-    //Command state buttons
-    for (int i = 0; i < 10; i++)
-    {
-        Button* button = state->buttons + i;
-
-        button->h = 0; //so that it is set to the size of the text
-        
-        Button_resize_text(button, state->ui_font);
-
-        button->w = state->window_w;
-        button->y = ui_font_char_h * i;
-    }
-
     int explorer_font_char_h;
-    TTF_SizeText(state->ui_font, "A", NULL, &explorer_font_char_h);
-
-    //FIle explorer buttons
-    for (int i = 0; i < state->file_count; i++)
-    {
-        Button* button = state->file_buttons + i;
-        editor_position_file_button(state, button, i+1);
-    }
+    TTF_SizeText(state->file_explorer_font, "A", NULL, &explorer_font_char_h);
 
     //Ui elements and DrawAreas
     {
@@ -1146,7 +1125,7 @@ void editor_resize_and_reposition(ProgramState* state)
         state->editor_area.w = state->window_w;
 
         //explorer area
-        if (state->file_explorer_area.y == 0)
+//        if (state->file_explorer_area.y == 0)
         {
             state->file_explorer_area.y = ui_font_char_h;
         }
@@ -1158,6 +1137,28 @@ void editor_resize_and_reposition(ProgramState* state)
     state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
     state->text.x = state->editor_area.x;
     state->text.y = state->editor_area.y;
+
+
+    //Command state buttons
+    for (int i = 0; i < 10; i++)
+    {
+        Button* button = state->buttons + i;
+
+        button->h = 0; //so that it is set to the size of the text
+        
+        Button_resize_text(button, state->ui_font);
+
+        button->w = state->window_w;
+        button->y = ui_font_char_h * i;
+    }
+
+    //FIle explorer buttons
+    for (int i = 0; i < state->file_count; i++)
+    {
+        Button* button = state->file_buttons + i;
+        editor_position_file_button(state, button, i+1);
+    }
+
 
     editor_update_file_explorer_camera(state);
 }
