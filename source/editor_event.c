@@ -117,7 +117,11 @@ void editor_handle_events(ProgramState* state, bool* should_update)
                     state->file_explorer_camera_y += -(state->file_buttons->h) * e.wheel.y;
 
                     int explorer_height_in_files = (state->file_explorer_area.h / state->file_buttons->h);
-                    int max_bottom = (state->file_count - explorer_height_in_files) * state->file_buttons->h;
+                    int h = state->file_buttons->h;
+//                    int margin_between_file_names = h * MARGIN_BETWEEN_FILE_NAMES_FACTOR;
+//                    h += margin_between_file_names;
+
+                    int max_bottom = ((state->file_count - explorer_height_in_files) * h) + state->file_explorer_camera_y;
 
                     if (state->file_explorer_camera_y > max_bottom)
                     {
