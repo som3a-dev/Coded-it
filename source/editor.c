@@ -569,6 +569,7 @@ void editor_update(ProgramState* state)
             if (cursor_y < state->editor_area.y)
             {
                 state->camera_y += (((cursor_y) - state->editor_area.y) / state->char_h) * state->char_h;
+//                printf("scroll\n");
             }
             if (cursor_x < state->editor_area.x)
             {
@@ -1112,6 +1113,8 @@ void editor_resize_and_reposition(ProgramState* state)
     state->text.x = state->editor_area.x;
     state->text.y = state->editor_area.y;
 
+    state->camera_x = (state->camera_x / state->char_w) * state->char_w;
+    state->camera_y = (state->camera_y / state->char_h) * state->char_h;
 
     //Command state buttons
     for (int i = 0; i < 10; i++)
