@@ -631,6 +631,11 @@ void editor_update_file_explorer(ProgramState* state)
         editor_add_file_to_explorer(state, data.cFileName);
     }
 
+    if (state->state == EDITOR_STATE_FILE_EXPLORER)
+    {
+        editor_select_first_enabled_button(state, state->file_buttons, state->file_count);
+    }    
+
     String_clear(&path);
 }
 
