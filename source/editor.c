@@ -5,11 +5,13 @@
 
 #include "util.h"
 #include "button.h"
+#include "button_callback.h"
 #include "draw.h"
 #include "json_parser.h"
 #include "syntax_parser.h"
 
 #include <assert.h>
+#include <direct.h>
 #include <memory.h>
 #include <windows.h>
 #include <fileapi.h>
@@ -407,36 +409,23 @@ void editor_init(ProgramState* state)
     state->text.font = state->font;
     state->command_input.font = state->ui_font;
 
-    editor_open_file(state, "CODE.c");
-
     editor_set_state(state, EDITOR_STATE_EDIT);
 
     //File explorer
     state->file_explorer_font_size = 16;
     state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
 
-    WIN32_FIND_DATAA data = {0};
-    HANDLE dir_handle = FindFirstFileA("*", &data);
+    //Directory stuff
+    //Get working directory
+    state->current_directory.text = _getcwd(NULL, 0);
+    assert(state->current_directory.text && "_getcwd failed.\n");
+    state->current_directory.len = strlen(state->current_directory.text);
 
-    if (dir_handle == INVALID_HANDLE_VALUE)
-    {
-        assert(false && "INVALID HANDLE VALUE");
-    }
+    editor_update_file_explorer(state);
 
-    int max_len = 9;
-    while (FindNextFileA(dir_handle, &data) != 0)
-    {
-        if (strcmp(data.cFileName, "..") == 0) continue;
-        if (strcmp(data.cFileName, ".") == 0) continue;
+    printf("%s\n", state->current_directory.text);
 
-        editor_add_file_to_explorer(state, data.cFileName);
-        if (strlen(data.cFileName) > max_len)
-        {
-            max_len = strlen(data.cFileName);
-        }
-    }
-    max_len++;
-
+    editor_open_file(state, "CODE.c");
 }
 
 
@@ -604,6 +593,45 @@ void editor_update(ProgramState* state)
             }
         } break;
     }
+}
+
+
+void editor_update_file_explorer(ProgramState* state)
+{
+    if (state->state == EDITOR_STATE_FILE_EXPLORER)
+    {
+        if (state->clicked_button)
+        {
+            state->clicked_button = NULL;
+        }
+    }
+    free(state->file_buttons);
+    state->file_buttons = NULL;
+    state->file_count = 0;
+
+    //Load directory files
+    WIN32_FIND_DATAA data = {0};
+    const char* suffix = "\\*";
+    
+    String path = {0};
+    String_set(&path, state->current_directory.text);
+    String_insert_string(&path, suffix, path.len);
+
+    HANDLE dir_handle = FindFirstFileA(path.text, &data);
+    if (dir_handle == INVALID_HANDLE_VALUE)
+    {
+        assert(false && "INVALID HANDLE VALUE");
+    }
+
+    while (FindNextFileA(dir_handle, &data) != 0)
+    {
+        if (strcmp(data.cFileName, "..") == 0) continue;
+        if (strcmp(data.cFileName, ".") == 0) continue;
+
+        editor_add_file_to_explorer(state, data.cFileName);
+    }
+
+    String_clear(&path);
 }
 
 
@@ -812,8 +840,10 @@ void editor_draw_file_explorer(ProgramState* state)
         Button_draw(state->file_buttons + i,
         state->window_surface, &(state->bg_color), state->file_explorer_camera_x,
         state->file_explorer_camera_y);
-        printf("%d, %d\n", state->file_explorer_camera_y, y);
     }
+
+    draw_text(state->ui_font, state->window_surface, state->current_directory.text, 0, 0, 255, 255, 255,
+    state->bg_color.r, state->bg_color.g, state->bg_color.b);
 }
 
 
@@ -922,7 +952,7 @@ void editor_position_file_button(const ProgramState* state, Button* button, int 
 
 
 
-bool editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count)
+void editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count)
 {
     state->clicked_button = NULL;
     for (int i = 0; i < button_count; i++)

@@ -1,21 +1,37 @@
 #include "editor_fileio.h"
+#include <windows.h>
 
-
-void editor_save_file(const ProgramState* state, const char* filename)
+int editor_save_file(const ProgramState* state, const char* filename)
 {
-    FILE* fp;
     if (filename == NULL)
     {
         printf("No current open file.\n");
         return;
     }
-    fopen_s(&fp, filename, "w");
 
-    const char* msg_format;
+    int return_code = FILEIO_PATH_WAS_INVALID;
+    char* msg_format = NULL;
+    FILE* fp;
+    String filepath = {0};
+
+    String_insert_string(&filepath, filename, 0);
+    String_insert(&filepath, '\\', 0);
+    String_insert_string(&filepath, state->current_directory.text, 0);
+    fopen_s(&fp, filepath.text, "w");
+
     if (!fp)
     {
-        //it should never be NULL ??
-        msg_format = "Couldn't save to file '%s'.";
+        int attributes = GetFileAttributes(filepath.text);
+        if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            String_set(&(state->current_directory), filepath.text);
+            return_code = FILEIO_PATH_WAS_DIRECTORY;
+        }
+        else
+        {
+
+            msg_format = "Couldn't save to file '%s'.";
+        }
     }
     else
     {
@@ -24,35 +40,60 @@ void editor_save_file(const ProgramState* state, const char* filename)
         fclose(fp);
 
         msg_format = "Saved to file '%s'.";
+        return_code = FILEIO_PATH_WAS_FILE;
     }
 
-    //send message
-    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
-    char* msg = malloc(msg_size); 
+    if (msg_format)
+    {
+        size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
+        char* msg = malloc(msg_size); 
 
-    snprintf(msg, msg_size, msg_format, filename);
-    
-    String str = {0};
-    String_set(&str, msg);
-    free(msg);
+        snprintf(msg, msg_size, msg_format, filename);
+        
+        String str = {0};
+        String_set(&str, msg);
+        free(msg);
 
-    editor_push_message(state, &str);
+        editor_push_message(state, &str);
+        String_set(&(state->current_file), filename);
+    }
+
+    String_clear(&filepath);
+
+    return return_code;
 }
 
 
-void editor_open_file(ProgramState* state, const char* filename)
+int editor_open_file(ProgramState* state, const char* filename)
 {
-    FILE* fp;
     if (filename == NULL)
     {
         printf("No file selected to open.\n");
     }
-    fopen_s(&fp, filename, "r");
 
+    int return_code = FILEIO_PATH_WAS_INVALID;
     char* msg_format = NULL;
+    FILE* fp;
+    String filepath = {0};
+
+    //Append filename to current directory
+    String_insert_string(&filepath, filename, 0);
+    String_insert(&filepath, '\\', 0);
+    String_insert_string(&filepath, state->current_directory.text, 0);
+    fopen_s(&fp, filepath.text, "r");
+
     if (!fp)
     {
-        msg_format = "Couldn't open file '%s'.";
+        int attributes = GetFileAttributes(filepath.text);
+        if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            String_set(&(state->current_directory), filepath.text);
+            return_code = FILEIO_PATH_WAS_DIRECTORY;
+        }
+        else
+        {
+            msg_format = "Couldn't open file '%s'.";
+        }
     }
     else
     {
@@ -76,17 +117,26 @@ void editor_open_file(ProgramState* state, const char* filename)
         fclose(fp);
 
         msg_format = "Opened file '%s'.";
+        return_code = FILEIO_PATH_WAS_FILE;
+    }
+
+
+    if (msg_format)
+    {
+        size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
+        char* msg = malloc(msg_size); 
+
+        snprintf(msg, msg_size, msg_format, filename);
+        
+        String str = {0};
+        String_set(&str, msg);
+        free(msg);
+
+        editor_push_message(state, &str);
         String_set(&(state->current_file), filename);
     }
 
-    size_t msg_size = sizeof(char) * (strlen(msg_format) + strlen(filename) + 1);
-    char* msg = malloc(msg_size); 
+    String_clear(&filepath);
 
-    snprintf(msg, msg_size, msg_format, filename);
-    
-    String str = {0};
-    String_set(&str, msg);
-    free(msg);
-
-    editor_push_message(state, &str);
+    return return_code;
 }

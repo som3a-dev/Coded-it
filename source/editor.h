@@ -110,6 +110,7 @@ typedef struct _ProgramState
 
     int state;
 
+    String current_directory;
     String current_file;
 
     Stack undo_tree;
@@ -165,6 +166,10 @@ void editor_loop(ProgramState* state);
 
 void editor_update(ProgramState* state);
 void editor_draw(ProgramState* state);
+
+//Called when the directory is changed to load in the new files
+void editor_update_file_explorer(ProgramState* state);
+
 void editor_draw_file_explorer(ProgramState* state);
 
 void editor_draw_status_bar(ProgramState* state);
@@ -177,7 +182,7 @@ void editor_add_file_to_explorer(ProgramState* state, const char* filename);
 //Basically the state->file_count if its the last file button
 void editor_position_file_button(const ProgramState* state, Button* button, int i);
 
-bool editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count);
+void editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count);
 
 
 //TODO(omar): find a better name than this shit

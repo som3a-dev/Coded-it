@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "button_callback.h"
+#include "editor_fileio.h"
 
 void Button_save_on_click(Button* button, ProgramState* state)
 {
@@ -89,19 +90,36 @@ void Button_file_on_click(Button* button, ProgramState* state)
 void Button_file_name_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;
-    
+
+    int code = 0;
     switch (state->file_explorer_action)
     {
         case EXPLORER_ACTION_SAVE:
         {
-            editor_save_file(state, button->text);
+            code = editor_save_file(state, button->text);
         } break;
 
         case EXPLORER_ACTION_OPEN:
         {
-            editor_open_file(state, button->text);
+            code = editor_open_file(state, button->text);
         } break;
     }
 
-    editor_set_state(state, EDITOR_STATE_EDIT);
+    switch (code)
+    {
+        case FILEIO_PATH_WAS_DIRECTORY:
+        {
+            editor_update_file_explorer(state);
+        } break;
+
+        case FILEIO_PATH_WAS_FILE:
+        {
+            editor_set_state(state, EDITOR_STATE_EDIT);
+        } break;
+
+        default:
+        {
+            //TODO(omar): error message
+        }
+    }
 }
