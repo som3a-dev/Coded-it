@@ -7,11 +7,13 @@
 //helper
 void set_font_size(const char* file, TTF_Font** font, int* size, int new_size, int min_size, int max_size)
 {
+    if (new_size == (*size)) return;
     if (new_size > max_size) new_size = max_size;
     if (new_size < min_size) new_size = min_size;
     if (*font)
     {
         TTF_CloseFont(*font);
+        *font = NULL;
     }
 
     *size = new_size;

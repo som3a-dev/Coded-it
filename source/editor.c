@@ -646,38 +646,6 @@ void editor_draw(ProgramState* state)
     SDL_MapRGB(state->window_surface->format,
     state->bg_color.r, state->bg_color.g, state->bg_color.b)); //Clear
 
-/*    { //draw border line
-        int char_h;
-        TTF_SizeText(state->ui_font, "A", NULL, &char_h);
-        SDL_Rect border_line = 
-        {
-            0, state->editor_area.h,
-            state->window_w, state->editor_area.border_thickness 
-        };
-
-//        SDL_FillRect(state->window_surface, &border_line, SDL_MapRGB(state->window_surface->format, 50, 50, 50));
-    }*/
-
-/*    if (state->state == EDITOR_STATE_EDIT)
-    { //draw font size
-        const char* format = "Font size: %d, UI Font size: %d";
-
-        int text_len = (strlen(format) - 4) + ulen_helper(state->font_size) + ulen_helper(state->ui_font_size) + 1;
-        char* text = malloc(sizeof(char) * text_len);
-
-        snprintf(text, text_len, format, state->font_size, state->ui_font_size);
-
-        int text_w;
-        TTF_SizeText(state->font, text, &text_w, NULL);
-
-        draw_text(state->ui_font, state->window_surface, text, 0,
-                    state->editor_area.h + state->editor_area.border_thickness,
-                    255, 255, 255,
-                    state->bg_color.r, state->bg_color.g, state->bg_color.b);
-
-        free(text);
-    }*/
-
     switch (state->state)
     {
         case EDITOR_STATE_COMMAND:
@@ -798,8 +766,6 @@ void editor_draw_file_explorer(ProgramState* state)
 {
     for (int i = 0; i < state->file_count; i++)
     {
-        //TODO(omar): Decide if culling buttons should be here or in button_draw
-
         int x = state->file_buttons[i].x - state->file_explorer_camera_x;
         int y = state->file_buttons[i].y - state->file_explorer_camera_y;
         int w = state->file_buttons[i].w;
