@@ -704,41 +704,13 @@ void editor_draw(ProgramState* state)
         {
             editor_draw_input_buffer(state);
             editor_draw_status_bar(state);
-
-            //draw status bar
-            /*
-            int line;
-            int col;
-            editor_get_cursor_pos(state, &col, &line, state->char_w, state->char_h);
-            line -= state->text.y;
-            col -= state->text.x;
-            line /= state->char_h;
-            col /= state->char_w;
-
-            const char* format = "Ln %d, Col %d";
-
-            int text_len = (strlen(format) - 4) + ulen_helper(line) + ulen_helper(col) + 1;
-            char* text = malloc(sizeof(char) * text_len);
-
-            snprintf(text, text_len, format, line, col);
-
-            int text_w;
-            TTF_SizeText(state->ui_font, text, &text_w, NULL);
-
-            draw_text(state->ui_font, state->window_surface, text, state->window_w - text_w, 
-                      state->editor_area.h + state->editor_area.border_thickness,
-                      255, 255, 255,
-                      state->bg_color.r, state->bg_color.g, state->bg_color.b);
-
-            free(text);*/
-
-            //draw DrawArea borders
-            editor_render_draw_area(state, &(state->message_area));
         } break;
     }
 
     if (state->state != EDITOR_STATE_COMMAND_INPUT)
     {
+        editor_render_draw_area(state, &(state->message_area));
+
         if (!state->message)
         {
             state->message = Queue_pop(&(state->messages), true);
@@ -833,11 +805,11 @@ void editor_draw_file_explorer(ProgramState* state)
         int w = state->file_buttons[i].w;
         int h = state->file_buttons[i].h;
 
-        if ((y+h) > (state->file_explorer_area.y + state->file_explorer_area.h))
+        if ((y) > (state->file_explorer_area.y + state->file_explorer_area.h))
         {
             continue;
         }
-        if (y < state->file_explorer_area.y)
+        if ((y+h) < state->file_explorer_area.y)
         {
             continue;
         }
@@ -846,6 +818,7 @@ void editor_draw_file_explorer(ProgramState* state)
         state->window_surface, &(state->bg_color), state->file_explorer_camera_x,
         state->file_explorer_camera_y);
     }
+
 
     draw_text(state->ui_font, state->window_surface, state->current_directory.text, 0, 0, 255, 255, 255,
     state->bg_color.r, state->bg_color.g, state->bg_color.b);
