@@ -177,3 +177,19 @@ bool sp_is_keyword(const char* text)
     return false;
 }
 
+
+bool sp_is_delimiter(char c)
+{
+    const char* delimiters = " \n(){}[];*+-|&%#";
+    const int delimiters_len = strlen(delimiters);
+
+    for (int i = 0; i < delimiters_len; i++)
+    {
+        if (c == delimiters[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}

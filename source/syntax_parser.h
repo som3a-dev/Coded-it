@@ -47,4 +47,6 @@ bool sp_is_braces(const char* text);
 //THE EXACT SAME LOGIC
 bool sp_is_comment(const char* text, sp_metadata* md);
 
+bool sp_is_delimiter(char c);
+
 int sp_get_token_type(const char* token, sp_metadata* md);
