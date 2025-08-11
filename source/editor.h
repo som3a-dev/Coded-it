@@ -184,6 +184,8 @@ void editor_position_file_button(const ProgramState* state, Button* button, int 
 
 void editor_check_button_mouse_click(ProgramState* state, Button* buttons, int button_count);
 
+void editor_update_file_camera(ProgramState* state);
+
 
 //TODO(omar): find a better name than this shit
 void editor_do_timed_events(ProgramState* state, bool* should_update);
