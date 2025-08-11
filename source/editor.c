@@ -569,7 +569,6 @@ void editor_update(ProgramState* state)
             if (cursor_y < state->editor_area.y)
             {
                 state->camera_y += (((cursor_y) - state->editor_area.y) / state->char_h) * state->char_h;
-//                printf("scroll\n");
             }
             if (cursor_x < state->editor_area.x)
             {
