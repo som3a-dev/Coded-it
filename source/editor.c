@@ -1126,12 +1126,14 @@ void editor_resize_and_reposition(ProgramState* state)
 
         button->w = state->window_w;
         button->y = ui_font_char_h * i;
+        button->font = state->ui_font;
     }
 
     //FIle explorer buttons
     for (int i = 0; i < state->file_count; i++)
     {
         Button* button = state->file_buttons + i;
+        button->font = state->file_explorer_font;
         editor_position_file_button(state, button, i+1);
     }
 
