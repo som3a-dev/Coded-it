@@ -3,13 +3,14 @@
 
 int editor_save_file(const ProgramState* state, const char* filename)
 {
+    int return_code = FILEIO_PATH_WAS_INVALID;
+
     if (filename == NULL)
     {
         printf("No current open file.\n");
-        return;
+        return return_code;
     }
 
-    int return_code = FILEIO_PATH_WAS_INVALID;
     char* msg_format = NULL;
     FILE* fp;
     String filepath = {0};
@@ -66,12 +67,13 @@ int editor_save_file(const ProgramState* state, const char* filename)
 
 int editor_open_file(ProgramState* state, const char* filename)
 {
+    int return_code = FILEIO_PATH_WAS_INVALID;
     if (filename == NULL)
     {
         printf("No file selected to open.\n");
+        return return_code;
     }
 
-    int return_code = FILEIO_PATH_WAS_INVALID;
     char* msg_format = NULL;
     FILE* fp;
     String filepath = {0};
