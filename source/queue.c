@@ -58,6 +58,12 @@ char* Queue_pop(Queue* queue, bool return_element)
     queue->len--;
     queue->arr = realloc(queue->arr, queue->len * queue->element_size);
 
+    if (queue->len == 0)
+    {
+        free(queue->arr);
+        queue->arr = NULL;
+    }
+
     return copy;
 }
 

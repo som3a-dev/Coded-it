@@ -1,6 +1,8 @@
 #include "editor_input_buffer.h"
 #include "syntax_parser.h"
 
+#include <assert.h>
+
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -91,6 +93,11 @@ bool editor_draw_input_buffer_character(ProgramState* state,
     if (!buffer) return;
 
     TTF_Font* font = buffer->font;
+    if (font == NULL)
+    {
+        printf("Buffer has no font");
+        assert(false);
+    }
 
     int selection_start = -2;
     int selection_end = -2;

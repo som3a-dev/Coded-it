@@ -66,7 +66,9 @@ void editor_init(ProgramState* state)
     state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
     state->ui_font_size = 16;
     state->ui_font = TTF_OpenFont("CONSOLA.ttf", state->ui_font_size);
-    if (!(state->font) || !(state->ui_font))
+    state->file_explorer_font_size = 16;
+    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
+    if (!(state->font) || !(state->ui_font) || !(state->file_explorer_font))
     {
         printf("Loading Font Failed\nError Message: %s\n", TTF_GetError());
         return 4;
@@ -411,9 +413,6 @@ void editor_init(ProgramState* state)
 
     editor_set_state(state, EDITOR_STATE_EDIT);
 
-    //File explorer
-    state->file_explorer_font_size = 16;
-    state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
 
     //Directory stuff
     //Get working directory
@@ -682,7 +681,10 @@ void editor_draw(ProgramState* state)
         if (!state->message)
         {
             state->message = Queue_pop(&(state->messages), true);
-            state->message_change_tic = SDL_GetTicks();
+            if (state->message)
+            {
+                state->message_change_tic = SDL_GetTicks();
+            }
         }
         if (state->message)
         {
@@ -926,6 +928,11 @@ void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
     SDL_Color text_color = { r, g, b, 255 };
     SDL_Color bg_color = {br, bg, bb, 255 };
     SDL_Surface* text_surface = TTF_RenderText_Shaded(font, text, text_color, bg_color);
+
+    if (text_surface == NULL)
+    {
+        return;
+    }
     
     SDL_Rect text_dst = { x, y, 0, 0 };
     TTF_SizeText(font, text, &(text_dst.w), &(text_dst.h));
@@ -1136,7 +1143,6 @@ void editor_resize_and_reposition(ProgramState* state)
         button->font = state->file_explorer_font;
         editor_position_file_button(state, button, i+1);
     }
-
 
     editor_update_file_explorer_camera(state);
 }

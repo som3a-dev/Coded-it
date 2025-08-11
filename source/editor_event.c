@@ -1,4 +1,5 @@
 #include "editor_event.h"
+#include <SDL_ttf.h>
 
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -7,6 +8,8 @@
 //helper
 void set_font_size(const char* file, TTF_Font** font, int* size, int new_size, int min_size, int max_size)
 {
+    return;
+
     if (new_size == (*size)) return;
     if (new_size > max_size) new_size = max_size;
     if (new_size < min_size) new_size = min_size;
@@ -18,6 +21,10 @@ void set_font_size(const char* file, TTF_Font** font, int* size, int new_size, i
 
     *size = new_size;
     *font = TTF_OpenFont(file, *size);
+    if ((*font) == NULL)
+    {
+        int x = 0;
+    }
 }
 
 
@@ -172,24 +179,6 @@ void editor_handle_events(ProgramState* state, bool* should_update)
 
 void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 {
-    switch (state->state)
-    {
-        case EDITOR_STATE_COMMAND:
-        {
-            editor_handle_events_keydown_command(state, e);
-        } break;
-
-        case EDITOR_STATE_EDIT:
-        case EDITOR_STATE_COMMAND_INPUT:
-        {
-            editor_handle_events_keydown_textual(state, e);
-        } break;
-
-        case EDITOR_STATE_FILE_EXPLORER:
-        {
-            editor_handle_events_keydown_file_explorer(state, e);
-        } break;
-    }
 
     switch (e.key.keysym.sym)
     {
@@ -235,7 +224,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 
             if (SDL_is_ctrl_pressed(keystate))
             {
-                set_font_size("CONSOLA.ttf", &(state->font),
+/*                set_font_size("CONSOLA.ttf", &(state->font),
                 &(state->font_size), state->font_size + 2, 12, 36);
 
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
@@ -244,7 +233,40 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 &(state->ui_font_size), state->ui_font_size + 2, 10, 30);
 
                 set_font_size("CONSOLA.ttf", &(state->file_explorer_font),
-                &(state->file_explorer_font_size), state->file_explorer_font_size + 2, 10, 30);
+                &(state->file_explorer_font_size), state->file_explorer_font_size + 2, 10, 30);*/
+
+                TTF_CloseFont(state->font);
+
+                state->font_size += 2;
+                if (state->font_size > 36)
+                {
+                    state->font_size = 36;
+                }
+
+                state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+
+                TTF_CloseFont(state->ui_font);
+
+                state->ui_font_size += 2;
+                if (state->ui_font_size > 36)
+                {
+                    state->ui_font_size = 36;
+                }
+
+                state->ui_font = TTF_OpenFont("CONSOLA.ttf", state->ui_font_size);
+
+
+                TTF_CloseFont(state->file_explorer_font);
+
+                state->file_explorer_font_size += 2;
+                if (state->file_explorer_font_size > 36)
+                {
+                    state->file_explorer_font_size = 36;
+                }
+
+                state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
                 
                 editor_resize_and_reposition(state);
             }
@@ -256,7 +278,7 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 
             if (SDL_is_ctrl_pressed(keystate))
             {
-                set_font_size("CONSOLA.ttf", &(state->font),
+/*                set_font_size("CONSOLA.ttf", &(state->font),
                 &(state->font_size), state->font_size - 2, 12, 36);
 
                 TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
@@ -265,12 +287,65 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
                 &(state->ui_font_size), state->ui_font_size - 2, 10, 30);
 
                 set_font_size("CONSOLA.ttf", &(state->file_explorer_font),
-                &(state->file_explorer_font_size), state->file_explorer_font_size - 2, 10, 30);
+                &(state->file_explorer_font_size), state->file_explorer_font_size - 2, 10, 30);*/
+
+                TTF_CloseFont(state->font);
+
+                state->font_size -= 2;
+                if (state->font_size < 12)
+                {
+                    state->font_size = 12;
+                }
+
+                state->font = TTF_OpenFont("CONSOLA.ttf", state->font_size);
+                TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
+
+
+                TTF_CloseFont(state->ui_font);
+
+                state->ui_font_size -= 2;
+                if (state->ui_font_size < 12)
+                {
+                    state->ui_font_size = 12;
+                }
+
+                state->ui_font = TTF_OpenFont("CONSOLA.ttf", state->ui_font_size);
+
+
+                TTF_CloseFont(state->file_explorer_font);
+
+                state->file_explorer_font_size -= 2;
+                if (state->file_explorer_font_size < 12)
+                {
+                    state->file_explorer_font_size = 12;
+                }
+
+                state->file_explorer_font = TTF_OpenFont("CONSOLA.ttf", state->file_explorer_font_size);
 
                 editor_resize_and_reposition(state);
             }
         } break;
     }
+
+    switch (state->state)
+    {
+        case EDITOR_STATE_COMMAND:
+        {
+            editor_handle_events_keydown_command(state, e);
+        } break;
+
+        case EDITOR_STATE_EDIT:
+        case EDITOR_STATE_COMMAND_INPUT:
+        {
+            editor_handle_events_keydown_textual(state, e);
+        } break;
+
+        case EDITOR_STATE_FILE_EXPLORER:
+        {
+            editor_handle_events_keydown_file_explorer(state, e);
+        } break;
+    }
+
 }
 
 
@@ -672,6 +747,11 @@ void editor_navigate_buttons_with_keys(ProgramState* state, Button* buttons, int
                     state->clicked_button->on_click(state->clicked_button, state);
                 }
             }
+        } break;
+
+        default:
+        {
+            printf("nothing\n");
         } break;
     }
 }

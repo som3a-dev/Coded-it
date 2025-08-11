@@ -167,6 +167,11 @@ void Button_resize_text(Button* button, TTF_Font* font)
         return false;
     }*/
 
+    if (font == NULL)
+    {
+        return;
+    }
+
     TTF_SizeText(font, button->text, &(button->text_w), &(button->text_h));
     if (button->w == 0)
     {
