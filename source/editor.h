@@ -22,6 +22,8 @@ static const float MARGIN_BETWEEN_FILE_NAMES_FACTOR = 0.1f; //Multiply this by t
                                                     //the margin.
                                                     //Maybe consts like this should be handled differently but this way is fine for now
 
+static const int FILE_TEXT_LEFT_MARGIN = 2;
+
 
 #endif
 

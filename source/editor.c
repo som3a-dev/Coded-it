@@ -1134,7 +1134,7 @@ void editor_resize_and_reposition(ProgramState* state)
 
     //Input buffers
     state->command_input.y = state->window_h - ui_font_char_h * 1.1f;
-    state->text.x = state->editor_area.x;
+    state->text.x = state->editor_area.x + FILE_TEXT_LEFT_MARGIN;
     state->text.y = state->editor_area.y;
 
     state->camera_x = (state->camera_x / state->char_w) * state->char_w;
