@@ -188,14 +188,23 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
 
             if (SDL_is_ctrl_pressed(keystate))
             {
-                int new_state = state->state + 1;
+/*                int new_state = state->state + 1;
 
                 if (new_state >= EDITOR_STATE_COUNT)
                 {
                     new_state = EDITOR_STATE_EDIT; //TODO(omar): maybe we should set to zero instead.
                 }
 
-                editor_set_state(state, new_state);
+                editor_set_state(state, new_state);*/
+
+                if (state->state == EDITOR_STATE_EDIT)
+                {
+                    editor_set_state(state, EDITOR_STATE_COMMAND);
+                }
+                else
+                {
+                    editor_set_state(state, EDITOR_STATE_EDIT);
+                }
             }
         } break;
 
