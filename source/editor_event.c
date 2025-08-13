@@ -706,7 +706,11 @@ void editor_navigate_buttons_with_keys(ProgramState* state, Button* buttons, int
                     }
                 }
             }
-            state->clicked_button->mouse_hovering = true;
+
+            if (state->clicked_button)
+            {
+                state->clicked_button->mouse_hovering = true;
+            }
         } break;
 
         case SDLK_DOWN:
@@ -735,7 +739,10 @@ void editor_navigate_buttons_with_keys(ProgramState* state, Button* buttons, int
                 }
             }
 
-            state->clicked_button->mouse_hovering = true;
+            if (state->clicked_button)
+            {
+                state->clicked_button->mouse_hovering = true;
+            }
         } break;
 
         case SDLK_RETURN:
