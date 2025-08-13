@@ -636,6 +636,9 @@ void editor_update_file_explorer(ProgramState* state)
     }    
 
     String_clear(&path);
+
+    state->file_explorer_camera_x = 0;
+    state->file_explorer_camera_y = 0;
 }
 
 
