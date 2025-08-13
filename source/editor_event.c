@@ -65,6 +65,11 @@ void editor_handle_events(ProgramState* state, bool* should_update)
                 action.start_index = buffer->cursor_index - 1;
                 action.character = e.text.text[0];
                 editor_push_text_action(state, &action);
+
+                if (state->state == EDITOR_STATE_FILE_EXPLORER)
+                {
+                    editor_update_file_explorer(state);
+                }
             }
         } break;
 

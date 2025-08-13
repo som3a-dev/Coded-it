@@ -371,10 +371,6 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             SDL_Color* token_color = state->token_colors + token_type;
 
-                            if (token_type == TOKEN_NONE)
-                            {
-                                printf("%d, %d, %d\n", token_color->r, token_color->g, token_color->b);
-                            }
                             editor_draw_input_buffer_character(state, buffer->text.text[i],
                             x, y, char_w, char_h, i, token_color, true);
 

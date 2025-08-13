@@ -489,7 +489,6 @@ void editor_do_timed_events(ProgramState* state, bool* should_update)
 
 void editor_update(ProgramState* state)
 {
- 
     if (editor_get_current_input_buffer(state))
     {
         //Do stuff that is specific to states with an input buffer
