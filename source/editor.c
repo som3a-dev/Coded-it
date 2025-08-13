@@ -624,8 +624,8 @@ void editor_update_file_explorer(ProgramState* state)
 
     while (FindNextFileA(dir_handle, &data) != 0)
     {
-        if (strcmp(data.cFileName, "..") == 0) continue;
-        if (strcmp(data.cFileName, ".") == 0) continue;
+//        if (strcmp(data.cFileName, "..") == 0) continue;
+//        if (strcmp(data.cFileName, ".") == 0) continue;
 
         editor_add_file_to_explorer(state, data.cFileName);
     }

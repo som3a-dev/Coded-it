@@ -1,6 +1,32 @@
 #include "editor_fileio.h"
 #include <windows.h>
 
+
+void editor_move_directory_backwards(ProgramState* state)
+{
+    int len = state->current_directory.len;
+    int last_folder_index = 0;
+    for (int i = 0; i < len; i++)
+    {
+        if (state->current_directory.text[i] == '\\') 
+        {
+            last_folder_index = i;
+        }
+    }
+
+    state->current_directory.len = len - (len - last_folder_index);
+    if (state->current_directory.text)
+    {
+        state->current_directory.text = realloc(state->current_directory.text, len - (len - last_folder_index) + 1);
+    }
+    else
+    {
+        //Shouldn't happen
+    }
+    state->current_directory.text[state->current_directory.len] = '\0';
+}
+
+
 int editor_save_file(const ProgramState* state, const char* filename)
 {
     int return_code = FILEIO_PATH_WAS_INVALID;
@@ -9,6 +35,11 @@ int editor_save_file(const ProgramState* state, const char* filename)
     {
         printf("No current open file.\n");
         return return_code;
+    }
+    if (strcmp(filename, "..") == 0)
+    {
+        editor_move_directory_backwards(state);
+        return FILEIO_PATH_WAS_DIRECTORY;
     }
 
     char* msg_format = NULL;
@@ -72,6 +103,12 @@ int editor_open_file(ProgramState* state, const char* filename)
     {
         printf("No file selected to open.\n");
         return return_code;
+    }
+
+    if (strcmp(filename, "..") == 0)
+    {
+        editor_move_directory_backwards(state);
+        return FILEIO_PATH_WAS_DIRECTORY;
     }
 
     char* msg_format = NULL;

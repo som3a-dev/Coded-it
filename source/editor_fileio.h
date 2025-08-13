@@ -11,5 +11,7 @@ enum
 };
 
 //Both return from the FILEIO enum
-int editor_save_file(const ProgramState* state, const char* filename);
+int editor_save_file(ProgramState* state, const char* filename);
 int editor_open_file(ProgramState* state, const char* filename);
+
+void editor_move_directory_backwards(ProgramState* state);

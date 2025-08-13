@@ -748,10 +748,5 @@ void editor_navigate_buttons_with_keys(ProgramState* state, Button* buttons, int
                 }
             }
         } break;
-
-        default:
-        {
-            printf("nothing\n");
-        } break;
     }
 }
