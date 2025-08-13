@@ -650,21 +650,25 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
         
         case SDLK_TAB:
         {
-            String_insert(&(buffer->text), ' ', buffer->cursor_index);
-            editor_set_cursor(state, buffer->cursor_index+1);
-            String_insert(&(buffer->text), ' ', buffer->cursor_index);
-            editor_set_cursor(state, buffer->cursor_index+1);
-
             //TODO(omar): rewrite this when we start using action.text
             TextAction action = {0};
             action.type = TEXT_ACTION_WRITE; 
-            action.start_index = buffer->cursor_index - 2;
+            action.start_index = buffer->cursor_index;
             action.character = ' ';
 
-            editor_push_text_action(state, &action);
+            for (int i = 0; i < state->tab_size; i++)
+            {
+                String_insert(&(buffer->text), ' ', buffer->cursor_index + i);
+                action.start_index = buffer->cursor_index + i;
+                editor_push_text_action(state, &action);
+            }
 
-            action.start_index++;
-            editor_push_text_action(state, &action);
+            editor_set_cursor(state, buffer->cursor_index + state->tab_size);
+
+/*            String_insert(&(buffer->text), ' ', buffer->cursor_index);
+            editor_set_cursor(state, buffer->cursor_index+1);
+            String_insert(&(buffer->text), ' ', buffer->cursor_index);
+            editor_set_cursor(state, buffer->cursor_index+1);*/
         } break;
 
         case SDLK_INSERT:
