@@ -925,6 +925,11 @@ void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
                 int x, int y, int r, int g, int b,
                 int br, int bg, int bb)
 {
+    if (text == NULL)
+    {
+        return;
+    }
+
     SDL_Color text_color = { r, g, b, 255 };
     SDL_Color bg_color = {br, bg, bb, 255 };
     SDL_Surface* text_surface = TTF_RenderText_Shaded(font, text, text_color, bg_color);
