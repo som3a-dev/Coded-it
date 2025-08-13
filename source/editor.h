@@ -30,7 +30,6 @@ enum
 {
     EDITOR_STATE_EDIT,
     EDITOR_STATE_COMMAND,
-    EDITOR_STATE_COMMAND_INPUT,
     EDITOR_STATE_FILE_EXPLORER,
     EDITOR_STATE_COUNT //not an actual state. used for counting
 };

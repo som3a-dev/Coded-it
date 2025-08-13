@@ -335,7 +335,6 @@ void editor_handle_events_keydown(ProgramState* state, SDL_Event e)
         } break;
 
         case EDITOR_STATE_EDIT:
-        case EDITOR_STATE_COMMAND_INPUT:
         {
             editor_handle_events_keydown_textual(state, e);
         } break;
@@ -539,11 +538,6 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
                     action.start_index = buffer->cursor_index - 1;
                     action.character = '\n';
                     editor_push_text_action(state, &action);
-                } break;
-
-                case EDITOR_STATE_COMMAND_INPUT:
-                {
-                    editor_set_state(state, EDITOR_STATE_EDIT);
                 } break;
             }
         } break;

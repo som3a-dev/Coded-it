@@ -656,11 +656,6 @@ void editor_draw(ProgramState* state)
             }
         } break;
 
-        case EDITOR_STATE_COMMAND_INPUT:
-        {
-            editor_draw_input_buffer(state);
-        } break;
-
         case EDITOR_STATE_FILE_EXPLORER:
         {
             editor_draw_file_explorer(state);
@@ -674,7 +669,6 @@ void editor_draw(ProgramState* state)
         } break;
     }
 
-    if (state->state != EDITOR_STATE_COMMAND_INPUT)
     {
         editor_render_draw_area(state, &(state->message_area));
 
@@ -992,7 +986,7 @@ void editor_set_state(ProgramState* state, int new_state)
             }
         } break;
 
-        case EDITOR_STATE_COMMAND_INPUT:
+/*        case EDITOR_STATE_COMMAND_INPUT:
         {
             InputBuffer* buffer = editor_get_current_input_buffer(state);
             if (state->clicked_button)
@@ -1006,7 +1000,7 @@ void editor_set_state(ProgramState* state, int new_state)
             }
             String_clear(&(buffer->text));
             buffer->cursor_index = 0;
-        } break;
+        } break;*/
 
         case EDITOR_STATE_COMMAND:
         {
@@ -1017,7 +1011,6 @@ void editor_set_state(ProgramState* state, int new_state)
                 button->mouse_hovering = false;
             } 
 
-            if (new_state != EDITOR_STATE_COMMAND_INPUT)
             {
                 if (state->clicked_button)
                 {

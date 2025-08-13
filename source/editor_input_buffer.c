@@ -19,10 +19,10 @@ InputBuffer* editor_get_current_input_buffer(const ProgramState* state)
             return &(state->text);
         } break;
 
-        case EDITOR_STATE_COMMAND_INPUT:
+/*        case EDITOR_STATE_COMMAND_INPUT:
         {
             return &(state->command_input);
-        } break;
+        } break;*/
     }
 
     return NULL;
@@ -210,7 +210,7 @@ void editor_draw_input_buffer(ProgramState* state)
 
     if (buffer->text.text)
     {
-        if (state->state == EDITOR_STATE_COMMAND_INPUT)
+/*        if (state->state == EDITOR_STATE_COMMAND_INPUT)
         {
             SDL_Color* token_color = state->token_colors + TOKEN_NONE;
 
@@ -218,7 +218,7 @@ void editor_draw_input_buffer(ProgramState* state)
             token_color->r, token_color->g, token_color->b,
             state->bg_color.r, state->bg_color.g, state->bg_color.b);
         }
-        else
+        else*/
         {
             String current_token = {0};
             for (int i = 0; i <= buffer->text.len; i++)
