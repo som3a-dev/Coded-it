@@ -109,7 +109,7 @@ typedef struct _ProgramState
 
     int state;
 
-    String current_directory;
+    String current_directory; //The actual current directory used
     String current_file;
 
     Stack undo_tree;
@@ -120,7 +120,9 @@ typedef struct _ProgramState
     uint32_t message_change_tic;
     
     InputBuffer text;
+    InputBuffer current_directory_ib; //File explorer directory input buffer
     InputBuffer command_input;
+
     Button* clicked_button; //the button clicked during the last
                             //EDITOR_STATE_COMMAND if any
 

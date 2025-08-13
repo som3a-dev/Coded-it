@@ -110,6 +110,7 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
         case FILEIO_PATH_WAS_DIRECTORY:
         {
             editor_update_file_explorer(state);
+            state->current_directory_ib.cursor_index = state->current_directory_ib.text.len;
         } break;
 
         case FILEIO_PATH_WAS_FILE:

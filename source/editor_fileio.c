@@ -4,26 +4,26 @@
 
 void editor_move_directory_backwards(ProgramState* state)
 {
-    int len = state->current_directory.len;
+    int len = state->current_directory_ib.text.len;
     int last_folder_index = 0;
     for (int i = 0; i < len; i++)
     {
-        if (state->current_directory.text[i] == '\\') 
+        if (state->current_directory_ib.text.text[i] == '\\') 
         {
             last_folder_index = i;
         }
     }
 
-    state->current_directory.len = len - (len - last_folder_index);
-    if (state->current_directory.text)
+    state->current_directory_ib.text.len = len - (len - last_folder_index);
+    if (state->current_directory_ib.text.text)
     {
-        state->current_directory.text = realloc(state->current_directory.text, len - (len - last_folder_index) + 1);
+        state->current_directory_ib.text.text = realloc(state->current_directory_ib.text.text, len - (len - last_folder_index) + 1);
     }
     else
     {
         //Shouldn't happen
     }
-    state->current_directory.text[state->current_directory.len] = '\0';
+    state->current_directory_ib.text.text[state->current_directory_ib.text.len] = '\0';
 }
 
 
@@ -48,7 +48,7 @@ int editor_save_file(const ProgramState* state, const char* filename)
 
     String_insert_string(&filepath, filename, 0);
     String_insert(&filepath, '\\', 0);
-    String_insert_string(&filepath, state->current_directory.text, 0);
+    String_insert_string(&filepath, state->current_directory_ib.text.text, 0);
     fopen_s(&fp, filepath.text, "w");
 
     if (!fp)
@@ -56,7 +56,7 @@ int editor_save_file(const ProgramState* state, const char* filename)
         int attributes = GetFileAttributes(filepath.text);
         if (attributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-            String_set(&(state->current_directory), filepath.text);
+            String_set(&(state->current_directory_ib.text), filepath.text);
             return_code = FILEIO_PATH_WAS_DIRECTORY;
         }
         else
@@ -118,7 +118,7 @@ int editor_open_file(ProgramState* state, const char* filename)
     //Append filename to current directory
     String_insert_string(&filepath, filename, 0);
     String_insert(&filepath, '\\', 0);
-    String_insert_string(&filepath, state->current_directory.text, 0);
+    String_insert_string(&filepath, state->current_directory_ib.text.text, 0);
     fopen_s(&fp, filepath.text, "r");
 
     if (!fp)
@@ -126,7 +126,7 @@ int editor_open_file(ProgramState* state, const char* filename)
         int attributes = GetFileAttributes(filepath.text);
         if (attributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-            String_set(&(state->current_directory), filepath.text);
+            String_set(&(state->current_directory_ib.text), filepath.text);
             return_code = FILEIO_PATH_WAS_DIRECTORY;
         }
         else

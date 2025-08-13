@@ -19,6 +19,11 @@ InputBuffer* editor_get_current_input_buffer(const ProgramState* state)
             return &(state->text);
         } break;
 
+        case EDITOR_STATE_FILE_EXPLORER:
+        {
+            return &(state->current_directory_ib);
+        } break;
+
 /*        case EDITOR_STATE_COMMAND_INPUT:
         {
             return &(state->command_input);
@@ -210,15 +215,33 @@ void editor_draw_input_buffer(ProgramState* state)
 
     if (buffer->text.text)
     {
-/*        if (state->state == EDITOR_STATE_COMMAND_INPUT)
+        if (state->state != EDITOR_STATE_EDIT)
         {
             SDL_Color* token_color = state->token_colors + TOKEN_NONE;
 
             draw_text(font, state->window_surface, buffer->text.text, x, y,
-            token_color->r, token_color->g, token_color->b,
+            0xff, 0xff, 0xff,
             state->bg_color.r, state->bg_color.g, state->bg_color.b);
+            
+            if ((buffer->cursor_index >= 0) && (buffer->cursor_index < buffer->text.len))
+            {
+                int char_w;
+                int char_h;
+                TTF_SizeText(buffer->font, "A", &char_w, &char_h);
+
+                int char_x;
+                int char_y;
+                editor_get_cursor_pos(state, &char_x, &char_y, char_w, char_h);
+
+                char cursor_char = buffer->text.text[buffer->cursor_index];
+                char text[2] = {cursor_char, '\0'};
+                
+                draw_text(font, state->window_surface, text, char_x, char_y,
+                0, 0, 0,
+                state->cursor_color.r, state->cursor_color.g, state->cursor_color.b);
+            }
         }
-        else*/
+        else
         {
             String current_token = {0};
             for (int i = 0; i <= buffer->text.len; i++)
@@ -348,6 +371,10 @@ void editor_draw_input_buffer(ProgramState* state)
 
                             SDL_Color* token_color = state->token_colors + token_type;
 
+                            if (token_type == TOKEN_NONE)
+                            {
+                                printf("%d, %d, %d\n", token_color->r, token_color->g, token_color->b);
+                            }
                             editor_draw_input_buffer_character(state, buffer->text.text[i],
                             x, y, char_w, char_h, i, token_color, true);
 

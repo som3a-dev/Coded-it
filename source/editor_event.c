@@ -365,7 +365,9 @@ void editor_handle_events_keydown_command(ProgramState* state, SDL_Event e)
 
 void editor_handle_events_keydown_file_explorer(ProgramState* state, SDL_Event e)
 {
+    editor_handle_events_keydown_textual(state, e);
     editor_navigate_buttons_with_keys(state, state->file_buttons, state->file_count, e);
+    editor_update_file_explorer(state);
 
     //Scrolling
     if (state->clicked_button)

@@ -199,7 +199,7 @@ void editor_init(ProgramState* state)
             str[strlen(str)-1] = '\0';
 
             rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
-            printf("%s\n", str);
+            printf("NONE : %s\n", str);
         }
         else
         {
@@ -410,19 +410,22 @@ void editor_init(ProgramState* state)
     //Input buffer properties
     state->text.font = state->font;
     state->command_input.font = state->ui_font;
+    state->current_directory_ib.font = state->ui_font;
 
     editor_set_state(state, EDITOR_STATE_EDIT);
 
 
     //Directory stuff
     //Get working directory
-    state->current_directory.text = _getcwd(NULL, 0);
-    assert(state->current_directory.text && "_getcwd failed.\n");
-    state->current_directory.len = strlen(state->current_directory.text);
+    state->current_directory_ib.text.text = _getcwd(NULL, 0);
+    assert(state->current_directory_ib.text.text && "_getcwd failed.\n");
+    state->current_directory_ib.text.len = strlen(state->current_directory_ib.text.text);
+    state->current_directory_ib.cursor_index = state->current_directory_ib.text.len;
+
 
     editor_update_file_explorer(state);
 
-    printf("%s\n", state->current_directory.text);
+    printf("%s\n", state->current_directory_ib.text.text);
 
     editor_open_file(state, "CODE.c");
 }
@@ -439,7 +442,7 @@ void editor_destroy(ProgramState* state)
     String_clear(&(state->text.text));
     String_clear(&(state->command_input.text));
     String_clear(&(state->clipboard));
-    String_clear(&(state->current_directory));
+    String_clear(&(state->current_directory_ib.text));
     String_clear(&(state->current_file));
 
 
@@ -486,6 +489,7 @@ void editor_do_timed_events(ProgramState* state, bool* should_update)
 
 void editor_update(ProgramState* state)
 {
+ 
     if (editor_get_current_input_buffer(state))
     {
         //Do stuff that is specific to states with an input buffer
@@ -597,6 +601,26 @@ void editor_update(ProgramState* state)
 
 void editor_update_file_explorer(ProgramState* state)
 {
+    //Check for a valid current directory in the input buffer
+    int attributes = GetFileAttributes(state->current_directory_ib.text.text);
+    if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+    {
+        if (state->current_directory.text && state->current_directory_ib.text.text)
+        {
+            if (strcmp(state->current_directory.text, state->current_directory_ib.text.text) == 0)
+            {
+                return;
+            }
+        }
+        String_set(&(state->current_directory), state->current_directory_ib.text.text);
+    }
+    else
+    {
+        return;
+    }
+
+    if (state->current_directory.text == NULL) return;
+
     if (state->state == EDITOR_STATE_FILE_EXPLORER)
     {
         if (state->clicked_button)
@@ -619,14 +643,11 @@ void editor_update_file_explorer(ProgramState* state)
     HANDLE dir_handle = FindFirstFileA(path.text, &data);
     if (dir_handle == INVALID_HANDLE_VALUE)
     {
-        assert(false && "INVALID HANDLE VALUE");
+        return;
     }
 
     while (FindNextFileA(dir_handle, &data) != 0)
     {
-//        if (strcmp(data.cFileName, "..") == 0) continue;
-//        if (strcmp(data.cFileName, ".") == 0) continue;
-
         editor_add_file_to_explorer(state, data.cFileName);
     }
 
@@ -662,7 +683,6 @@ void editor_draw(ProgramState* state)
         case EDITOR_STATE_FILE_EXPLORER:
         {
             editor_draw_file_explorer(state);
-            editor_render_draw_area(state, &(state->file_explorer_area));
         } break;
 
         case EDITOR_STATE_EDIT:
@@ -785,8 +805,11 @@ void editor_draw_file_explorer(ProgramState* state)
     }
 
 
-    draw_text(state->ui_font, state->window_surface, state->current_directory.text, 0, 0, 255, 255, 255,
-    state->bg_color.r, state->bg_color.g, state->bg_color.b);
+    editor_render_draw_area(state, &(state->file_explorer_area));
+
+//    draw_text(state->ui_font, state->window_surface, state->current_directory_ib.text.text, 0, 0, 255, 255, 255,
+//    state->bg_color.r, state->bg_color.g, state->bg_color.b);
+    editor_draw_input_buffer(state);
 }
 
 
