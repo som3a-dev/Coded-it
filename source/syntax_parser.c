@@ -180,7 +180,7 @@ bool sp_is_keyword(const char* text)
 
 bool sp_is_delimiter(char c)
 {
-    const char* delimiters = " \n(){}[];*+-|&%#";
+    const char* delimiters = " \n(){}[];*+-|&%#\t";
     const int delimiters_len = strlen(delimiters);
 
     for (int i = 0; i < delimiters_len; i++)

@@ -341,6 +341,14 @@ void editor_draw_input_buffer(ProgramState* state)
                             x += char_w;
                         } break;
 
+                        case '\t':
+                        {
+                            editor_draw_input_buffer_character(state, buffer->text.text[i],
+                            x, y, char_w, char_h, i, NULL, false);
+
+                            x += char_w * state->tab_size;
+                        } break;
+
                         case '\n':
                         {
                             meta_data.line_is_comment = false;

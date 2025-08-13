@@ -422,12 +422,11 @@ void editor_init(ProgramState* state)
     state->current_directory_ib.text.len = strlen(state->current_directory_ib.text.text);
     state->current_directory_ib.cursor_index = state->current_directory_ib.text.len;
 
-
     editor_update_file_explorer(state);
 
-    printf("%s\n", state->current_directory_ib.text.text);
-
     editor_open_file(state, "CODE.c");
+
+    state->tab_size = 4;
 }
 
 

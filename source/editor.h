@@ -84,10 +84,13 @@ typedef struct _ProgramState
 {
     SDL_Window* window;
     SDL_Surface* window_surface;
+
     TTF_Font* font;
     int font_size;
     TTF_Font* ui_font; //for UI elements generally
     int ui_font_size;
+
+    int tab_size; //TODO(omar): maybe this and similar stuff should be in some type of Config struct
 
     SDL_Color bg_color; //background color
     SDL_Color cursor_color;
