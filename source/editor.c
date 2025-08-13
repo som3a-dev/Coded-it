@@ -1015,8 +1015,6 @@ void editor_set_state(ProgramState* state, int new_state)
             {
                 Button* button = state->buttons + i;
                 button->mouse_hovering = false;
-                button->state = BUTTON_STATE_DISABLED;
-                Button_disable_children(button, state);
             } 
 
             if (new_state != EDITOR_STATE_COMMAND_INPUT)
@@ -1047,7 +1045,6 @@ void editor_set_state(ProgramState* state, int new_state)
         for (int i = 0; i < 10; i++)
         {
             state->buttons[i].mouse_hovering = false;
-            state->buttons[i].state = BUTTON_STATE_ENABLED;
         }
 
         editor_select_first_enabled_button(state, state->buttons, 10);
@@ -1058,15 +1055,13 @@ void editor_set_state(ProgramState* state, int new_state)
         for (int i = 0; i < state->file_count; i++)
         {
             Button* button = state->file_buttons + i;
-            button->state = BUTTON_STATE_DISABLED;
+            button->mouse_hovering = false;
         }
 
         for (int i = 0; i < 10; i++)
         {
             Button* button = state->buttons + i;
             button->mouse_hovering = false;
-            button->state = BUTTON_STATE_DISABLED;
-            Button_disable_children(button, state);
         } 
     }
 
