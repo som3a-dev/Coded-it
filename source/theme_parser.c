@@ -126,6 +126,11 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
         SDL_Color* color = token_colors + TOKEN_STRING_LITERAL;
         json_value* token_color = jp_get_child_value_in_object(parent_obj, "semanticTokenColors/stringLiteral");
 
+        if (token_color == NULL)
+        {
+            tp_get_color_in_token_colors(theme_token_colors, "\"string\"");
+        }
+
         if (token_color)
         {
             assert(token_color->type == JSON_VALUE_STRING);

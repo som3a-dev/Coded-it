@@ -151,7 +151,7 @@ void editor_init(ProgramState* state)
 
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
     tp_load_theme(state->token_colors, &(state->bg_color), "handmade_theme.json");
- 
+
     //draw areas
     state->editor_area.border_thickness = 4;
     state->editor_area.outline_color.r = 50;
