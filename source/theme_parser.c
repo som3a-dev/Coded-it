@@ -74,6 +74,18 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         //TODO(omar): maybe calcuate an appropriate outline color using the color
     }
 
+    //message area
+    if (tp_load_color(parent_obj, "colors/statusBar.border", &(state->message_area.outline_color)))
+    {
+
+    }
+    else
+    {
+        state->message_area.outline_color.r = 50;
+        state->message_area.outline_color.g = 50;
+        state->message_area.outline_color.b = 50;
+    }
+
     //load background color
     bool loaded_bg_color = tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
 
