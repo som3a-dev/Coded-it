@@ -9,6 +9,7 @@
 #include "draw.h"
 #include "json_parser.h"
 #include "syntax_parser.h"
+#include "theme_parser.h"
 
 #include <assert.h>
 #include <direct.h>
@@ -210,64 +211,8 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_KEYWORD;
-        json_value* token_color = NULL;
-        
-        for (int i = 0; i < token_colors->values_count; i++) 
-        {
-            json_value* val = token_colors->values + i;
-            if (val->type != JSON_VALUE_OBJECT)
-            {
-                //TODO(omar): this probably should never happen. maybe print an error
-                assert(false);
-                continue;
-            }
+        json_value* token_color = tp_get_color_in_token_colors(token_colors, "\"keyword\"");
 
-            json_object* obj = (json_object*)(val->val);
-            assert(obj);
-
-            json_value* scope = hash_table_get(&(obj->table), "scope");
-            if (scope == NULL)
-            {
-                //TODO(omar): this probably should never happen. maybe print an error
-                assert(false);
-                continue;
-            }
-
-            if (scope->type == JSON_VALUE_STRING)
-            {
-                if (strcmp(scope->val, "\"keyword\"") == 0)
-                {
-                    json_value* settings = hash_table_get(&(obj->table), "settings");
-                    assert(settings);
-                    json_object* settings_obj = (json_object*)(settings->val);
-
-                    token_color = hash_table_get(&(settings_obj->table), "foreground");
-                    break;
-                }
-            }
-            else if (scope->type == JSON_VALUE_ARRAY)
-            {
-                json_array* arr = (json_array*)(scope->val);
-                for (int i = 0; i < arr->values_count; i++)
-                {
-                    json_value* val = arr->values + i;
-                    if (val->type == JSON_VALUE_STRING)
-                    {
-                        if (strcmp(val->val, "\"keyword\"") == 0)
-                        {
-                            json_value* settings = hash_table_get(&(obj->table), "settings");
-                            assert(settings);
-                            json_object* settings_obj = (json_object*)(settings->val);
-
-                            token_color = hash_table_get(&(settings_obj->table), "foreground");
-                            goto done_keyword;
-                        }
-                    }
-                }
-            }
-        }
-        
-        done_keyword:
         if (token_color)
         {
             assert(token_color->type == JSON_VALUE_STRING);
@@ -304,6 +249,7 @@ void editor_init(ProgramState* state)
         }
         else
         {
+            token_color = 
             color->r = 165;
             color->g = 255;
             color->b = 120;
@@ -340,64 +286,8 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_COMMENT;
-        json_value* token_color = NULL;
+        json_value* token_color = tp_get_color_in_token_colors(token_colors, "\"comment\"");
         
-        for (int i = 0; i < token_colors->values_count; i++) 
-        {
-            json_value* val = token_colors->values + i;
-            if (val->type != JSON_VALUE_OBJECT)
-            {
-                //TODO(omar): this probably should never happen. maybe print an error
-                assert(false);
-                continue;
-            }
-
-            json_object* obj = (json_object*)(val->val);
-            assert(obj);
-
-            json_value* scope = hash_table_get(&(obj->table), "scope");
-            if (scope == NULL)
-            {
-                //TODO(omar): this probably should never happen. maybe print an error
-                assert(false);
-                continue;
-            }
-
-            if (scope->type == JSON_VALUE_STRING)
-            {
-                if (strcmp(scope->val, "\"comment\"") == 0)
-                {
-                    json_value* settings = hash_table_get(&(obj->table), "settings");
-                    assert(settings);
-                    json_object* settings_obj = (json_object*)(settings->val);
-
-                    token_color = hash_table_get(&(settings_obj->table), "foreground");
-                    break;
-                }
-            }
-            else if (scope->type == JSON_VALUE_ARRAY)
-            {
-                json_array* arr = (json_array*)(scope->val);
-                for (int i = 0; i < arr->values_count; i++)
-                {
-                    json_value* val = arr->values + i;
-                    if (val->type == JSON_VALUE_STRING)
-                    {
-                        if (strcmp(val->val, "\"comment\"") == 0)
-                        {
-                            json_value* settings = hash_table_get(&(obj->table), "settings");
-                            assert(settings);
-                            json_object* settings_obj = (json_object*)(settings->val);
-
-                            token_color = hash_table_get(&(settings_obj->table), "foreground");
-                            goto done_comment;
-                        }
-                    }
-                }
-            }
-        }
-        
-        done_comment:
         if (token_color)
         {
             assert(token_color->type == JSON_VALUE_STRING);
