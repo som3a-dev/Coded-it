@@ -28,7 +28,7 @@ bool SDL_is_ctrl_pressed(uint8_t* keystate)
 
 bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b)
 {
-    if (strlen(str) != 6)
+    if (strlen(str) < 6)
     {
         return false;
     }
