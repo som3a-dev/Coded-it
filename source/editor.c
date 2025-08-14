@@ -130,12 +130,8 @@ void editor_init(ProgramState* state)
     Queue_init(&(state->messages), sizeof(String));
 
     String msg = {0};
-    String_set(&msg, "msg1");
+    String_set(&msg, "Initialized.");
     editor_push_message(state, &msg);
-
-    String msg2 = {0};
-    String_set(&msg2, "msg2");
-    editor_push_message(state, &msg2);
 
     state->selection_start_index = -2;
 
@@ -150,7 +146,7 @@ void editor_init(ProgramState* state)
     state->cursor_color.a = 255;
 
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
-    tp_load_theme(state->token_colors, &(state->bg_color), "handmade_theme.json");
+    tp_load_theme(state->token_colors, &(state->cursor_color), &(state->bg_color), "light-default.json");
 
     //draw areas
     state->editor_area.border_thickness = 4;
@@ -217,6 +213,7 @@ void editor_destroy(ProgramState* state)
     String_clear(&(state->command_input.text));
     String_clear(&(state->clipboard));
     String_clear(&(state->current_directory_ib.text));
+    String_clear(&(state->current_directory));
     String_clear(&(state->current_file));
 
 

@@ -2,36 +2,82 @@
 #include "syntax_parser.h"
 #include <stdbool.h>
 #include <assert.h>
+#include <stdio.h>
 
 
-void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* theme_path)
+bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
+{
+    if (color == NULL) return false;
+
+    json_value* theme_color = jp_get_child_value_in_object(parent_obj, path);
+
+    if (theme_color)
+    {
+        if (theme_color->type != JSON_VALUE_STRING)
+        {
+            return false;
+        }
+
+        char* str = theme_color->val;
+        str++;
+        str++;
+        str[strlen(str)-1] = '\0';
+
+        rgb_hex_str_to_int(str,
+        &(color->r),
+        &(color->g),
+        &(color->b),
+        &(color->a));
+
+        return true;
+    }
+    
+    return false;
+}
+
+
+void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* bg_color, const char* theme_path)
 {
     if (token_colors == NULL) return;
     if (theme_path == NULL) return;
 
     //load theme file
     json_object* parent_obj = jp_parse_file(theme_path);
-    assert(parent_obj && "Loading theme failed.");
+    if (parent_obj == NULL)
+    {
+        printf("Loading theme failed.\n");
+        return;
+    }
 
     //load background color
-    if (bg_color)
+    tp_load_color(parent_obj, "colors/editor.background", bg_color);
+
+    //Load cursor color
+    if (cursor_color)
     {
-        json_value* theme_bg_color = jp_get_child_value_in_object(parent_obj, "colors/editor.background");
-
-        if (theme_bg_color)
+        if (tp_load_color(parent_obj, "colors/editorCursor.foreground", cursor_color))
         {
-            assert(theme_bg_color->type == JSON_VALUE_STRING);
 
-            char* str = theme_bg_color->val;
-            str++;
-            str++;
-            str[strlen(str)-1] = '\0';
+        }
+        else if (bg_color)
+        {
+            //Determine if the theme is light or dark with the background color
+            float brightness = (0.2126 * bg_color->r + 0.7152 * bg_color->g + 0.0722 * bg_color->b) / 255;
+            brightness = 1.0 - brightness;
 
-            rgb_hex_str_to_int(str,
-            &(bg_color->r),
-            &(bg_color->g),
-            &(bg_color->b),
-            &(bg_color->a));
+            //230 not 255 because i didn't like the look of a fully white cursor. fully black is fine though
+            cursor_color->r = 230 * brightness;
+            cursor_color->g = 230 * brightness;
+            cursor_color->b = 230 * brightness;
+            cursor_color->a = 255;
+        }
+        else
+        {
+            //Default to a greyish cursor
+            cursor_color->r = 150;
+            cursor_color->g = 150;
+            cursor_color->b = 150;
+            cursor_color->a = 255;
         }
     }
 
@@ -46,18 +92,9 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
 
     {
         SDL_Color* color = token_colors + TOKEN_NONE;
-        json_value* token_color = jp_get_child_value_in_object(parent_obj, "colors/editor.foreground");
         
-        if (token_color)
+        if (tp_load_color(parent_obj, "colors/editor.foreground", color))
         {
-            assert(token_color->type == JSON_VALUE_STRING);
-
-            char* str = token_color->val;
-            str++;
-            str++;
-            str[strlen(str)-1] = '\0';
-
-            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
         }
         else
         {
@@ -81,8 +118,6 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str[strlen(str)-1] = '\0';
 
             rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
-
-            printf("%s\n", str);
         }
         else
         {
@@ -114,8 +149,6 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str[strlen(str)-1] = '\0';
 
             rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
-
-            printf("%s\n", str);
         }
         else
         {
@@ -131,7 +164,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
 
         if (token_color == NULL)
         {
-            tp_get_color_in_token_colors(theme_token_colors, "\"string\"");
+            token_color = tp_get_color_in_token_colors(theme_token_colors, "\"string\"");
         }
 
         if (token_color)
@@ -143,8 +176,6 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str[strlen(str)-1] = '\0';
 
             rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
-
-            printf("%s\n", str);
         }
         else
         {
