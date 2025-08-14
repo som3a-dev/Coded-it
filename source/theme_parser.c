@@ -36,9 +36,9 @@ bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
 }
 
 
-void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* bg_color, const char* theme_path)
+void tp_load_theme(ProgramState* state, const char* theme_path)
 {
-    if (token_colors == NULL) return;
+    if (state->token_colors == NULL) return;
     if (theme_path == NULL) return;
 
     //load theme file
@@ -50,34 +50,33 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* 
     }
 
     //load background color
-    tp_load_color(parent_obj, "colors/editor.background", bg_color);
+    bool loaded_bg_color = tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
 
     //Load cursor color
-    if (cursor_color)
     {
-        if (tp_load_color(parent_obj, "colors/editorCursor.foreground", cursor_color))
+        if (tp_load_color(parent_obj, "colors/editorCursor.foreground", &(state->cursor_color)))
         {
 
         }
-        else if (bg_color)
+        else if (loaded_bg_color)
         {
             //Determine if the theme is light or dark with the background color
-            float brightness = (0.2126 * bg_color->r + 0.7152 * bg_color->g + 0.0722 * bg_color->b) / 255;
+            float brightness = (0.2126 * state->bg_color.r + 0.7152 * state->bg_color.g + 0.0722 * state->bg_color.b) / 255;
             brightness = 1.0 - brightness;
 
             //230 not 255 because i didn't like the look of a fully white cursor. fully black is fine though
-            cursor_color->r = 230 * brightness;
-            cursor_color->g = 230 * brightness;
-            cursor_color->b = 230 * brightness;
-            cursor_color->a = 255;
+            state->cursor_color.r = 230 * brightness;
+            state->cursor_color.g = 230 * brightness;
+            state->cursor_color.b = 230 * brightness;
+            state->cursor_color.a = 255;
         }
         else
         {
             //Default to a greyish cursor
-            cursor_color->r = 150;
-            cursor_color->g = 150;
-            cursor_color->b = 150;
-            cursor_color->a = 255;
+            state->cursor_color.r = 150;
+            state->cursor_color.g = 150;
+            state->cursor_color.b = 150;
+            state->cursor_color.a = 255;
         }
     }
 
@@ -91,7 +90,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* 
     }
 
     {
-        SDL_Color* color = token_colors + TOKEN_NONE;
+        SDL_Color* color = state->token_colors + TOKEN_NONE;
         
         if (tp_load_color(parent_obj, "colors/editor.foreground", color))
         {
@@ -106,7 +105,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* 
 
     }
     {
-        SDL_Color* color = token_colors + TOKEN_KEYWORD;
+        SDL_Color* color = state->token_colors + TOKEN_KEYWORD;
         json_value* token_color = tp_get_color_in_token_colors(theme_token_colors, "\"keyword\"");
 
         if (token_color)
@@ -128,7 +127,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* 
         }
     }
     {
-        SDL_Color* color = token_colors + TOKEN_NUMERIC;
+        SDL_Color* color = state->token_colors + TOKEN_NUMERIC;
 
         //TODO(omar): Maybe checking for this in semanticTokenColors isn't needed as it isn't in all themes.
         //But constant.numeric seems to be in all themes and the same value
@@ -159,7 +158,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* 
         }
     }
     {
-        SDL_Color* color = token_colors + TOKEN_STRING_LITERAL;
+        SDL_Color* color = state->token_colors + TOKEN_STRING_LITERAL;
         json_value* token_color = jp_get_child_value_in_object(parent_obj, "semanticTokenColors/stringLiteral");
 
         if (token_color == NULL)
@@ -186,12 +185,12 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* cursor_color, SDL_Color* 
         }
     }
     {
-        SDL_Color* color = token_colors + TOKEN_BRACES;
+        SDL_Color* color = state->token_colors + TOKEN_BRACES;
         const char* dark_default = "FFD700";
         rgb_hex_str_to_int(dark_default, &(color->r), &(color->g), &(color->b), &(color->a));
     }
     {
-        SDL_Color* color = token_colors + TOKEN_COMMENT;
+        SDL_Color* color = state->token_colors + TOKEN_COMMENT;
         json_value* token_color = tp_get_color_in_token_colors(theme_token_colors, "\"comment\"");
         
         if (token_color)

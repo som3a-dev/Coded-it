@@ -146,7 +146,7 @@ void editor_init(ProgramState* state)
     state->cursor_color.a = 255;
 
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
-    tp_load_theme(state->token_colors, &(state->cursor_color), &(state->bg_color), "light-default.json");
+    tp_load_theme(state, "light-default.json");
 
     //draw areas
     state->editor_area.border_thickness = 4;
