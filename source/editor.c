@@ -234,8 +234,17 @@ void editor_init(ProgramState* state)
     }
     {
         SDL_Color* color = state->token_colors + TOKEN_NUMERIC;
+
+        //TODO(omar): Maybe checking for this in semanticTokenColors isn't needed as it isn't in all themes.
+        //But constant.numeric seems to be in all themes and the same value
+        //But i'll keep it for now
         json_value* token_color = jp_get_child_value_in_object(parent_obj, "semanticTokenColors/numberLiteral");
-        
+    
+        if (token_color == NULL)
+        {
+            token_color = tp_get_color_in_token_colors(token_colors, "\"constant.numeric\"");
+        }
+
         if (token_color)
         {
             assert(token_color->type == JSON_VALUE_STRING);
@@ -249,7 +258,6 @@ void editor_init(ProgramState* state)
         }
         else
         {
-            token_color = 
             color->r = 165;
             color->g = 255;
             color->b = 120;
