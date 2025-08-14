@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <stdio.h>
-
+#include <string.h>
 
 bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
 {
@@ -21,6 +21,8 @@ bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
         char* str = theme_color->val;
         str++;
         str++;
+
+        char last_char = str[strlen(str)-1];
         str[strlen(str)-1] = '\0';
 
         rgb_hex_str_to_int(str,
@@ -28,6 +30,8 @@ bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
         &(color->g),
         &(color->b),
         &(color->a));
+
+        str[strlen(str)] = last_char;
 
         return true;
     }
