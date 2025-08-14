@@ -62,7 +62,8 @@ enum
     DRAW_AREA_TOP_BORDER = 1 << 1,
     DRAW_AREA_LEFT_BORDER = 1 << 2,
     DRAW_AREA_RIGHT_BORDER = 1 << 3,
-    DRAW_AREA_FILL = 1 << 4
+    DRAW_AREA_FILL = 1 << 4,
+    DRAW_AREA_OUTLINE = 1 << 5
 };
 
 
@@ -94,7 +95,6 @@ typedef struct _ProgramState
 
     SDL_Color bg_color; //background color
     SDL_Color cursor_color;
-    SDL_Color status_bar_color;
 
     bool running;
 

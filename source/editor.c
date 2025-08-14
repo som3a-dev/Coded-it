@@ -138,13 +138,6 @@ void editor_init(ProgramState* state)
 //    state->current_file = "json_parser.c";
 //    editor_open_file(state);
 
-
-    //Cursor color
-    state->cursor_color.r = 255;
-    state->cursor_color.g = 255;
-    state->cursor_color.b = 255;
-    state->cursor_color.a = 255;
-
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
     tp_load_theme(state, "light-default.json");
 
@@ -170,10 +163,8 @@ void editor_init(ProgramState* state)
     state->file_explorer_area.outline_color.g = 50;
     state->file_explorer_area.outline_color.b = 50;
 
-    state->status_bar_area.color.r = 170;
-    state->status_bar_area.color.g = 170;
-    state->status_bar_area.color.b = 170;
     state->status_bar_area.flags |= DRAW_AREA_FILL;
+    state->status_bar_area.border_thickness = 4;
 
     //Must be called to init draw areas and stuff
     editor_resize_and_reposition(state); //to set editor_area.h
@@ -198,6 +189,7 @@ void editor_init(ProgramState* state)
     editor_open_file(state, "CODE.c");
 
     state->tab_size = 4;
+
 }
 
 
@@ -595,7 +587,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
     color = SDL_MapRGB(state->window_surface->format, area->outline_color.r,
     area->outline_color.g, area->outline_color.b);
 
-    if (area->flags & DRAW_AREA_TOP_BORDER)
+    if ((area->flags & DRAW_AREA_TOP_BORDER) || (area->flags & DRAW_AREA_OUTLINE))
     {
         SDL_Rect rect = {
             area->x, area->y,
@@ -605,7 +597,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
         SDL_FillRect(state->window_surface, &rect,color);
     }
 
-    if (area->flags & DRAW_AREA_BOTTOM_BORDER)
+    if ((area->flags & DRAW_AREA_BOTTOM_BORDER) || (area->flags & DRAW_AREA_OUTLINE))
     {
         SDL_Rect rect = {
             area->x, area->y + area->h,
@@ -615,7 +607,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
         SDL_FillRect(state->window_surface, &rect,color);
     }
 
-    if (area->flags & DRAW_AREA_LEFT_BORDER)
+    if ((area->flags & DRAW_AREA_LEFT_BORDER) || (area->flags & DRAW_AREA_OUTLINE))
     {
         SDL_Rect rect = {
             area->x, area->y,
@@ -625,7 +617,7 @@ void editor_render_draw_area(ProgramState* state, const DrawArea* area)
         SDL_FillRect(state->window_surface, &rect,color);
     }
 
-    if (area->flags & DRAW_AREA_RIGHT_BORDER)
+    if ((area->flags & DRAW_AREA_RIGHT_BORDER) || (area->flags & DRAW_AREA_OUTLINE))
     {
         SDL_Rect rect = {
             area->x + area->w, area->y,
@@ -890,7 +882,7 @@ void editor_resize_and_reposition(ProgramState* state)
         state->message_area.w = state->window_w;
 
         //editor area
-        state->editor_area.y = state->status_bar_area.y + state->status_bar_area.h + state->status_bar_area.x;
+        state->editor_area.y = state->status_bar_area.y + state->status_bar_area.h + state->status_bar_area.border_thickness;
         state->editor_area.h = state->message_area.y;
         state->editor_area.w = state->window_w;
 
