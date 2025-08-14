@@ -25,7 +25,6 @@
 const int CURSOR_BLINK_TIME = 1000;
 const int MESSAGE_DURATION = 1000;
 
-
 void editor_init(ProgramState* state)
 {
     memset(state, 0, sizeof(ProgramState));
@@ -34,7 +33,7 @@ void editor_init(ProgramState* state)
     state->state = EDITOR_STATE_EDIT;
 
     const char* error = NULL;
-    
+     
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     error = SDL_GetError();
     if (error[0])
@@ -150,7 +149,7 @@ void editor_init(ProgramState* state)
     state->cursor_color.a = 255;
 
     //load theme file
-    json_object* parent_obj = jp_parse_file("theme.json");
+    json_object* parent_obj = jp_parse_file("handmade_theme.json");
     assert(parent_obj && "Loading theme failed.");
 
 
@@ -199,7 +198,6 @@ void editor_init(ProgramState* state)
             str[strlen(str)-1] = '\0';
 
             rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
-            printf("NONE : %s\n", str);
         }
         else
         {
@@ -247,8 +245,29 @@ void editor_init(ProgramState* state)
                     break;
                 }
             }
+            else if (scope->type == JSON_VALUE_ARRAY)
+            {
+                json_array* arr = (json_array*)(scope->val);
+                for (int i = 0; i < arr->values_count; i++)
+                {
+                    json_value* val = arr->values + i;
+                    if (val->type == JSON_VALUE_STRING)
+                    {
+                        if (strcmp(val->val, "\"keyword\"") == 0)
+                        {
+                            json_value* settings = hash_table_get(&(obj->table), "settings");
+                            assert(settings);
+                            json_object* settings_obj = (json_object*)(settings->val);
+
+                            token_color = hash_table_get(&(settings_obj->table), "foreground");
+                            goto done_keyword;
+                        }
+                    }
+                }
+            }
         }
         
+        done_keyword:
         if (token_color)
         {
             assert(token_color->type == JSON_VALUE_STRING);
@@ -356,8 +375,29 @@ void editor_init(ProgramState* state)
                     break;
                 }
             }
+            else if (scope->type == JSON_VALUE_ARRAY)
+            {
+                json_array* arr = (json_array*)(scope->val);
+                for (int i = 0; i < arr->values_count; i++)
+                {
+                    json_value* val = arr->values + i;
+                    if (val->type == JSON_VALUE_STRING)
+                    {
+                        if (strcmp(val->val, "\"comment\"") == 0)
+                        {
+                            json_value* settings = hash_table_get(&(obj->table), "settings");
+                            assert(settings);
+                            json_object* settings_obj = (json_object*)(settings->val);
+
+                            token_color = hash_table_get(&(settings_obj->table), "foreground");
+                            goto done_comment;
+                        }
+                    }
+                }
+            }
         }
         
+        done_comment:
         if (token_color)
         {
             assert(token_color->type == JSON_VALUE_STRING);
