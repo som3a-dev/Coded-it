@@ -664,11 +664,6 @@ void editor_handle_events_keydown_textual(ProgramState* state, SDL_Event e)
             }
 
             editor_set_cursor(state, buffer->cursor_index + state->tab_size);
-
-/*            String_insert(&(buffer->text), ' ', buffer->cursor_index);
-            editor_set_cursor(state, buffer->cursor_index+1);
-            String_insert(&(buffer->text), ' ', buffer->cursor_index);
-            editor_set_cursor(state, buffer->cursor_index+1);*/
         } break;
 
         case SDLK_INSERT:
