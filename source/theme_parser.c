@@ -30,7 +30,8 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             rgb_hex_str_to_int(str,
             &(bg_color->r),
             &(bg_color->g),
-            &(bg_color->b));
+            &(bg_color->b),
+            &(bg_color->a));
         }
     }
 
@@ -56,7 +57,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str++;
             str[strlen(str)-1] = '\0';
 
-            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
         }
         else
         {
@@ -79,7 +80,8 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str++;
             str[strlen(str)-1] = '\0';
 
-            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
+
             printf("%s\n", str);
         }
         else
@@ -111,7 +113,8 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str++;
             str[strlen(str)-1] = '\0';
 
-            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
+
             printf("%s\n", str);
         }
         else
@@ -139,7 +142,8 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str++;
             str[strlen(str)-1] = '\0';
 
-            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
+
             printf("%s\n", str);
         }
         else
@@ -153,7 +157,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
     {
         SDL_Color* color = token_colors + TOKEN_BRACES;
         const char* dark_default = "FFD700";
-        rgb_hex_str_to_int(dark_default, &(color->r), &(color->g), &(color->b));
+        rgb_hex_str_to_int(dark_default, &(color->r), &(color->g), &(color->b), &(color->a));
     }
     {
         SDL_Color* color = token_colors + TOKEN_COMMENT;
@@ -167,7 +171,7 @@ void tp_load_theme(SDL_Color* token_colors, SDL_Color* bg_color, const char* the
             str++;
             str[strlen(str)-1] = '\0';
 
-            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b));
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
         }
         else
         {

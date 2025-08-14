@@ -26,7 +26,7 @@ bool SDL_is_ctrl_pressed(uint8_t* keystate)
 }
 
 
-bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b)
+bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a)
 {
     if (strlen(str) < 6)
     {
@@ -36,8 +36,6 @@ bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b)
     char rstr[3] = {str[0], str[1], 0};
     char gstr[3] = {str[2], str[3], 0};
     char bstr[3] = {str[4], str[5], 0};
-
-    printf("%s, %s, %s\n", rstr, gstr, bstr);
     
     if (r)
     {
@@ -50,6 +48,11 @@ bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b)
     if (b)
     {
         *b = strtol(bstr, NULL, 16);
+    }
+    if ((a) && (strlen(str) >= 8))
+    {
+        char astr[3] = {str[6], str[7], 0};
+        *a = strtol(astr, NULL, 16);
     }
 
     return true;

@@ -484,7 +484,7 @@ void editor_draw(ProgramState* state)
             draw_text(state->ui_font, state->window_surface, state->message->text,
                     0,
                     state->command_input.y,
-                    255, 230, 230 ,
+                    233, 230, 230, 255,
                     state->bg_color.r, state->bg_color.g, state->bg_color.b);
 
         }
@@ -525,7 +525,7 @@ void editor_draw_status_bar(ProgramState* state)
 
         draw_text(state->font, state->window_surface, text,
                     x, y, 
-                    0, 0, 0,
+                    0, 0, 0, 255,
                     state->status_bar_area.color.r,
                     state->status_bar_area.color.g,
                     state->status_bar_area.color.b
@@ -546,7 +546,7 @@ void editor_draw_status_bar(ProgramState* state)
 
         draw_text(state->font, state->window_surface, state->current_file.text,
                   x, y, 
-                  0, 0, 0,
+                  0, 0, 0, 255,
                   state->status_bar_area.color.r,
                   state->status_bar_area.color.g,
                   state->status_bar_area.color.b);
@@ -715,7 +715,7 @@ void editor_check_button_mouse_click(ProgramState* state, Button* buttons, int b
 
 
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
-                int x, int y, int r, int g, int b,
+                int x, int y, int r, int g, int b, int a,
                 int br, int bg, int bb)
 {
     if (text == NULL)
@@ -723,9 +723,9 @@ void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
         return;
     }
 
-    SDL_Color text_color = { r, g, b, 255 };
+    SDL_Color text_color = { r, g, b, a };
     SDL_Color bg_color = {br, bg, bb, 255 };
-    SDL_Surface* text_surface = TTF_RenderText_Shaded(font, text, text_color, bg_color);
+    SDL_Surface* text_surface = TTF_RenderText_Blended(font, text, text_color);
 
     if (text_surface == NULL)
     {

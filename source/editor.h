@@ -201,7 +201,7 @@ void editor_do_timed_events(ProgramState* state, bool* should_update);
 //bg_color (br, bg, bb) is the color of the background of the editor. set by the theme.
 //this is used to color the box that is rendered around SDL ttf text when using RenderText_Shaded
 void draw_text(TTF_Font* font, SDL_Surface* dst_surface, const char* text,
-                int x, int y, int r, int g, int b,
+                int x, int y, int r, int g, int b, int a,
                 int br, int bg, int bb);
 
 

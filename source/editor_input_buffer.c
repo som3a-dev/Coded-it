@@ -169,21 +169,21 @@ bool editor_draw_input_buffer_character(ProgramState* state,
     {
         draw_text(font, state->window_surface,
         text, draw_x, draw_y,
-        color->r, color->g, color->b,
+        color->r, color->g, color->b, color->a,
         200, 200, 200); //TODO(omar): pick a selection color from the theme
     }
     else if ((state->draw_cursor) && (index_in_text == buffer->cursor_index))
     {
         draw_text(font, state->window_surface,
         text, draw_x, draw_y,
-        color->r, color->g, color->b,
+        color->r, color->g, color->b, color->a,
         state->cursor_color.r, state->cursor_color.g, state->cursor_color.b);
     }
     else
     {
         draw_text(font, state->window_surface,
         text, draw_x, draw_y,
-        color->r, color->g, color->b,
+        color->r, color->g, color->b, color->a,
         state->bg_color.r, state->bg_color.g, state->bg_color.b);
     }
 
@@ -220,7 +220,7 @@ void editor_draw_input_buffer(ProgramState* state)
             SDL_Color* token_color = state->token_colors + TOKEN_NONE;
 
             draw_text(font, state->window_surface, buffer->text.text, x, y,
-            0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff,
             state->bg_color.r, state->bg_color.g, state->bg_color.b);
             
             if ((buffer->cursor_index >= 0) && (buffer->cursor_index < buffer->text.len))
@@ -237,7 +237,7 @@ void editor_draw_input_buffer(ProgramState* state)
                 char text[2] = {cursor_char, '\0'};
                 
                 draw_text(font, state->window_surface, text, char_x, char_y,
-                0, 0, 0,
+                0, 0, 0, 255,
                 state->cursor_color.r, state->cursor_color.g, state->cursor_color.b);
             }
         }
