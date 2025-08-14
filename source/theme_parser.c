@@ -51,6 +51,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
 
     //load background color
     bool loaded_bg_color = tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
+    float brightness = (0.2126 * state->bg_color.r + 0.7152 * state->bg_color.g + 0.0722 * state->bg_color.b) / 255;
 
     //Load cursor color
     {
@@ -60,14 +61,10 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         }
         else if (loaded_bg_color)
         {
-            //Determine if the theme is light or dark with the background color
-            float brightness = (0.2126 * state->bg_color.r + 0.7152 * state->bg_color.g + 0.0722 * state->bg_color.b) / 255;
-            brightness = 1.0 - brightness;
-
             //230 not 255 because i didn't like the look of a fully white cursor. fully black is fine though
-            state->cursor_color.r = 230 * brightness;
-            state->cursor_color.g = 230 * brightness;
-            state->cursor_color.b = 230 * brightness;
+            state->cursor_color.r = 230 * (1.0 - brightness);
+            state->cursor_color.g = 230 * (1.0 -brightness);
+            state->cursor_color.b = 230 * (1.0 - brightness);
             state->cursor_color.a = 255;
         }
         else
