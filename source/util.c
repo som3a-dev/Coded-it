@@ -26,6 +26,48 @@ bool SDL_is_ctrl_pressed(uint8_t* keystate)
 }
 
 
+void SDL_FillRectAlpha(SDL_Surface* surface, const SDL_Rect* rect, SDL_Color* color)
+{
+    uint8_t r = color->r;
+    uint8_t g = color->g; 
+    uint8_t b = color->b;
+    uint8_t a = color->a;
+
+    int right = rect->x + rect->w;
+    int bottom = rect->y + rect->h;
+    for (int x = rect->x; x < right; x++)
+    {
+        if (x < 0) continue;
+        if (x > surface->w) goto end;
+        for (int y = rect->y; y < bottom; y++)
+        {
+            if (y < 0) continue;
+            if (y > surface->h) goto end;
+
+            Uint32* pixel = ((Uint32*)(surface->pixels)) + x + (y * surface->w);
+            Uint32 dst_color = *pixel;
+
+            uint8_t dst_r = (dst_color >> surface->format->Rshift) & 0xff;
+            uint8_t dst_g = (dst_color >> surface->format->Gshift) & 0xff;
+            uint8_t dst_b = (dst_color >> surface->format->Bshift) & 0xff;
+
+            dst_r = (dst_r * (255 - a) + r * (a)) / 255;
+            dst_g = (dst_g * (255 - a) + g * (a)) / 255;
+            dst_b = (dst_b * (255 - a) + b * (a)) / 255;
+//            dst_g = (dst_g * (1 - a) + g * (a));
+//            dst_b = (dst_b * (1 - a) + b * (a));
+
+            dst_color = (dst_r << surface->format->Rshift) | (dst_g << surface->format->Gshift) | (dst_b << surface->format->Bshift);
+
+            *pixel = dst_color;
+        }
+    }
+
+    end:
+    return;
+}
+
+
 bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a)
 {
     if (strlen(str) < 6)
