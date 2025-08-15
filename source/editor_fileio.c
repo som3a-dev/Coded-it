@@ -87,7 +87,6 @@ int editor_save_file(const ProgramState* state, const char* filename)
         free(msg);
 
         editor_push_message(state, &str);
-        String_set(&(state->current_file), filename);
     }
 
     String_clear(&filepath);
