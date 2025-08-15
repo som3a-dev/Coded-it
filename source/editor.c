@@ -89,39 +89,39 @@ void editor_init(ProgramState* state)
 
     int index = 0;
     {
-        config.text = "File";
+/*        config.text = "File";
         config.on_click = Button_file_on_click;
         config.on_input = NULL;
         config.disabled = false;
         Button_init(state->buttons + index, &config);
-        index++;
+        index++;*/
     }
     {
-        config.text = "Open";
-        config.y += config.h;
+        config.text = "Open File";
 
         config.on_click = Button_open_on_click;
         config.on_input = Button_open_on_input;
-        config.disabled = true;
+        config.disabled = false;
         Button_init(state->buttons + index, &config);
 
-        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
+//        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
  
         index++;
+        config.y += config.h;
 
     }
     {
-        config.text = "Save";
-        config.y += config.h;
+        config.text = "Save File";
 
         config.on_click = Button_save_on_click;
         config.on_input = Button_save_on_input;
-        config.disabled = true;
+        config.disabled = false;
         Button_init(state->buttons + index, &config);
 
-        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
+//        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
 
         index++;
+        config.y += config.h;
     }
 
 
@@ -139,13 +139,13 @@ void editor_init(ProgramState* state)
 //    editor_open_file(state);
 
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
-    tp_load_theme(state, "light-default.json");
+    tp_load_theme(state, "theme.json");
 
     //draw areas
-    state->editor_area.border_thickness = 4;
+    state->editor_area.border_thickness = 2;
 
     state->message_area.flags |= DRAW_AREA_TOP_BORDER | DRAW_AREA_FILL;
-    state->message_area.border_thickness = 4;
+    state->message_area.border_thickness = 2;
 
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
