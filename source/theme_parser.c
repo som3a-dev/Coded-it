@@ -63,7 +63,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         state->status_bar_area.color.r = 170;
         state->status_bar_area.color.g = 170;
         state->status_bar_area.color.b = 170;
-        state->message_area.outline_color.a = 255;
+        state->status_bar_area.color.a = 255;
     }
 
     if (tp_load_color(parent_obj, "colors/statusBar.border", &(state->status_bar_area.outline_color)))
@@ -74,6 +74,13 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
     {
         //TODO(omar): maybe calcuate an appropriate outline color using the color
     }
+
+
+    //load background color
+    bool loaded_bg_color = tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
+
+    //Determine theme brightness with background
+    float brightness = (0.2126 * state->bg_color.r + 0.7152 * state->bg_color.g + 0.0722 * state->bg_color.b) / 255;
 
     //message area
     if (tp_load_color(parent_obj, "colors/statusBar.border", &(state->message_area.outline_color)))
@@ -87,12 +94,8 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         state->message_area.outline_color.b = 50;
         state->message_area.outline_color.a = 255;
     }
-
-    //load background color
-    bool loaded_bg_color = tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
-
-    //Determine theme brightness with background
-    float brightness = (0.2126 * state->bg_color.r + 0.7152 * state->bg_color.g + 0.0722 * state->bg_color.b) / 255;
+    memcpy(&(state->message_area.color), &(state->bg_color), sizeof(SDL_Color));
+    state->message_area.color.a = 255;
 
     //Load cursor color
     {

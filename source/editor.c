@@ -139,16 +139,13 @@ void editor_init(ProgramState* state)
 //    editor_open_file(state);
 
     state->token_colors = malloc(sizeof(SDL_Color) * _TOKEN_COUNT);
-    tp_load_theme(state, "handmade_theme.json");
+    tp_load_theme(state, "light-default.json");
 
     //draw areas
     state->editor_area.border_thickness = 4;
 
     state->message_area.flags |= DRAW_AREA_TOP_BORDER | DRAW_AREA_FILL;
     state->message_area.border_thickness = 4;
-    state->message_area.color.r = state->bg_color.r;
-    state->message_area.color.g = state->bg_color.g;
-    state->message_area.color.b = state->bg_color.b;
 
     state->file_explorer_area.border_thickness = 4;
     state->file_explorer_area.flags |= DRAW_AREA_RIGHT_BORDER | DRAW_AREA_BOTTOM_BORDER | DRAW_AREA_TOP_BORDER; 
