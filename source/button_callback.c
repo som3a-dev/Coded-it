@@ -131,12 +131,21 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
  
             if (tp_load_theme(state, filepath.text) == false)
             {
+                FILE* fp;
+                fopen_s(&fp, filepath.text, "r");
+
                 int attributes = GetFileAttributes(filepath.text);
-                if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+                if ((attributes & FILE_ATTRIBUTE_DIRECTORY) && (fp == NULL))
                 {
                     String_set(&(state->current_directory_ib.text), filepath.text);
                     code = FILEIO_PATH_WAS_DIRECTORY;
                 }
+                else
+                {
+                    code = FILEIO_PATH_WAS_FILE;
+                }
+
+                fclose(fp);
             }
             else
             {
@@ -156,6 +165,7 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
         } break;
 
         case FILEIO_PATH_WAS_FILE:
+        case FILEIO_PATH_WAS_INVALID:
         {
             editor_set_state(state, EDITOR_STATE_EDIT);
         } break;
