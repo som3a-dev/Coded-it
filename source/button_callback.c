@@ -1,13 +1,14 @@
 #include <stdio.h>
+#include <windows.h>
 
 #include "button_callback.h"
 #include "editor_fileio.h"
+#include "theme_parser.h"
 
 void Button_save_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;
 
-//    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
     editor_set_state(state, EDITOR_STATE_FILE_EXPLORER);
     state->file_explorer_action = EXPLORER_ACTION_SAVE;
 }
@@ -17,9 +18,18 @@ void Button_open_on_click(Button* button, ProgramState* state)
 {
     if (!state) return;
 
-//    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
     editor_set_state(state, EDITOR_STATE_FILE_EXPLORER);
     state->file_explorer_action = EXPLORER_ACTION_OPEN;
+}
+
+
+void Button_load_theme_on_click(Button* button, ProgramState* state)
+{
+    if (!state) return;
+
+//    editor_set_state(state, EDITOR_STATE_COMMAND_INPUT);
+    editor_set_state(state, EDITOR_STATE_FILE_EXPLORER);
+    state->file_explorer_action = EXPLORER_ACTION_LOAD_THEME;
 }
 
 
@@ -103,6 +113,29 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
         case EXPLORER_ACTION_OPEN:
         {
             code = editor_open_file(state, button->text);
+        } break;
+
+        case EXPLORER_ACTION_LOAD_THEME:
+        {
+            String filepath = {0};
+
+            String_insert_string(&filepath, button->text, 0);
+            String_insert(&filepath, '\\', 0);
+            String_insert_string(&filepath, state->current_directory_ib.text.text, 0);
+ 
+            if (tp_load_theme(state, filepath.text) == false)
+            {
+                int attributes = GetFileAttributes(filepath.text);
+                if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+                {
+                    String_set(&(state->current_directory_ib.text), filepath.text);
+                    code = FILEIO_PATH_WAS_DIRECTORY;
+                }
+            }
+
+            String_clear(&filepath);
+
+            code = FILEIO_PATH_WAS_FILE;
         } break;
     }
 

@@ -123,6 +123,18 @@ void editor_init(ProgramState* state)
         index++;
         config.y += config.h;
     }
+    {
+        config.text = "Load Theme";
+
+        config.on_click = Button_load_theme_on_click;
+        config.disabled = false;
+        Button_init(state->buttons + index, &config);
+
+//        Button_add_child(get_button_by_text(state->buttons, 10, "File"), state, index);
+
+        index++;
+        config.y += config.h;
+    }
 
 
     Stack_init(&(state->undo_tree), sizeof(TextAction));
