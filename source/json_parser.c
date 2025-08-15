@@ -179,7 +179,7 @@ json_object* jp_parse(json_token* tokens, const int tokens_count)
         }
     }
 
-    assert(false && "ERROR: Expected object at the start of the json file");
+    printf("ERROR: Expected object at the start of the json file");
     return NULL;
 }
 
@@ -207,7 +207,8 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
                 if (IS_CLOSED_BRACKET(prev_token->val) == false)
                 {
                     printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
-                    assert(false);
+                    free(array);
+                    return NULL;
                 }
             }
             goto next_token;
@@ -219,12 +220,14 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
 
         if (prev_token->type != JSON_TOKEN_CHAR)
         {
-            assert(false && "Invalid token");
+            free(array);
+            return NULL;
         }
         if ((prev_token->val != '[') && (prev_token->val != ','))
         {
             printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
-            assert(false);
+            free(array);
+            return NULL;
         }
 
         if (t->type == JSON_TOKEN_CHAR)
@@ -232,19 +235,30 @@ json_array* jp_parse_array(json_token** token, const int tokens_count,
             if (t->val == '[')
             {
                 json_array* sub_array = jp_parse_array(token, tokens_count, token_index);
+                if (sub_array == NULL)
+                {
+                    free(array);
+                    return NULL;
+                }
                 json_value array_val = {JSON_VALUE_ARRAY, sub_array};
                 json_array_push(array, &array_val);
             }
             else if (t->val == '{')
             {
-                json_array* object = jp_parse_object(token, tokens_count, token_index);
+                json_object* object = jp_parse_object(token, tokens_count, token_index);
+                if (object == NULL)
+                {
+                    free(array);
+                    return NULL;
+                }
                 json_value object_val = {JSON_VALUE_OBJECT, object};
                 json_array_push(array, &object_val);
             }
             else
             {
                 printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
-                assert(false);
+                free(array);
+                return NULL;
             }
         }
         else
@@ -288,7 +302,8 @@ json_object* jp_parse_object(json_token** token, const int tokens_count, int* to
                         (prev_token->val != ','))
                         {
                             printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
-                            assert(false);
+                            free(obj);
+                            return NULL;
                         }
                     }
                     goto end;
@@ -299,28 +314,38 @@ json_object* jp_parse_object(json_token** token, const int tokens_count, int* to
                 }
                 
                 printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n", t->val, *token_index);
-                assert(false);
+                free(obj);
+                return NULL;
             } break;
 
             case JSON_TOKEN_STRING:
             {
                 if (prev_token->type != JSON_TOKEN_CHAR)
                 {
-                    assert(false && "Invalid token");
+                    printf("ERROR %d: Invalid token", __LINE__);
+                    free(obj);
+                    return NULL;
                 }
 
                 if ((prev_token->val != '{') && (prev_token->val != ','))
                 {
-                    assert(false && "Invalid token");
+                    printf("ERROR %d: Invalid token", __LINE__);
+                    free(obj);
+                    return NULL;
                 }
 
-                jp_parse_key_value(token, tokens_count, token_index, &(obj->table));
+                if (jp_parse_key_value(token, tokens_count, token_index, &(obj->table)))
+                {
+                    free(obj);
+                    return NULL;
+                }
             } break;
 
             default:
             {
-                printf("Unexpected token\n");
-                assert(false);
+                printf("ERROR %d: Invalid token", __LINE__);
+                free(obj);
+                return NULL;
             } break;
         }
         
@@ -342,7 +367,7 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
     {
         //TODO(omar):
         //There is no next token ? print an error
-        printf("No next token\n");
+        printf("ERROR %d: No next token\n", __LINE__);
         return 1;
     }
 
@@ -354,8 +379,7 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
     {
         //TODO(omar):
         //Next token is not a character? print an error
-        printf("Unexpected token\n");
-        assert(false);
+        printf("ERROR %d: Invalid token", __LINE__);
         return 2;
     }
     
@@ -365,8 +389,7 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
         {
             //TODO(omar):
             //Token has no value token ? print an error
-            printf("No value\n");
-            assert(false);
+            printf("ERROR %d: Invalid token", __LINE__);
             return 3;
         }
 
@@ -412,8 +435,8 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
 
                     default:
                     {
-                        printf("Unexpected token\n");
-                        assert(false);
+                        printf("ERROR %d: Invalid token", __LINE__);
+                        return 2;
                     } break;
                 }
             } break;
@@ -433,9 +456,8 @@ int jp_parse_key_value(json_token** token, const int tokens_count,
     }
     else
     {
-        printf("\n\nERROR: Unexpected character '%c', token index: %d\n\n",
-        (*token)->val, *token_index);
-        assert(false);
+        printf("ERROR %d: Invalid token", __LINE__);
+        return 2;
     }
     
     return 0;
@@ -529,7 +551,12 @@ json_token* jp_lex(const char* str, int* out_tokens_count)
             default:
             {
                 printf("\n\nERROR: Unexpected character '%c', index: %d\n\n", str[0], char_index);
-                assert(false);
+                for (int i = 0; i < tokens_count; i++)
+                {
+                    json_token_destroy(tokens + i);
+                }
+                free(tokens);
+                return NULL;
             } break;
         }
         

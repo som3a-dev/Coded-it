@@ -40,7 +40,7 @@ bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
 }
 
 
-void tp_load_theme(ProgramState* state, const char* theme_path)
+bool tp_load_theme(ProgramState* state, const char* theme_path)
 {
     if (state->token_colors == NULL) return;
     if (theme_path == NULL) return;
@@ -50,7 +50,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
     if (parent_obj == NULL)
     {
         printf("Loading theme failed.\n");
-        return;
+        return false;
     }
 
     //status bar
@@ -151,7 +151,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
 
         if (token_color)
         {
-            assert(token_color->type == JSON_VALUE_STRING);
+            if (token_color->type != JSON_VALUE_STRING) return false;
             char* str = token_color->val;
             str++;
             str++;
@@ -182,7 +182,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
 
         if (token_color)
         {
-            assert(token_color->type == JSON_VALUE_STRING);
+            if (token_color->type != JSON_VALUE_STRING) return false;
             char* str = token_color->val;
             str++;
             str++;
@@ -209,7 +209,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
 
         if (token_color)
         {
-            assert(token_color->type == JSON_VALUE_STRING);
+            if (token_color->type != JSON_VALUE_STRING) return false;
             char* str = token_color->val;
             str++;
             str++;
@@ -236,7 +236,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         
         if (token_color)
         {
-            assert(token_color->type == JSON_VALUE_STRING);
+            if (token_color->type != JSON_VALUE_STRING) return false;
             char* str = token_color->val;
             str++;
             str++;
@@ -252,6 +252,8 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
             color->a = 255;
         }
     }
+
+    return true;
 }
 
 

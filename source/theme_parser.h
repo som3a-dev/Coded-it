@@ -7,5 +7,5 @@ json_value* tp_get_color_in_token_colors(json_array* token_colors, const char* t
 
 bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color);
 
-void tp_load_theme(ProgramState* state, const char* theme_path);
+bool tp_load_theme(ProgramState* state, const char* theme_path);
 
