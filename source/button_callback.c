@@ -117,8 +117,14 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
 
         case EXPLORER_ACTION_LOAD_THEME:
         {
-            String filepath = {0};
+            if (strcmp(button->text, "..") == 0)
+            {
+                editor_move_directory_backwards(state);
+                code = FILEIO_PATH_WAS_DIRECTORY;
+                break;
+            }
 
+            String filepath = {0};
             String_insert_string(&filepath, button->text, 0);
             String_insert(&filepath, '\\', 0);
             String_insert_string(&filepath, state->current_directory_ib.text.text, 0);
@@ -132,10 +138,12 @@ void Button_file_name_on_click(Button* button, ProgramState* state)
                     code = FILEIO_PATH_WAS_DIRECTORY;
                 }
             }
+            else
+            {
+                code = FILEIO_PATH_WAS_FILE;
+            }
 
             String_clear(&filepath);
-
-            code = FILEIO_PATH_WAS_FILE;
         } break;
     }
 
