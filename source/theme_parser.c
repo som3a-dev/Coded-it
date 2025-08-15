@@ -63,6 +63,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         state->status_bar_area.color.r = 170;
         state->status_bar_area.color.g = 170;
         state->status_bar_area.color.b = 170;
+        state->message_area.outline_color.a = 255;
     }
 
     if (tp_load_color(parent_obj, "colors/statusBar.border", &(state->status_bar_area.outline_color)))
@@ -84,6 +85,7 @@ void tp_load_theme(ProgramState* state, const char* theme_path)
         state->message_area.outline_color.r = 50;
         state->message_area.outline_color.g = 50;
         state->message_area.outline_color.b = 50;
+        state->message_area.outline_color.a = 255;
     }
 
     //load background color
