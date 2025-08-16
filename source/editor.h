@@ -79,6 +79,7 @@ typedef struct
     int flags;
     SDL_Color color;
     SDL_Color outline_color;
+    SDL_Color text_color;
 } DrawArea;
 
 

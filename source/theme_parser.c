@@ -73,6 +73,24 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
     else
     {
         //TODO(omar): maybe calcuate an appropriate outline color using the color
+        state->status_bar_area.outline_color.r = 50;
+        state->status_bar_area.outline_color.g = 50;
+        state->status_bar_area.outline_color.b = 50;
+        state->status_bar_area.outline_color.a = 255;
+    }
+
+    if (tp_load_color(parent_obj, "colors/statusBar.foreground", &(state->status_bar_area.text_color)))
+    {
+
+    }
+    else
+    {
+        {
+            state->status_bar_area.text_color.r = 0;
+            state->status_bar_area.text_color.g = 0;
+            state->status_bar_area.text_color.b = 0;
+            state->status_bar_area.text_color.a = 255;
+        }
     }
 
 

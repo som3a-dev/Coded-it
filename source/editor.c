@@ -522,7 +522,10 @@ void editor_draw_status_bar(ProgramState* state)
 
         draw_text(state->font, state->window_surface, text,
                     x, y, 
-                    0, 0, 0, 255,
+                    state->status_bar_area.text_color.r,
+                    state->status_bar_area.text_color.g,
+                    state->status_bar_area.text_color.b,
+                    state->status_bar_area.text_color.a,
                     state->status_bar_area.color.r,
                     state->status_bar_area.color.g,
                     state->status_bar_area.color.b
@@ -542,11 +545,14 @@ void editor_draw_status_bar(ProgramState* state)
         }
 
         draw_text(state->font, state->window_surface, state->current_file.text,
-                  x, y, 
-                  0, 0, 0, 255,
-                  state->status_bar_area.color.r,
-                  state->status_bar_area.color.g,
-                  state->status_bar_area.color.b);
+                x, y, 
+                state->status_bar_area.text_color.r,
+                state->status_bar_area.text_color.g,
+                state->status_bar_area.text_color.b,
+                state->status_bar_area.text_color.a,
+                state->status_bar_area.color.r,
+                state->status_bar_area.color.g,
+                state->status_bar_area.color.b);
     }
 }
 
