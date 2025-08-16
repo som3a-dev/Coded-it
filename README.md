@@ -2,11 +2,11 @@
 
 A Fast, Powerful Code editor for.. everyone... but mainly for C programmers.
 
-# NOTE!
+## NOTE!
 
 Still in very early development.
 
-## How It's Made:
+# How It's Made:
 
 **Tech used:** C, SDL2
 
@@ -14,7 +14,7 @@ Written in C from scratch using only SDL2 as a platform layer.
 Everything here from json parsing to alpha blending is handwritten from scratch.
 No useless bloat. Pure code.
 
-## Current state 
+# Current state 
 
 - Basic Support for VS code themes
 - File IO with a file explorer
@@ -23,7 +23,7 @@ No useless bloat. Pure code.
 - UI elements (Status bar, Buttons etc)
 - Syntax highlighting
 
-## Planned Features:
+# Planned Features
 
 - More advanced complex syntax highlighting (Highlighting language specific structures like function calls)
 - More complex text handling (Vim keybinds. Custom keybinds)
