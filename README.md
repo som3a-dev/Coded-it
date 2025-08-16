@@ -2,7 +2,7 @@
 
 A Fast, Powerful Code editor for.. everyone... but mainly for C programmers.
 
-## NOTE!
+#### NOTE!
 
 Still in very early development.
 
@@ -12,7 +12,7 @@ Still in very early development.
 
 Written in C from scratch using only SDL2 as a platform layer.
 Everything here from json parsing to alpha blending is handwritten from scratch.
-No useless bloat. Pure code.
+No bloat. Pure code.
 
 # Current state 
 
