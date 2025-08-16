@@ -33,3 +33,5 @@ No bloat. Pure code.
 And many more features.
 
 
+# Screenshots
+![screenshot](screenshots/1.png)

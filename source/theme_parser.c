@@ -86,9 +86,9 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
     else
     {
         {
-            state->status_bar_area.text_color.r = 0;
-            state->status_bar_area.text_color.g = 0;
-            state->status_bar_area.text_color.b = 0;
+            state->status_bar_area.text_color.r = 220;
+            state->status_bar_area.text_color.g = 220;
+            state->status_bar_area.text_color.b = 220;
             state->status_bar_area.text_color.a = 255;
         }
     }
