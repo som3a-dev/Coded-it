@@ -42,8 +42,8 @@ bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
 
 bool tp_load_theme(ProgramState* state, const char* theme_path)
 {
-    if (state->token_colors == NULL) return;
-    if (theme_path == NULL) return;
+    if (state->token_colors == NULL) return false;
+    if (theme_path == NULL) return false;
 
     //load theme file
     json_object* parent_obj = jp_parse_file(theme_path);
@@ -53,67 +53,33 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
         return false;
     }
 
-    //status bar
-    if (tp_load_color(parent_obj, "colors/statusBar.background", &(state->status_bar_area.color)))
-    {
 
-    }
-    else
-    {
-        state->status_bar_area.color.r = 170;
-        state->status_bar_area.color.g = 170;
-        state->status_bar_area.color.b = 170;
-        state->status_bar_area.color.a = 255;
-    }
-
-    if (tp_load_color(parent_obj, "colors/statusBar.border", &(state->status_bar_area.outline_color)))
-    {
-        state->status_bar_area.flags |= DRAW_AREA_BOTTOM_BORDER;
-    }
-    else
-    {
-        //TODO(omar): maybe calcuate an appropriate outline color using the color
-        state->status_bar_area.outline_color.r = 50;
-        state->status_bar_area.outline_color.g = 50;
-        state->status_bar_area.outline_color.b = 50;
-        state->status_bar_area.outline_color.a = 255;
-    }
-
-    if (tp_load_color(parent_obj, "colors/statusBar.foreground", &(state->status_bar_area.text_color)))
-    {
-
-    }
-    else
-    {
-        {
-            state->status_bar_area.text_color.r = 220;
-            state->status_bar_area.text_color.g = 220;
-            state->status_bar_area.text_color.b = 220;
-            state->status_bar_area.text_color.a = 255;
-        }
-    }
-
-
-    //load background color
-    bool loaded_bg_color = tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
-
+    tp_load_color(parent_obj, "colors/editor.background", &(state->bg_color));
     //Determine theme brightness with background
     float brightness = (0.2126 * state->bg_color.r + 0.7152 * state->bg_color.g + 0.0722 * state->bg_color.b) / 255;
 
-    //message area
-    if (tp_load_color(parent_obj, "colors/statusBar.border", &(state->message_area.outline_color)))
+    if (tp_load_color(parent_obj, "colors/statusBar.background", &(state->status_bar_area.color)))
     {
+        tp_load_color(parent_obj, "colors/statusBar.border", &(state->status_bar_area.outline_color));
+        tp_load_color(parent_obj, "colors/statusBar.foreground", &(state->status_bar_area.text_color));
 
+        tp_load_color(parent_obj, "colors/statusBar.border", &(state->message_area.outline_color));
     }
     else
-    {
-        state->message_area.outline_color.r = 50;
-        state->message_area.outline_color.g = 50;
-        state->message_area.outline_color.b = 50;
-        state->message_area.outline_color.a = 255;
+    { 
+        SDL_Color default_status_bar_bg = {140, 140, 140, 230};
+        memcpy(&(state->status_bar_area.color), &default_status_bar_bg, sizeof(SDL_Color));
+
+        SDL_Color default_status_bar_text = {0, 0, 0, 255};
+        memcpy(&(state->status_bar_area.text_color), &default_status_bar_text, sizeof(SDL_Color));
+
+        memcpy(&(state->message_area.outline_color), &default_status_bar_bg, sizeof(SDL_Color));
     }
-    memcpy(&(state->message_area.color), &(state->bg_color), sizeof(SDL_Color));
-    state->message_area.color.a = 255;
+
+    //To make it the same as the bg color
+    state->message_area.color.a = 0;
+
+    state->status_bar_area.flags |= DRAW_AREA_BOTTOM_BORDER;
 
     //Load cursor color
     {
@@ -121,21 +87,13 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
         {
 
         }
-        else if (loaded_bg_color)
+        else
         {
             //230 not 255 because i didn't like the look of a fully white cursor. fully black is fine though
             state->cursor_color.r = 230 * (1.0 - brightness);
             state->cursor_color.g = 230 * (1.0 -brightness);
             state->cursor_color.b = 230 * (1.0 - brightness);
             state->cursor_color.a = 150;
-        }
-        else
-        {
-            //Default to a greyish cursor
-            state->cursor_color.r = 150;
-            state->cursor_color.g = 150;
-            state->cursor_color.b = 150;
-            state->cursor_color.a = 200;
         }
     }
 
