@@ -80,7 +80,8 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
     }
 
     //To make it the same as the bg color
-    state->message_area.color.a = 0;
+    memcpy(&(state->message_area.color), &(state->bg_color), sizeof(SDL_Color));
+    state->message_area.color.a = 255;
 
     state->status_bar_area.flags |= DRAW_AREA_BOTTOM_BORDER;
 
