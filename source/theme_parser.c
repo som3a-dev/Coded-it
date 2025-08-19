@@ -31,12 +31,6 @@ bool tp_load_color(json_object* parent_obj, const char* path, SDL_Color* color)
         &(color->b),
         &(color->a));
 
-        if (strlen(str) != 8)
-        {
-            //There is no alpha specified. set it to 255
-            color->a = 255;
-        }
-
         str[strlen(str)] = last_char;
 
         return true;

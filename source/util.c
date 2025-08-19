@@ -91,10 +91,17 @@ bool rgb_hex_str_to_int(const char* str, uint8_t* r, uint8_t* g, uint8_t* b, uin
     {
         *b = strtol(bstr, NULL, 16);
     }
-    if ((a) && (strlen(str) >= 8))
+    if (a)
     {
-        char astr[3] = {str[6], str[7], 0};
-        *a = strtol(astr, NULL, 16);
+        if (strlen(str) >= 8)
+        {
+            char astr[3] = {str[6], str[7], 0};
+            *a = strtol(astr, NULL, 16);
+        }
+        else
+        {
+            *a = 255;
+        }
     }
 
     return true;
