@@ -329,8 +329,8 @@ void editor_update(ProgramState* state)
             }
             if ((cursor_y + state->char_h) > state->editor_area.h)
             {
-                state->camera_y += (((cursor_y + state->char_h) - state->editor_area.h) / state->char_h) * state->char_h;
-                state->camera_y += state->char_h; //the cursor's height offset
+                state->camera_y += ((((cursor_y + state->char_h) - state->editor_area.h) / state->char_h) + 1) * state->char_h;
+//                state->camera_y += state->char_h; //the cursor's height offset
             }
 
             if (cursor_y < state->editor_area.y)
