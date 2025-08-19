@@ -5,7 +5,7 @@
 #include "string.h"
 #include "syntax_parser.h"
 
-const char* keywords = "#include:auto:break:case:char:const:continue:default:do:double:else:enum:extern:float:for:goto:if:inline:int:long:register:restrict:return:short:signed:sizeof:static:struct:switch:typedef:union:unsigned:void:volatile:while:_Bool:_Complex:_Imaginary";
+const char* keywords = "#pragma:#define:#include:auto:break:case:char:const:continue:default:do:double:else:enum:extern:float:for:goto:if:inline:int:long:register:restrict:return:short:signed:sizeof:static:struct:switch:typedef:union:unsigned:void:volatile:while:_Bool:_Complex:_Imaginary";
 
 
 int sp_get_token_type(const char* token, sp_metadata* md)
