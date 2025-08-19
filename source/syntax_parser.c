@@ -5,7 +5,7 @@
 #include "string.h"
 #include "syntax_parser.h"
 
-const char* keywords = "auto:break:case:char:const:continue:default:do:double:else:enum:extern:float:for:goto:if:inline:int:long:register:restrict:return:short:signed:sizeof:static:struct:switch:typedef:union:unsigned:void:volatile:while:_Bool:_Complex:_Imaginary";
+const char* keywords = "#include:auto:break:case:char:const:continue:default:do:double:else:enum:extern:float:for:goto:if:inline:int:long:register:restrict:return:short:signed:sizeof:static:struct:switch:typedef:union:unsigned:void:volatile:while:_Bool:_Complex:_Imaginary";
 
 
 int sp_get_token_type(const char* token, sp_metadata* md)
@@ -180,7 +180,7 @@ bool sp_is_keyword(const char* text)
 
 bool sp_is_delimiter(char c)
 {
-    const char* delimiters = " \n(){}[];*+-|&%#\t";
+    const char* delimiters = " \n(){}[];*+-|&%\t";
     const int delimiters_len = strlen(delimiters);
 
     for (int i = 0; i < delimiters_len; i++)
