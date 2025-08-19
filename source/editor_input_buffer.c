@@ -312,6 +312,16 @@ void editor_draw_input_buffer(ProgramState* state)
                                         }
                                     }
                                 }
+
+                                else if (c == '#' && (token_type == TOKEN_KEYWORD))
+                                {
+                                    meta_data.line_is_preprocessor = true;
+                                }
+
+                                else if (meta_data.line_is_preprocessor && (token_type != TOKEN_KEYWORD))
+                                {
+                                    color = state->token_colors + TOKEN_PREPROCESSOR;
+                                }
                             }
 
                             draw_token_char:
@@ -322,7 +332,6 @@ void editor_draw_input_buffer(ProgramState* state)
                         }
 
                         String_clear(&current_token);
-
                     }
 
                     //draw the delimiter
@@ -352,6 +361,7 @@ void editor_draw_input_buffer(ProgramState* state)
                         case '\n':
                         {
                             meta_data.line_is_comment = false;
+                            meta_data.line_is_preprocessor = false;
                             editor_draw_input_buffer_character(state, buffer->text.text[i],
                             x, y, char_w, char_h, i, NULL, false);
 

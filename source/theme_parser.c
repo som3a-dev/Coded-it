@@ -231,6 +231,29 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
             color->a = 255;
         }
     }
+    {
+        SDL_Color* color = state->token_colors + TOKEN_PREPROCESSOR;
+        json_value* token_color = tp_get_color_in_token_colors(theme_token_colors, "\"meta.preprocessor\"");
+        
+        if (token_color)
+        {
+            if (token_color->type != JSON_VALUE_STRING) return false;
+            char* str = token_color->val;
+            str++;
+            str++;
+            str[strlen(str)-1] = '\0';
+
+            rgb_hex_str_to_int(str, &(color->r), &(color->g), &(color->b), &(color->a));
+        }
+        else
+        {
+            color->r = 180;
+            color->g = 180;
+            color->b = 180;
+            color->a = 255;
+        }
+    }
+
 
     return true;
 }

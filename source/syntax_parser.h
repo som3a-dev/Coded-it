@@ -12,6 +12,7 @@ enum
     TOKEN_STRING_LITERAL,
     TOKEN_BRACES,
     TOKEN_COMMENT,
+    TOKEN_PREPROCESSOR,
     _TOKEN_COUNT
 };
 
@@ -23,6 +24,7 @@ typedef struct
 {
     int quote_count; //how many quotes in the file up to this point
     bool line_is_comment;
+    bool line_is_preprocessor;
 } sp_metadata;
 
 
