@@ -61,7 +61,10 @@ bool tp_load_theme(ProgramState* state, const char* theme_path)
     if (tp_load_color(parent_obj, "colors/statusBar.background", &(state->status_bar_area.color)))
     {
         tp_load_color(parent_obj, "colors/statusBar.border", &(state->status_bar_area.outline_color));
-        tp_load_color(parent_obj, "colors/statusBar.foreground", &(state->status_bar_area.text_color));
+        if (tp_load_color(parent_obj, "colors/statusBar.foreground", &(state->status_bar_area.text_color)) == false)
+        {
+            tp_load_color(parent_obj, "colors/editor.foreground", &(state->status_bar_area.text_color));
+        }
 
         tp_load_color(parent_obj, "colors/statusBar.border", &(state->message_area.outline_color));
     }
