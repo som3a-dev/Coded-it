@@ -76,7 +76,6 @@ void editor_init(ProgramState* state)
 
     TTF_SizeText(state->font, "A", &(state->char_w), &(state->char_h));
 
-
     ButtonConfig config = {0};
     config.pressed_r = 110;
     config.pressed_g = 100;
