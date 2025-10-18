@@ -414,3 +414,4 @@ vendor
 CODE2.c
 source/.vscode/settings.json
 json_parser.c
+/.vscode
